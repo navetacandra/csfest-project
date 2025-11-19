@@ -867,13 +867,12 @@ Ref: presence.class_enrollment_id > class_enrollment.id
 
 ## Front-End Specification {#frontend-spec}
 
-**Stack**: ReactJS, Tailwind
-**Style**: Neo-Brutalism, Bento Layout
-**Fonts**: Outfit (Normal), Archivo Black (Bold)
-**Color Palette**:
-
-- #FFFFFF (White)
-- #333333 (Black)
-- #E63946 (Red)
-- #FFD700 (Yellow)
-- #00FF7F (Green)
+- **Stack**: ReactJS, Tailwind
+- **Style**: Neo-Brutalism, Bento Layout
+- **Fonts**: Outfit (Normal), Archivo Black (Bold)
+- **Color Palette**:
+  - #FFFFFF (White)
+  - #333333 (Black)
+  - #E63946 (Red)
+  - #FFD700 (Yellow)
+  - #00FF7F (Green)
