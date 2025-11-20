@@ -1,0 +1,11 @@
+INSERT INTO file (id, mahasiswa_id, dosen_id, upload_name, random_name) VALUES
+(1, 1, NULL, 'tugas_1.pdf', 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.pdf'),
+(2, 2, NULL, 'laporan_magang.docx', 'b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q.docx'),
+(3, NULL, 1, 'materi_kuliah_1.pdf', 'c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r.pdf'),
+(4, NULL, 2, 'silabus_2025.pdf', 'd4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s.pdf'),
+(5, NULL, NULL, 'berita_1_thumb.jpg', 'e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t.jpg'),
+(6, NULL, NULL, 'berita_2_thumb.png', 'f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u.png'),
+(7, 4, NULL, 'submission_final.pdf', 'g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v.pdf'),
+(8, NULL, 3, 'soal_uts.docx', 'h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w.docx'),
+(9, NULL, NULL, 'berita_3_thumb.jpg', 'i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x.jpg'),
+(10, NULL, NULL, 'berita_4_thumb.jpg', 'j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y.jpg');

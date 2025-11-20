@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS mahasiswa (
+  id INTEGER PRIMARY KEY NOT NULL,
+  major_id INTEGER NOT NULL,
+  study_program_id INTEGER NOT NULL,
+  nim TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (major_id) REFERENCES major(id),
+  FOREIGN KEY (study_program_id) REFERENCES study_program(id)
+);

@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS task (
+  id INTEGER PRIMARY KEY NOT NULL,
+  post_id INTEGER NOT NULL,
+  class_enrollment_id INTEGER NOT NULL,
+  file_id INTEGER NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (post_id) REFERENCES post(id),
+  FOREIGN KEY (class_enrollment_id) REFERENCES class_enrollment(id),
+  FOREIGN KEY (file_id) REFERENCES file(id)
+);

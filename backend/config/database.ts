@@ -1,15 +1,16 @@
-import { resolve as pathResolve } from "node:path";
-import { existsSync, readFileSync, rmSync } from "node:fs";
 import { Database } from "bun:sqlite";
+
+function resolve(path: string): string {
+  return Bun.fileURLToPath(import.meta.resolve(path));
+}
 
 export class Sqlite {
   protected database_path: string;
   protected db: Database;
 
   constructor(filename: string = "database.sqlite") {
-    this.database_path = pathResolve(`${__dirname}/../database/${filename}`);
-
-    const isFirstRun = !existsSync(this.database_path);
+    this.database_path = resolve(`${__dirname}/../database/${filename}`);
+    const isFirstRun = Bun.file(this.database_path).size == 0; // no data or not exists
 
     this.db = new Database(this.database_path, {
       create: true,
@@ -18,15 +19,36 @@ export class Sqlite {
 
     if (isFirstRun) {
       try {
-        const initialQuery = readFileSync(
-          pathResolve(`${__dirname}/../database/migration.sql`),
-          "utf8",
-        );
+        const migrationFiles = Array.from(
+          new Bun.Glob("*.sql").scanSync({
+            onlyFiles: true,
+            followSymlinks: false,
+            absolute: true,
+            cwd: resolve(`${__dirname}/../database/migrations`),
+          }),
+        )
+          .sort()
+          .map((path) => Bun.file(path).text());
+        const seedFiles = Array.from(
+          new Bun.Glob("*.sql").scanSync({
+            onlyFiles: true,
+            followSymlinks: false,
+            absolute: true,
+            cwd: resolve(`${__dirname}/../database/seeds`),
+          }),
+        )
+          .sort()
+          .map((path) => Bun.file(path).text());
 
-        this.db.run("PRAGMA journal_mode = WAL;");
-        this.query(initialQuery);
+        this.db.query("PRAGMA journal_mode = WAL;");
+
+        const initialQueries = [...migrationFiles, ...seedFiles];
+        const execute = this.db.transaction(async (sqls: Promise<string>[]) => {
+          for (const sql of sqls) this.db.run(await sql);
+        });
+        execute(initialQueries);
       } catch (err) {
-        rmSync(this.database_path); // remove failed database
+        Bun.file(this.database_path).delete(); // remove failed database
         console.error(`Failed to migrate\nError: `, err);
         throw err;
       }
