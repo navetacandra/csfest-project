@@ -3,6 +3,11 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "start": "./dist/kulmsin-backend",
+    "dev": "bun run --watch index.ts",
+    "build": "bun build index.ts --target bun --compile --outfile dist/kulmsin-backend"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/express": "^5.0.5",
