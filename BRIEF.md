@@ -429,6 +429,7 @@
       - **Role**: admin | dosen | mahasiswa
       - **Description**: Authentication (login) endpoint
       - **Payload**:
+
       ```ts
       {
         username: string,
@@ -443,6 +444,7 @@
           role: string,
         }
         ```
+
   - `/api/logout`
     - `DELETE`
       - **Role**: admin | dosen | mahasiswa
@@ -452,6 +454,7 @@
       {
       }
       ```
+
 - Profile
   - `/me`
     - `GET`
@@ -465,6 +468,20 @@
         name: string,
         email: string,
         username: string,
+      }
+      ```
+- News
+  - `/api/news/{id}`
+    - `GET`
+      - **Role**: admin | dosen | mahasiswa
+      - **Description**: Show news
+      - **Response Data**:
+      ```ts
+      {
+        id: number,
+        title: string,
+        thumbnail: string,
+        content: string
       }
       ```
 - Class
@@ -485,6 +502,7 @@
         - **Role**: dosen | mahasiswa
         - **Description**: Enroll class by key
         - **Payload**:
+
         ```ts
         {
           enroll_key: string;
@@ -492,12 +510,14 @@
         ```
 
         - **Response Data**:
+
         ```ts
         {
           id: number,
           name: string,
         }
         ```
+
     - `/api/classes/{class_id}`
       - `GET`
         - **Role**: admin | dosen | mahasiswa
@@ -513,12 +533,14 @@
           }[]
         }
         ```
+
   - Post
     - `/api/classes/{class_id}/posts`
       - `POST`
         - **Role**: admin | dosen
         - **Description**: Create new post on class
         - **Payload**:
+
         ```ts
         {
           title: string,
@@ -529,6 +551,7 @@
         ```
 
         - **Response Data**:
+
         ```ts
         {
           id: number,
@@ -536,6 +559,7 @@
           type: "post" | "task"
         }
         ```
+
     - `/api/classes/{class_id}/posts/{post_id}`
       - `GET`
         - **Role**: admin | dosen | mahasiswa
@@ -563,6 +587,7 @@
         - **Role**: admin | dosen
         - **Description**: Edit post
         - **Payload**:
+
         ```ts
         {
           title: string,
@@ -573,16 +598,19 @@
         ```
 
         - **Response Data**:
+
         ```ts
         {
           id: number,
         }
         ```
+
     - `/api/classes/{class_id}/posts/{post_id}/task`
       - `POST`
         - **Role**: mahasiswa
         - **Description**: Upload completed task file
         - **Payload**:
+
         ```ts
         {
           file: File; // task's file (single file)
@@ -590,11 +618,13 @@
         ```
 
         - **Response Data**:
+
         ```ts
         {
           id: number,
         }
         ```
+
 - Schedule
   - `/api/schedule`
     - `GET`
@@ -631,7 +661,8 @@
         accumulated_late: number,
         recap: {
           id: number,
-          class: string,
+          class_id: string,
+          class_name: string,
           status: string,
           late_time: number
         }[],
@@ -653,6 +684,7 @@
     - `POST`
       **Description**: Set presence status
       **Payload**:
+
       ```ts
       {
         status: "hadir" | "izin" | "sakit" | "alpha", // only able set to "hadir" as mahasiswa
@@ -662,11 +694,13 @@
       ```
 
       - **Response Data**:
+
       ```ts
       {
         status: string,
       }
       ```
+
 - General
   - `/api/dashboard`
     - `GET`
@@ -676,17 +710,26 @@
       ```ts
       {
         news: {
+          id: number,
           title: string,
-          content: string,
+          thumbnail: string
         }[],
         schedule: {
-          name: string
+          class_id: number,
+          name: string,
+          start: string,
+          end: string
         }[],
         tasks: {
           id: number,
-          class_id: number,
+          class: string,
           title: string,
-        },
+        }[],
+        classes: {
+          id: number,
+          name: string,
+          schedule: number
+        }[]
       }
       ```
   - `/api/tasks` **Mahasiswa/Dosen Only**
@@ -694,6 +737,7 @@
       - **Role**: dosen | mahasiswa
       - **Description**: Get all/completed/incoming tasks on followed class
       - **Payload**:
+
       ```ts
       {
         filter: "all" | "completed" | "incoming";
@@ -701,6 +745,7 @@
       ```
 
       - **Response Data**:
+
       ```ts
       {
         id: number,
@@ -709,6 +754,7 @@
         status: "completed" | "incoming"
       }[]
       ```
+
   - `/storage/{file_id}`
     - `GET`
       - **Role**: admin | dosen | mahasiswa
@@ -716,22 +762,23 @@
 
 ## Back-End Specification {#backend-spec}
 
-**Stack**: Bun v1.3.2 (TypeScript), SQLite3
-**Framework**: Express
-**Timezone**: Asia/Jakarta
-**File Storage**: local
-**File Upload Sepc**:
-- Allowed Type: pdf/jpg/png/docx
-- Max Size: 10 MB
-**Environment Variable**:
+- **Stack**: Bun v1.3.2 (TypeScript), SQLite3
+- **Framework**: Express
+- **Timezone**: Asia/Jakarta
+- **File Storage**: local
+- **File Upload Sepc**:
+  - Allowed Type: pdf/jpg/png/docx
+  - Max Size: 10 MB
+- **Environment Variable**:
 
 ```env
 PORT=
 JWT_SECRET_KEY=
 PASSWORD_SECRET_KEY=
+DB_PATH=
 ```
 
-**Database Design**:
+- **Database Design**:
 
 ```dbml
 Table major {
@@ -762,7 +809,6 @@ Table file {
 Table admin {
   id int [pk, not null]
   name varchar [not null]
-  email varchar [not null, unique]
   username varchar [not null, unique]
   password varchar [not null]
   created_at timestamp [not null, default: `now()`]
@@ -786,7 +832,6 @@ Table dosen {
   id int [pk, not null]
   nip varchar [not null]
   name varchar [not null]
-  email varchar [not null, unique]
   username varchar [not null, unique]
   password varchar [not null]
   created_at timestamp [not null, default: `now()`]
@@ -796,6 +841,7 @@ Table dosen {
 Table news {
   id int [pk, not null]
   title varchar [not null]
+  thumbnail_file_id int [not null]
   content text [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
@@ -806,6 +852,8 @@ Table class {
   name varchar [not null]
   enroll_key varchar [not null, unique]
   schedule int [not null]
+  start_time varchar [not null]
+  end_time varchat [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 }
@@ -863,6 +911,7 @@ Ref: task.post_id > post.id
 Ref: task.class_enrollment_id > class_enrollment.id
 Ref: task.file_id > file.id
 Ref: presence.class_enrollment_id > class_enrollment.id
+Ref: news.thumbnail_file_id > file.id
 ```
 
 ## Front-End Specification {#frontend-spec}
