@@ -1,5 +1,4 @@
 import { mkdirSync } from "node:fs";
-import { randomUUID } from "node:crypto";
 import { extname, resolve as pathResolve } from "node:path";
 import multer, { type FileFilterCallback } from "multer";
 import type { Request } from "express";
@@ -22,9 +21,8 @@ const storage = (directory: string = "") =>
     },
 
     filename: (req: Request, file: Express.Multer.File, cb) => {
-      const random = randomUUID({ disableEntropyCache: true });
-      const ext = extname(file.originalname);
-      cb(null, `${random}${ext}`);
+      const random = Bun.randomUUIDv7("hex", Date.now());
+      cb(null, random);
     },
   });
 

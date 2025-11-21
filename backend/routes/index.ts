@@ -13,7 +13,6 @@ import newsRoute from "./news.route";
 import dashboardRoute from "./dashboard.route";
 import presenceRoute from "./presence.route";
 import scheduleRoute from "./schedule.route";
-import storageRoute from "./storage.route";
 import taskRoute from "./task.route";
 
 const router: Router = Router();
@@ -27,21 +26,20 @@ router.get("/", (_req: Request, res: Response) => {
   } as SuccessResponse<string>);
 });
 
-router.use(authRoute);
-router.use("/classes", classRoute);
-router.use("/news", newsRoute);
-router.use("/schedule", scheduleRoute);
-router.use("/storage", storageRoute);
-router.use("/tasks", taskRoute);
-router.use("/dashboard", dashboardRoute);
-router.use("/presence", presenceRoute);
+// router.use(authRoute);
+// router.use("/classes", classRoute);
+// router.use("/news", newsRoute);
+// router.use("/schedule", scheduleRoute);
+// router.use("/tasks", taskRoute);
+// router.use("/dashboard", dashboardRoute);
+// router.use("/presence", presenceRoute);
 
-adminRouter.use("/classes", adminClassRoute);
-adminRouter.use("/news", adminNewsRoute);
-adminRouter.use("/dosen", adminDosenRoute);
-adminRouter.use("/mahasiswa", adminMahasiswaRoute);
-adminRouter.use("/major", adminMajorRoute);
+// adminRouter.use("/classes", adminClassRoute);
+// adminRouter.use("/news", adminNewsRoute);
+// adminRouter.use("/dosen", adminDosenRoute);
+// adminRouter.use("/mahasiswa", adminMahasiswaRoute);
+// adminRouter.use("/major", adminMajorRoute);
 
-router.use("/admin", adminRouter);
+// router.use("/admin", adminRouter);
 
 export default router;

@@ -51,6 +51,8 @@ export class Sqlite {
         Bun.file(this.database_path).delete(); // remove failed database
         console.error(`Failed to migrate\nError: `, err);
         throw err;
+      } finally {
+        Bun.gc(); // trigger gc to clean-up
       }
     }
   }
