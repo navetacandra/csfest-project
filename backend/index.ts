@@ -13,6 +13,6 @@ app.use(express.json());
 app.use("/api", apiRouter);
 // app.use("/storage", storageRoute);
 
-app.listen(SERVER_PORT, "127.0.0.1", () => {
+app.listen(SERVER_PORT, "0.0.0.0", () => {
   console.log(`Server was listening on port ${SERVER_PORT}`);
 });
