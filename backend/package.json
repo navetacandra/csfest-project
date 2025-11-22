@@ -6,7 +6,8 @@
   "scripts": {
     "start": "./dist/kulmsin-backend",
     "dev": "bun run --watch index.ts",
-    "build": "bun build index.ts --target bun --compile --outfile dist/kulmsin-backend"
+    "build": "bun build index.ts --target bun --compile --outfile dist/kulmsin-backend",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
