@@ -1,68 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --background: oklch(96.47% 0.0401 157.79);
+  --secondary-background: oklch(100% 0 0); 
+  --foreground: oklch(0% 0 0);
+  --main-foreground: oklch(0% 0 0);
+   --main: oklch(79.76% 0.2044 153.08);
+  --border: oklch(0% 0 0);
+  --ring: oklch(0% 0 0);
+  --overlay: oklch(0% 0 0 / 0.8);
+  --shadow: -2px 4px 0px 0px var(--border);
+  --chart-1: oklch(100% 0 0);
+  --chart-2: oklch(79.76% 0.2044 153.08);
+  --chart-3: oklch(45.88% 0.2044 253.08);
+  --chart-4: oklch(90% 0.2044 53.08);
+  --chart-5: oklch(70% 0.2044 353.08);
+  --chart-active-dot: oklch(20% 0 0);
+  --danger: #FF6678;
+  --danger-foreground: black;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.dark {
+  --background: #333333;
+  --secondary-background: #333333;
+  --foreground: #FFFFFF;
+  --main-foreground: #FFFFFF;
+  --main: #E63946;
+  --border: #333333;
+  --ring: #FFFFFF;
+  --shadow: -2px 4px 0px 0px var(--border);
+  --chart-1: #00FF7F;
+  --chart-2: #E63946;
+  --chart-3: #008AE5;
+  --chart-4: #FFD700;
+  --chart-5: #7A83FF;
+  --chart-active-dot: #FFFFFF;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+@theme inline {
+  --color-main: var(--main);
+  --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-foreground: var(--foreground);
+  --color-main-foreground: var(--main-foreground);
+  --color-border: var(--border);
+  --color-overlay: var(--overlay);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+
+  --spacing-boxShadowX: -2px;
+  --spacing-boxShadowY: 4px;
+  --spacing-reverseBoxShadowX: --2px;
+  --spacing-reverseBoxShadowY: -4px;
+  --radius-base: 5px;
+  --shadow-shadow: var(--shadow);
+  --font-weight-base: 500;
+  --font-weight-heading: 700;
+}
+  
+@layer base {
+  body {
+    @apply text-foreground bg-background;
+    font-family: "Comic Neue", cursive;
   }
 }
