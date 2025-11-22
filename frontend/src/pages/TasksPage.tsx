@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from "react-router-dom"
 
 const tasks = [
-  { title: 'Task Title 1', className: 'class name', status: 'Completed' },
-  { title: 'Task Title 2', className: 'class name', status: 'Incomplete' },
-  { title: 'Task Title 3', className: 'class name', status: 'Completed' },
-  { title: 'Task Title 4', className: 'class name', status: 'Incomplete' },
+  { id: 1, title: 'Task Title 1', className: 'class name', status: 'Completed' },
+  { id: 2, title: 'Task Title 2', className: 'class name', status: 'Incomplete' },
+  { id: 3, title: 'Task Title 3', className: 'class name', status: 'Completed' },
+  { id: 4, title: 'Task Title 4', className: 'class name', status: 'Incomplete' },
 ];
 
 const TasksPage: React.FC = () => {
@@ -36,7 +36,7 @@ const TasksPage: React.FC = () => {
                         hover:shadow-none
                         shadow-shadow
                       "
-                onClick={() => navigate("/task")}
+                onClick={() => navigate("/task/" + task.id)}
               >
                 <div>
                   <h2 className="text-xl font-bold text-primary">{task.title}</h2>

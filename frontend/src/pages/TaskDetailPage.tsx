@@ -2,46 +2,50 @@ import React from 'react';
 
 const TaskDetailPage: React.FC = () => {
   return (
-    <main className="flex-grow w-full mx-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 sm:p-8 md:p-12">
-      <div className="space-y-8">
-        <section>
-          <h2 className="text-3xl sm:text-4xl font-bold text-sky-600 dark:text-sky-400">Post or Task Title</h2>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">posted_at: &lt;timestamp&gt;</p>
-          <p className="mt-4 text-gray-700 dark:text-gray-300">Here is message of post or task. This is only for placeholder.</p>
-          <a className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-sky-500 dark:border-sky-400 text-sky-600 dark:text-sky-400 rounded-lg text-sm font-medium hover:bg-sky-50 dark:hover:bg-sky-900/50 transition-colors" href="#">
-            <span className="material-icons-outlined text-lg">attach_file</span>
-            file1.pdf
-          </a>
-        </section>
-        <hr className="border-t border-primary/50" />
-        <section className="space-y-8">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Your Submission</h3>
-            <div className="flex items-center gap-4">
-              <span className="inline-flex items-center gap-2 px-4 py-2 border border-green-500 dark:border-green-400 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/40 rounded-lg text-sm font-medium">
-                <span className="material-icons-outlined text-lg">check_circle_outline</span>
-                submitted.pdf
-              </span>
-            </div>
+    <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
+      <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
+        <main className="flex-grow w-full">
+          <div className="space-y-8">
+            <section>
+              <h2 className="text-4xl font-bold text-primary">Post or Task Title</h2>
+              <p className="mt-2 text-text-secondary-light dark:text-text-secondary-dark">posted_at: &lt;timestamp&gt;</p>
+              <p className="mt-4 text-text-main-light dark:text-text-main-dark">Here is message of post or task. This is only for placeholder.</p>
+              <a className="mt-6 inline-flex items-center gap-2 px-4 py-2 border-2 border-primary text-primary rounded-lg text-md font-bold hover:bg-green-100 transition-colors shadow-[-3px_3px_0px_0px_black] hover:shadow-none hover:translate-y-[1px]" href="#">
+                <span className="material-icons-outlined text-lg">attach_file</span>
+                file1.pdf
+              </a>
+            </section>
+            <hr className="border-t-2 border-primary" />
+            <section className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold text-primary mb-4">Your Submission</h3>
+                <div className="flex items-center gap-4">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 border-2 border-green-500 text-green-600 bg-green-100 rounded-lg text-md font-bold shadow-[-3px_3px_0px_0px_black]">
+                    <span className="material-icons-outlined text-lg">check_circle_outline</span>
+                    submitted.pdf
+                  </span>
+                </div>
+              </div>
+              <label htmlFor="file-upload" className="flex flex-col items-center justify-center p-8 sm:p-12 border-2 border-dashed border-primary rounded-xl bg-green-50 text-center cursor-pointer">
+                <span className="material-icons-outlined text-4xl text-primary mb-4">cloud_upload</span>
+                <div className="relative font-bold text-primary">
+                  <span>Choose File or </span>
+                  <span className="text-blue-500">Drag n Drop </span>
+                  <span>File to Upload</span>
+                </div>
+                <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">PDF, DOCX, PNG, JPG up to 10MB</p>
+              </label>
+              <div className="flex justify-end">
+                <button className="px-8 py-2.5 bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] text-white font-bold rounded-lg hover:translate-y-1 hover:shadow-none transition-all" type="submit">
+                  Submit
+                </button>
+              </div>
+            </section>
           </div>
-          <div className="flex flex-col items-center justify-center p-8 sm:p-12 border-2 border-dashed border-primary/60 rounded-xl bg-background-light dark:bg-gray-800/60 text-center">
-            <span className="material-icons-outlined text-4xl text-primary mb-4">cloud_upload</span>
-            <label className="relative cursor-pointer font-medium text-gray-600 dark:text-gray-300" htmlFor="file-upload">
-              <span>Choose File or</span>
-              <span className="text-primary">Drag n Drop</span>
-              <span>File to Upload</span>
-              <input className="sr-only" id="file-upload" name="file-upload" type="file" />
-            </label>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">PDF, DOCX, PNG, JPG up to 10MB</p>
-          </div>
-          <div className="flex justify-end">
-            <button className="px-8 py-2.5 bg-primary/10 dark:bg-primary/20 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-background-light dark:focus:ring-offset-background-dark transition-all" type="submit">
-              Submit
-            </button>
-          </div>
-        </section>
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
 

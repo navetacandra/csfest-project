@@ -23,32 +23,34 @@ const ClassPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 ">
-      <div className="max-w-7xl mx-auto border-2 border-gray-400 dark:border-gray-600 rounded-2xl p-6 sm:p-8">
+    <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
+      <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main>
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-primary">Class</h2>
-            <div className='flex gap-2'>
+            <h2 className="text-4xl font-bold text-primary">Class</h2>
+            <div className='flex gap-4'>
               <Link to="/presence-as-lecturer">
-                <Button>Presence</Button>
+                <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none">
+                  Presence
+                </Button>
               </Link>
-              <Button>Create New Post</Button>
+              <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none">
+                Create New Post
+              </Button>
             </div>
           </div>
           <div className="space-y-4">
             {posts.map((post, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md dark:hover:border-primary transition-all duration-300"
+                className="flex items-center gap-5 p-6 border-2 border-primary rounded-lg bg-[#E0FFE8] cursor-pointer transition-all duration-200 hover:-translate-x-1 hover:shadow-none shadow-shadow"
               >
-                <div className="flex items-center space-x-5">
-                  <div className="flex-shrink-0 w-16 h-16 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
-                    <ClipboardList className="w-10 h-10" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{post.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Posted on {post.date}</p>
-                  </div>
+                <div className="flex-shrink-0 w-16 h-16 bg-green-200 text-primary rounded-lg flex items-center justify-center border-2 border-primary">
+                  <ClipboardList className="w-10 h-10" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary">{post.title}</h3>
+                  <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">Posted on {post.date}</p>
                 </div>
               </div>
             ))}
