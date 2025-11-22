@@ -62,10 +62,10 @@ const PresenceRecapPage: React.FC = () => {
                     {classItem.statuses.map((status, statusIndex) => (
                       <div
                         key={statusIndex}
-                        className={`h-16 rounded-lg text-white flex items-center justify-center font-bold
+                        className={`h-16 text-white flex items-center justify-center font-bold
                         border-2 border-primary 
                         ${getStatusBgColor(status)}
-                        shadow-[-3px_4px_0px_0px_black]
+                        shadow-shadow
                         transition-all duration-200
                         hover:-translate-y-[2px] hover:shadow-none
                         `}

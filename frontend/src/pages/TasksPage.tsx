@@ -18,7 +18,7 @@ const TasksPage: React.FC = () => {
         <main>
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-4xl font-bold text-primary">Your Tasks</h2>
-            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none">
+            <Button className="bg-green-400 border-2 border-black hover:translate-y-1 hover:shadow-none">
               All
             </Button>
           </div>
@@ -46,7 +46,6 @@ const TasksPage: React.FC = () => {
                 <Button className="
                         px-5 py-2 border-2 border-black
                         bg-danger text-white rounded-lg font-bold
-                        shadow-[-3px_4px_0px_0px_black]
                         hover:translate-y-[2px] hover:shadow-none
                         transition-all
                       ">
