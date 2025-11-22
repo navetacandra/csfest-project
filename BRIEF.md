@@ -802,6 +802,7 @@ Table file {
   dosen_id int [null]
   upload_name varchar [not null]
   random_name varchar [not null, unique]
+  mimetype varchar
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 }
@@ -854,6 +855,7 @@ Table class {
   schedule int [not null]
   start_time varchar [not null]
   end_time varchat [not null]
+  actived_at timestamp [not null, default: `now()`]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 }
