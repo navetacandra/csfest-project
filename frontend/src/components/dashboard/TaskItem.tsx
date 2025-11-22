@@ -14,13 +14,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ title, className, status }) => {
 
   return (
     <Link to="/task/1" className="block">
-      <div className="flex justify-between items-center p-6 border-2 border-primary rounded-lg bg-gray-50/10 dark:bg-gray-800/20 hover:bg-gray-100/10 dark:hover:bg-gray-700/20 transition-colors">
+      <div className="flex justify-between items-center p-4 bg-[#E0FFE8] rounded-lg border-2 border-primary cursor-pointer transition-all duration-200 hover:-translate-x-1 hover:shadow-none shadow-shadow ">
         <div>
-          <h3 className="text-2xl font-semibold">{title}</h3>
-          <p className="text-gray-500 dark:text-gray-400">{className}</p>
+          <h3 className="text-lg font-bold text-primary">{title}</h3>
+          <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{className}</p>
         </div>
-        {isCompleted ? <Badge className='w-30 h-10' variant={'default'}>Sudah Dikumpulkan</Badge> :
-          <Badge className='w-30 h-10' variant={'danger'}>Belum Dikumpulkan</Badge>}
+        <Badge variant={isCompleted ? 'default' : 'danger'}>
+          {isCompleted ? 'Completed' : 'Incomplete'}
+        </Badge>
       </div>
     </Link>
   );

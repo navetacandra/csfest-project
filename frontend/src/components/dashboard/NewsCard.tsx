@@ -25,7 +25,7 @@ const NewsCard: React.FC = () => {
         {news.map((item, index) => (
           <div
             key={index}
-            className="flex items-center gap-4 p-4 bg-background rounded-base border-2 border-border cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex items-center gap-4 p-4 bg-background rounded-base border-2 border-border cursor-pointer 0 transition-all duration-200 hover:-translate-x-1 hover:shadow-none shadow-shadow"
             onClick={handleNewsClick}
           >
             <div className="w-24 h-16 bg-chart-2 rounded-base flex-shrink-0 flex items-center justify-center border-2 border-border">

@@ -35,8 +35,9 @@ const ClassesPage = () => {
                         border-2 border-primary rounded-lg 
                         bg-[#E0FFE8] cursor-pointer 
                         transition-all duration-200 
-                        hover:-translate-y-1 
-                        hover:shadow-shadow
+                        hover:-translate-x-1 
+                        hover:shadow-none
+                        shadow-shadow
                       "
                   onClick={handleClassClick}
                 >

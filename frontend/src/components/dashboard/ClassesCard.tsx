@@ -18,7 +18,7 @@ const ClassesCard: React.FC = () => {
       <h2 className="text-xl font-heading mb-4 text-foreground">Classes</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {classes.map((item, index) => (
-          <div key={index} className="bg-background p-4 rounded-base border-2 border-border">
+          <div key={index} className="bg-background p-4 rounded-base border-2 border-border hover:shadow-none shadow-shadow hover:-translate-x-[2px] transition-all">
             <p className="font-semibold text-foreground">{item.title}</p>
             <p className="text-sm text-foreground/80">{item.schedule}</p>
           </div>

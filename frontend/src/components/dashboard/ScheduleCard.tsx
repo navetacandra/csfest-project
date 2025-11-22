@@ -17,7 +17,7 @@ const ScheduleCard: React.FC = () => {
       <h2 className="text-xl font-heading mb-4 text-foreground">Schedule</h2>
       <div className="space-y-4">
         {schedules.map((item, index) => (
-          <div key={index} className="flex justify-between items-center p-4 bg-background rounded-base border-2 border-border">
+          <div key={index} className="flex justify-between items-center p-4 bg-background rounded-base border-2 border-border hover:shadow-none shadow-shadow hover:-translate-x-[2px] transition-all">
             <div>
               <p className="font-semibold text-foreground">{item.title}</p>
               <p className="text-sm text-foreground/80">{item.time}</p>

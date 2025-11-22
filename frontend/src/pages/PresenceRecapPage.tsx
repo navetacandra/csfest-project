@@ -67,7 +67,7 @@ const PresenceRecapPage: React.FC = () => {
                         ${getStatusBgColor(status)}
                         shadow-shadow
                         transition-all duration-200
-                        hover:-translate-y-[2px] hover:shadow-none
+                        hover:-translate-x-[2px] hover:shadow-none
                         `}
                       >
                         {status}
