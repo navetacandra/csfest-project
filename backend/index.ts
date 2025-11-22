@@ -4,7 +4,7 @@ import storageRoute from "./routes/storage.route";
 import { Sqlite } from "./config/database";
 
 const SERVER_PORT: number = parseInt(process.env.PORT ?? "") || 5000;
-const sqlite: Sqlite = new Sqlite(process.env.DB_NAME);
+export const sqlite: Sqlite = new Sqlite(process.env.DB_NAME);
 const app: Express = express();
 
 app.use(express.urlencoded({ extended: true }));
