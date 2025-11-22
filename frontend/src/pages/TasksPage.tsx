@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
-import TaskItem from '@/components/dashboard/TaskItem';
+import { useNavigate } from "react-router-dom"
 
 const tasks = [
   { title: 'Task Title 1', className: 'class name', status: 'Completed' },
@@ -11,24 +10,49 @@ const tasks = [
 ];
 
 const TasksPage: React.FC = () => {
+  const navigate = useNavigate()
+
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
-      <div className="max-w-7xl mx-auto border-2 border-gray-400 dark:border-gray-600 rounded-2xl p-6 sm:p-8">
+    <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
+      <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main>
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-4xl font-bold text-primary">Your Tasks</h2>
-            <Button className="bg-yellow-900/50 text-yellow-200 border-2 border-yellow-600 px-8 py-2 rounded-lg text-lg hover:bg-yellow-900/70 transition-colors">
+            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none">
               All
             </Button>
           </div>
           <div className="space-y-6">
             {tasks.map((task, index) => (
-              <TaskItem
+              <div
                 key={index}
-                title={task.title}
-                className={task.className}
-                status={task.status as 'Completed' | 'Incomplete'}
-              />
+                className="
+                        flex justify-between items-center p-6
+                        border-2 border-primary rounded-lg
+                        bg-[#E0FFE8] cursor-pointer
+                        transition-all duration-200
+                        hover:-translate-y-1
+                        hover:shadow-shadow
+                      "
+                onClick={() => navigate("/task")}
+              >
+                <div>
+                  <h2 className="text-xl font-bold text-primary">{task.title}</h2>
+                  <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                    {task.className}
+                  </p>
+                </div>
+
+                <Button className="
+                        px-5 py-2 border-2 border-black
+                        bg-danger text-white rounded-lg font-bold
+                        shadow-[-3px_4px_0px_0px_black]
+                        hover:translate-y-[2px] hover:shadow-none
+                        transition-all
+                      ">
+                  View Task
+                </Button>
+              </div>
             ))}
           </div>
         </main>

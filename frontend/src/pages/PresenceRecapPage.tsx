@@ -1,8 +1,7 @@
 import React from 'react';
-import Header from '@/components/layout/Header';
+
 
 const PresenceRecapPage: React.FC = () => {
-  // Mock data for presence
   const presenceRecapData = {
     totalLateness: 0,
     weeks: ['Pekan 1', 'Pekan 2', 'Pekan 3', 'Pekan 4', 'Pekan 5', 'Pekan 6', '...', 'Pekan 16'],
@@ -23,25 +22,25 @@ const PresenceRecapPage: React.FC = () => {
   const getStatusBgColor = (status: string | null) => {
     switch (status) {
       case 'hadir':
-        return 'bg-green-700';
+        return 'bg-green-400';
       case 'izint':
-        return 'bg-yellow-600';
+        return 'bg-yellow-400';
       case 'alpha':
-        return 'bg-red-700';
+        return 'bg-red-400';
       case 'sakit':
-        return 'bg-amber-800';
+        return 'bg-orange-400';
       default:
-        return 'border border-dashed border-gray-400 dark:border-gray-600';
+        return 'bg-gray-200 border border-dashed border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-400';
     }
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 ">
-       <div className="max-w-7xl mx-auto border-2 border-gray-400 dark:border-gray-600 rounded-2xl p-6 sm:p-8">
+    <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
+       <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main className="flex-grow w-full">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-primary">Presence Recap</h1>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">
+            <h1 className="text-4xl font-bold text-primary">Presence Recap</h1>
+            <p className="mt-2 text-text-secondary-light dark:text-text-secondary-dark">
               Total Lateness: <span className="font-semibold">{presenceRecapData.totalLateness} minutes</span>
             </p>
           </div>
@@ -50,20 +49,26 @@ const PresenceRecapPage: React.FC = () => {
               <div className="grid grid-flow-col auto-cols-max gap-3 md:gap-4">
                 <div className="flex flex-col gap-3 md:gap-4 pt-12 items-end">
                   {presenceRecapData.weeks.map((week, index) => (
-                    <div key={index} className="h-16 flex items-center justify-end font-semibold text-gray-600 dark:text-gray-400">
+                    <div key={index} className="h-16 flex items-center justify-end font-semibold text-text-secondary-light dark:text-text-secondary-dark">
                       {week}
                     </div>
                   ))}
                 </div>
                 {presenceRecapData.classes.map((classItem, classIndex) => (
                   <div key={classIndex} className="flex flex-col gap-3 md:gap-4 w-28">
-                    <div className="h-12 flex items-center justify-center font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="h-12 flex items-center justify-center font-bold text-primary">
                       {classItem.name}
                     </div>
                     {classItem.statuses.map((status, statusIndex) => (
                       <div
                         key={statusIndex}
-                        className={`h-16 rounded-lg text-white flex items-center justify-center font-medium ${getStatusBgColor(status)}`}
+                        className={`h-16 rounded-lg text-white flex items-center justify-center font-bold
+                        border-2 border-primary 
+                        ${getStatusBgColor(status)}
+                        shadow-[-3px_4px_0px_0px_black]
+                        transition-all duration-200
+                        hover:-translate-y-[2px] hover:shadow-none
+                        `}
                       >
                         {status}
                       </div>
