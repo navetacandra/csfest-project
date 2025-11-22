@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export type PresenceStatus = "hadir" | "sakit" | "izin" | "alpha";
+const presenceStatusEnum = z.enum(["hadir", "sakit", "izin", "alpha"]);
 
 export interface Presence {
   id: number;
@@ -12,7 +13,7 @@ export interface Presence {
 }
 
 export const setPresenceSchema = z.object({
-  status: z.enum(["hadir", "sakit", "izin", "alpha"]),
+  status: presenceStatusEnum,
   mahasiswa_id: z.number().int().positive().optional(),
   late_time: z.number().int().min(0).optional(),
 });

@@ -18,6 +18,9 @@ export const createMahasiswaSchema = z.object({
   name: z.string().min(1, "Name cannot be empty"),
   major_id: z.number().int().positive(),
   study_program_id: z.number().int().positive(),
+  email: z.string().email("Invalid email format"),
+  username: z.string().min(1, "Username cannot be empty"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export const updateMahasiswaSchema = createMahasiswaSchema;
+export const updateMahasiswaSchema = createMahasiswaSchema.partial();

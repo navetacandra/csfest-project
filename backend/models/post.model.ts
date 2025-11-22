@@ -14,7 +14,7 @@ export interface Post {
 }
 
 export const createPostSchema = z.object({
-  title: z.string().min(1, "Title cannot be empty"),
   message: z.string().min(1, "Message cannot be empty"),
   type: z.enum(["post", "task"]),
+  file_id: z.number().int().optional(),
 });

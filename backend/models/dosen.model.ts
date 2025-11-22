@@ -5,7 +5,7 @@ export interface Dosen {
   nip: string;
   name: string;
   username: string;
-  password: string;
+  password?: string;
   created_at: string;
   updated_at: string;
 }
