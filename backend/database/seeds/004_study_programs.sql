@@ -1,4 +1,3 @@
--- Study Programs (35 records: 7 majors * 5 programs)
 INSERT INTO study_program (id, major_id, name) VALUES
 -- Major 1: Ilmu Komputer
 (1, 1, 'Teknik Informatika'),

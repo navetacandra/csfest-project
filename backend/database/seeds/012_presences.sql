@@ -1,4 +1,3 @@
--- Data presensi untuk mahasiswa di kelas yang berbeda
 INSERT INTO presence (id, class_enrollment_id, status, late_time, schedule_date) VALUES
 (1, 7, 'hadir', 0, '2025-11-24'), -- mhs 1, class 1
 (2, 8, 'hadir', 5, '2025-11-24'), -- mhs 2, class 1

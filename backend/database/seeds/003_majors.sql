@@ -1,4 +1,3 @@
--- Majors (7 records)
 INSERT INTO major (id, name) VALUES
 (1, 'Ilmu Komputer'),
 (2, 'Ekonomi dan Bisnis'),

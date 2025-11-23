@@ -1,5 +1,3 @@
--- Admins (5 records)
--- Note: Passwords are placeholders and should be replaced with actual hashes.
 INSERT INTO admin (id, name, username, password) VALUES
 (1, 'Super Admin', 'superadmin', '$2b$10$verysecurepasswordhashplaceholder1'),
 (2, 'Admin Akademik', 'admin.akademik', '$2b$10$verysecurepasswordhashplaceholder2'),

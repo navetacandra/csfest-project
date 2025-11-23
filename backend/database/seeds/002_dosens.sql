@@ -1,5 +1,3 @@
--- Dosens (5 records)
--- Note: Passwords are placeholders and should be replaced with actual hashes.
 INSERT INTO dosen (id, nip, name, username, password) VALUES
 (1, '198501012010011001', 'Dr. Budi Hartono, M.Kom.', 'budi.hartono', '$2b$10$verysecurepasswordhashplaceholder6'),
 (2, '198805102012022002', 'Prof. Dr. Retno Wulandari, S.T., M.T.', 'retno.wulandari', '$2b$10$verysecurepasswordhashplaceholder7'),

@@ -4,13 +4,13 @@ import multer, { type FileFilterCallback } from "multer";
 import type { Request } from "express";
 
 const ALLOWED_MIME_TYPES: string[] = [
-  "application/pdf", // .pdf
-  "image/jpeg", // .jpg | .jpeg
-  "image/png", // .png
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const storage = (directory: string = "") =>
   multer.diskStorage({
