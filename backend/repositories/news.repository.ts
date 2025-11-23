@@ -33,13 +33,17 @@ export class NewsRepository {
     return result.length > 0 ? result[0]! : null;
   }
 
-  all(page: number = 1, limit: number = 10): { id: number; title: string }[] {
+  all(page: number = 1, limit: number = 10): { id: number; title: string; thumbnail: string }[] {
     const offset = (page - 1) * limit;
     return this.db.query(
-      "SELECT id, title FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      `SELECT n.id, n.title, f.random_name as thumbnail
+       FROM news n
+       JOIN file f ON n.thumbnail_file_id = f.id
+       ORDER BY n.created_at DESC
+       LIMIT ? OFFSET ?`,
       limit,
       offset,
-    ) as { id: number; title: string }[];
+    ) as { id: number; title: string; thumbnail: string }[];
   }
 
   update(id: number, data: NewsForUpdate): void {

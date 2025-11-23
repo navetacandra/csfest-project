@@ -1,0 +1,2055 @@
+openapi: 3.0.0
+info:
+  title: Ku-LMSin API
+  description: API for Ku-LMSin - University Learning Management System
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@kulmsin.edu
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+  - url: https://kulmsin-api.com/api
+    description: Production server
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "testuser"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9..."
+                      role:
+                        type: string
+                        enum: [admin, dosen, mahasiswa]
+                        example: "mahasiswa"
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 401
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Invalid username or password"
+                      code:
+                        type: string
+                        example: "AUTHENTICATION_FAILED"
+
+  /logout:
+    delete:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate user session
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: {}
+
+  /profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      description: Get details of authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                        example: 1
+                      username:
+                        type: string
+                        example: "testuser"
+                      name:
+                        type: string
+                        example: "Test User"
+                      email:
+                        type: string
+                        example: "test@example.com"
+                      nip:
+                        type: string
+                        example: "1234567890"
+                      nim:
+                        type: string
+                        example: "235150200111001"
+                      role:
+                        type: string
+                        enum: [admin, dosen, mahasiswa]
+                        example: "mahasiswa"
+
+  /news:
+    get:
+      tags:
+        - News
+      summary: Get public news list
+      description: Retrieve paginated list of news (with id, title, and thumbnail only)
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of news articles (id, title, and thumbnail only)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NewsListItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /news/{id}:
+    get:
+      tags:
+        - News
+      summary: Get specific news
+      description: Retrieve details of a specific news article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      responses:
+        '200':
+          description: News details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/News'
+
+  /dashboard:
+    get:
+      tags:
+        - General
+      summary: Get dashboard data
+      description: Retrieve user dashboard summary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      news:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/NewsListItem'
+                      schedule:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Class'
+                      tasks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TaskItem'
+                      classes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Class'
+
+  /classes:
+    get:
+      tags:
+        - Class
+      summary: Get followed classes
+      description: Retrieve list of classes the user is enrolled in
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Class'
+    post:
+      tags:
+        - Class
+      summary: Enroll in class
+      description: Enroll in a class using enrollment key
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enroll_key
+              properties:
+                enroll_key:
+                  type: string
+                  example: "ABC123DEF"
+      responses:
+        '200':
+          description: Successfully enrolled in class
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Class'
+
+  /classes/{id}:
+    get:
+      tags:
+        - Class
+      summary: Get class details
+      description: Retrieve details of a specific class and its posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      responses:
+        '200':
+          description: Class details with posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                        example: 1
+                      name:
+                        type: string
+                        example: "Pemrograman Web Lanjutan"
+                      enroll_key:
+                        type: string
+                        example: "WEB2025ADV"
+                      schedule:
+                        type: integer
+                        example: 1
+                      start_time:
+                        type: string
+                        example: "08:00"
+                      end_time:
+                        type: string
+                        example: "10:00"
+                      actived_at:
+                        type: string
+                        example: "2024-11-23T10:00:00Z"
+                      created_at:
+                        type: string
+                        example: "2024-11-23T10:00:00Z"
+                      updated_at:
+                        type: string
+                        example: "2024-11-23T10:00:00Z"
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: number
+                              example: 1
+                            message:
+                              type: string
+                              example: "Selamat datang di kelas Pemrograman Web Lanjutan"
+                            type:
+                              type: string
+                              example: "post"
+
+  /classes/{class_id}/posts:
+    post:
+      tags:
+        - Posts
+      summary: Create post in class
+      description: Create a new post or task in a class
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+                - type
+              properties:
+                message:
+                  type: string
+                  example: "Tugas 1: Buat sebuah landing page sederhana menggunakan HTML & CSS"
+                type:
+                  type: string
+                  enum: [post, task]
+                  example: "task"
+      responses:
+        '200':
+          description: Successfully created post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Post'
+
+  /classes/{class_id}/posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Get post details
+      description: Retrieve details of a specific post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/PostWithFile'
+    put:
+      tags:
+        - Posts
+      summary: Update post
+      description: Update an existing post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Updated message"
+                type:
+                  type: string
+                  enum: [post, task]
+                  example: "post"
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Post'
+    delete:
+      tags:
+        - Posts
+      summary: Delete post
+      description: Delete a specific post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      responses:
+        '200':
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Post'
+
+  /classes/{class_id}/posts/{post_id}/task:
+    post:
+      tags:
+        - Tasks
+      summary: Submit task
+      description: Submit a completed task file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Task file to submit
+      responses:
+        '200':
+          description: Task submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Task'
+
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      summary: Get user tasks
+      description: Retrieve list of tasks for the user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, completed, incoming]
+            default: "all"
+          description: Filter tasks by status
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskItem'
+
+  /schedule:
+    get:
+      tags:
+        - Schedule
+      summary: Get user schedule
+      description: Retrieve schedule of classes the user is enrolled in
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User schedule
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Class'
+
+  /presence/recap:
+    get:
+      tags:
+        - Presence
+      summary: Get presence recap
+      description: Retrieve presence records and accumulated lateness for student
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Presence recap
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/PresenceRecap'
+
+  /presence/{class_id}:
+    post:
+      tags:
+        - Presence
+      summary: Set presence
+      description: Record attendance for a class
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule_date
+                - status
+              properties:
+                schedule_date:
+                  type: string
+                  format: date
+                  example: "2024-11-24"
+                status:
+                  type: string
+                  enum: [hadir, izin, sakit, alpha]
+                  example: "hadir"
+                studentId:
+                  type: integer
+                  description: Required when setting for another student (by dosen)
+                late_time:
+                  type: integer
+                  description: Late time in minutes, default 0
+      responses:
+        '200':
+          description: Presence recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Presence'
+
+  /admin/major:
+    get:
+      tags:
+        - Admin
+      summary: Get list of majors
+      description: Retrieve all majors (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of majors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Major'
+    post:
+      tags:
+        - Admin
+      summary: Create major
+      description: Create a new major (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "Ilmu Komputer"
+      responses:
+        '200':
+          description: Major created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Major'
+
+  /admin/major/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get major details
+      description: Retrieve details of a specific major (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+      responses:
+        '200':
+          description: Major details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Major'
+    put:
+      tags:
+        - Admin
+      summary: Update major
+      description: Update an existing major (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Informatika"
+      responses:
+        '200':
+          description: Major updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Major'
+    delete:
+      tags:
+        - Admin
+      summary: Delete major
+      description: Delete a specific major (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+      responses:
+        '200':
+          description: Major deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Major'
+
+  /admin/major/{major_id}/study_program:
+    get:
+      tags:
+        - Admin
+      summary: Get study programs for major
+      description: Retrieve all study programs for a specific major (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: major_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+      responses:
+        '200':
+          description: List of study programs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudyProgram'
+    post:
+      tags:
+        - Admin
+      summary: Create study program
+      description: Create a new study program for a major (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: major_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "Teknik Informatika"
+      responses:
+        '200':
+          description: Study program created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/StudyProgram'
+
+  /admin/major/{major_id}/study_program/{id}:
+    delete:
+      tags:
+        - Admin
+      summary: Delete study program
+      description: Delete a specific study program (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: major_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Major ID
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Study Program ID
+      responses:
+        '200':
+          description: Study program deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/StudyProgram'
+
+  /admin/mahasiswa:
+    get:
+      tags:
+        - Admin
+      summary: Get list of mahasiswa
+      description: Retrieve paginated list of students (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by name
+        - name: major_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter by major ID
+        - name: study_program_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter by study program ID
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          example: 1
+                        name:
+                          type: string
+                          example: "Agus Setiawan"
+                        major:
+                          type: string
+                          example: "Ilmu Komputer"
+                        study_program:
+                          type: string
+                          example: "Teknik Informatika"
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags:
+        - Admin
+      summary: Create mahasiswa
+      description: Create a new student (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nim
+                - name
+                - email
+                - major_id
+                - study_program_id
+                - username
+                - password
+              properties:
+                nim:
+                  type: string
+                  example: "235150200111001"
+                name:
+                  type: string
+                  example: "Agus Setiawan"
+                email:
+                  type: string
+                  format: email
+                  example: "agus.s@student.college.id"
+                major_id:
+                  type: integer
+                  example: 1
+                study_program_id:
+                  type: integer
+                  example: 1
+                username:
+                  type: string
+                  example: "agus.setiawan"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Mahasiswa'
+
+  /admin/mahasiswa/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get mahasiswa details
+      description: Retrieve details of a specific student (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Student ID
+      responses:
+        '200':
+          description: Student details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                        example: 1
+                      name:
+                        type: string
+                        example: "Agus Setiawan"
+                      major:
+                        type: string
+                        example: "Ilmu Komputer"
+                      study_program:
+                        type: string
+                        example: "Teknik Informatika"
+    put:
+      tags:
+        - Admin
+      summary: Update mahasiswa
+      description: Update an existing student (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Student ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nim:
+                  type: string
+                  example: "235150200111001"
+                name:
+                  type: string
+                  example: "Agus Setiawan Updated"
+                email:
+                  type: string
+                  format: email
+                  example: "agus.updated@student.college.id"
+                major_id:
+                  type: integer
+                  example: 2
+                study_program_id:
+                  type: integer
+                  example: 2
+                username:
+                  type: string
+                  example: "agus.setiawan.updated"
+      responses:
+        '200':
+          description: Student updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Mahasiswa'
+    delete:
+      tags:
+        - Admin
+      summary: Delete mahasiswa
+      description: Delete a specific student (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Student ID
+      responses:
+        '200':
+          description: Student deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Mahasiswa'
+
+  /admin/dosen:
+    get:
+      tags:
+        - Admin
+      summary: Get list of dosen
+      description: Retrieve paginated list of lecturers (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nip
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by NIP
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by name
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of lecturers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DosenWithUsername'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags:
+        - Admin
+      summary: Create dosen
+      description: Create a new lecturer (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nip
+                - name
+              properties:
+                nip:
+                  type: string
+                  example: "198501012010011001"
+                name:
+                  type: string
+                  example: "Dr. Budi Hartono, M.Kom."
+                username:
+                  type: string
+                  example: "budi.hartono"
+      responses:
+        '200':
+          description: Lecturer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/DosenWithUsername'
+
+  /admin/dosen/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get dosen details
+      description: Retrieve details of a specific lecturer (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Lecturer ID
+      responses:
+        '200':
+          description: Lecturer details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/DosenWithUsername'
+    put:
+      tags:
+        - Admin
+      summary: Update dosen
+      description: Update an existing lecturer (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Lecturer ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nip:
+                  type: string
+                  example: "198501012010011001"
+                name:
+                  type: string
+                  example: "Dr. Budi Hartono, M.Kom."
+      responses:
+        '200':
+          description: Lecturer updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/DosenWithUsername'
+    delete:
+      tags:
+        - Admin
+      summary: Delete dosen
+      description: Delete a specific lecturer (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Lecturer ID
+      responses:
+        '200':
+          description: Lecturer deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/DosenWithUsername'
+
+  /admin/classes:
+    post:
+      tags:
+        - Admin
+      summary: Create class
+      description: Create a new class (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - schedule
+              properties:
+                name:
+                  type: string
+                  example: "Pemrograman Web Lanjutan"
+                schedule:
+                  type: integer
+                  minimum: 0
+                  maximum: 6
+                  example: 1
+      responses:
+        '200':
+          description: Class created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Class'
+
+  /admin/news:
+    get:
+      tags:
+        - Admin
+      summary: Get all news (admin)
+      description: Retrieve paginated list of news (admin only) (with id, title, and thumbnail only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of news articles (id, title, and thumbnail only)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NewsListItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags:
+        - Admin
+      summary: Create news
+      description: Create a new news article (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - thumbnail_file_id
+              properties:
+                title:
+                  type: string
+                  example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
+                content:
+                  type: string
+                  example: "Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026..."
+                thumbnail_file_id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: News created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/News'
+
+  /admin/news/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get news details (admin)
+      description: Retrieve details of a specific news article (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      responses:
+        '200':
+          description: News details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/News'
+    put:
+      tags:
+        - Admin
+      summary: Update news
+      description: Update an existing news article (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Updated News Title"
+                content:
+                  type: string
+                  example: "Updated news content..."
+                thumbnail_file_id:
+                  type: integer
+                  example: 6
+      responses:
+        '200':
+          description: News updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/News'
+    delete:
+      tags:
+        - Admin
+      summary: Delete news
+      description: Delete a specific news article (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: News ID
+      responses:
+        '200':
+          description: News deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/News'
+
+  /storage/{file_id}:
+    get:
+      tags:
+        - Storage
+      summary: Download file
+      description: Download a file by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: File ID
+      responses:
+        '200':
+          description: File for download
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Test User"
+        username:
+          type: string
+          example: "testuser"
+        email:
+          type: string
+          example: "test@example.com"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    Admin:
+      allOf:
+        - $ref: '#/components/schemas/User'
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Admin User"
+        username:
+          type: string
+          example: "admin"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    Dosen:
+      allOf:
+        - $ref: '#/components/schemas/User'
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        nip:
+          type: string
+          example: "198501012010011001"
+        name:
+          type: string
+          example: "Dr. Budi Hartono, M.Kom."
+        username:
+          type: string
+          example: "budi.hartono"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    DosenWithUsername:
+      allOf:
+        - $ref: '#/components/schemas/Dosen'
+    
+    Mahasiswa:
+      allOf:
+        - $ref: '#/components/schemas/User'
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        major_id:
+          type: number
+          example: 1
+        study_program_id:
+          type: number
+          example: 1
+        nim:
+          type: string
+          example: "235150200111001"
+        name:
+          type: string
+          example: "Agus Setiawan"
+        email:
+          type: string
+          example: "agus.s@student.college.id"
+        username:
+          type: string
+          example: "agus.setiawan"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    Major:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Ilmu Komputer"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    StudyProgram:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        major_id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Teknik Informatika"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    Class:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Pemrograman Web Lanjutan"
+        enroll_key:
+          type: string
+          example: "WEB2025ADV"
+        schedule:
+          type: number
+          example: 1
+        start_time:
+          type: string
+          example: "08:00"
+        end_time:
+          type: string
+          example: "10:00"
+        actived_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    News:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        title:
+          type: string
+          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
+        thumbnail_file_id:
+          type: number
+          example: 5
+        content:
+          type: string
+          example: "Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026. Segera lakukan pendaftaran ulang melalui portal akademik."
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+
+    NewsListItem:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        title:
+          type: string
+          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
+        thumbnail:
+          type: string
+          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.jpg"
+    
+    Post:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        class_id:
+          type: number
+          example: 1
+        class_enrollment_id:
+          type: number
+          example: 1
+        file_id:
+          type: number
+          example: null
+        message:
+          type: string
+          example: "Selamat datang di kelas Pemrograman Web Lanjutan"
+        type:
+          type: string
+          example: "post"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    PostWithFile:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+      type: object
+      properties:
+        file:
+          $ref: '#/components/schemas/File'
+        task:
+          $ref: '#/components/schemas/Task'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+    
+    File:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        mahasiswa_id:
+          type: number
+          example: null
+        dosen_id:
+          type: number
+          example: null
+        upload_name:
+          type: string
+          example: "tugas_1.pdf"
+        random_name:
+          type: string
+          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.pdf"
+        size:
+          type: number
+          example: 1024
+        mimetype:
+          type: string
+          example: "application/pdf"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    Task:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        post_id:
+          type: number
+          example: 3
+        class_enrollment_id:
+          type: number
+          example: 7
+        file_id:
+          type: number
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    TaskItem:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        class_id:
+          type: number
+          example: 1
+        title:
+          type: string
+          example: "Tugas 1: Buat sebuah landing page sederhana"
+        status:
+          type: string
+          enum: [completed, incoming]
+          example: "incoming"
+    
+    Presence:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        class_enrollment_id:
+          type: number
+          example: 7
+        schedule_date:
+          type: string
+          format: date
+          example: "2024-11-24"
+        status:
+          type: string
+          enum: [hadir, sakit, izin, alpha]
+          example: "hadir"
+        late_time:
+          type: number
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+    
+    PresenceRecap:
+      type: object
+      properties:
+        accumulated_late:
+          type: number
+          example: 0
+        recap:
+          type: array
+          items:
+            $ref: '#/components/schemas/Presence'
+    
+    PaginationMeta:
+      type: object
+      properties:
+        size:
+          type: number
+          example: 10
+        page:
+          type: number
+          example: 1
+        limit:
+          type: number
+          example: 10
