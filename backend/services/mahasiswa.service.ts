@@ -10,7 +10,7 @@ export class MahasiswaService {
     this.mahasiswaRepository = new MahasiswaRepository(sqlite);
   }
 
-  async create(data: Omit<Mahasiswa, "id" | "created_at" | "updated_at">) {
+  async create(data: Omit<Mahasiswa, "id" | "created_at" | "updated_at">): Promise<Mahasiswa | null> {
     if (!data.password) {
       throw new Error("Password is required to create a new mahasiswa.");
     }
@@ -27,7 +27,7 @@ export class MahasiswaService {
     name?: string,
     major_id?: number,
     study_program_id?: number,
-  ) {
+  ): Mahasiswa[] {
     return this.mahasiswaRepository.all(
       page,
       limit,
@@ -37,7 +37,7 @@ export class MahasiswaService {
     );
   }
 
-  getById(id: number) {
+  getById(id: number): Mahasiswa {
     const mahasiswa = this.mahasiswaRepository.findById(id);
     if (!mahasiswa) {
       throw new Error("Mahasiswa not found");
@@ -48,7 +48,7 @@ export class MahasiswaService {
   async update(
     id: number,
     data: Partial<Omit<Mahasiswa, "id" | "created_at" | "updated_at">>,
-  ) {
+  ): Promise<Mahasiswa | null> {
     if (data.password) {
       data.password = await Password.hash(data.password);
     }
@@ -56,7 +56,7 @@ export class MahasiswaService {
     return this.mahasiswaRepository.findById(id);
   }
 
-  delete(id: number) {
+  delete(id: number): Mahasiswa {
     const mahasiswa = this.mahasiswaRepository.findById(id);
     if (!mahasiswa) {
       throw new Error("Mahasiswa not found");

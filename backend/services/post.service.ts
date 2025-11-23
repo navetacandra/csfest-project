@@ -3,6 +3,22 @@ import type { Post } from "../models/post.model";
 import { TaskRepository } from "../repositories/task.repository";
 import { FileRepository } from "../repositories/file.repository";
 import { Sqlite } from "../config/database";
+import type { File } from "../models/file.model";
+import type { Task } from "../models/task.model";
+
+interface PostWithFile extends Post {
+  file: File | null;
+}
+
+interface PostWithFileAndTask extends Post {
+  file: File | null;
+  task: Task | null;
+}
+
+interface PostWithFileAndTasks extends Post {
+  file: File | null;
+  tasks: Task[];
+}
 
 export class PostService {
   private postRepository: PostRepository;
@@ -15,7 +31,7 @@ export class PostService {
     this.fileRepository = new FileRepository(sqlite);
   }
 
-  create(data: Omit<Post, "id" | "created_at" | "updated_at">) {
+  create(data: Omit<Post, "id" | "created_at" | "updated_at">): Post | null {
     const newPostId = this.postRepository.create(data);
     return this.postRepository.findById(Number(newPostId));
   }
@@ -23,7 +39,7 @@ export class PostService {
   getById(
     id: number,
     accessor?: { role: "dosen" } | { role: "mahasiswa"; studentId: number },
-  ) {
+  ): PostWithFile | PostWithFileAndTask | PostWithFileAndTasks {
     const post = this.postRepository.findById(id);
     if (!post) {
       throw new Error("Post not found");
@@ -50,7 +66,7 @@ export class PostService {
     return { ...post, file };
   }
 
-  delete(id: number) {
+  delete(id: number): Post {
     const post = this.postRepository.findById(id);
     if (!post) {
       throw new Error("Post not found");
@@ -62,7 +78,7 @@ export class PostService {
   update(
     id: number,
     data: Partial<Omit<Post, "id" | "created_at" | "updated_at">>,
-  ) {
+  ): Post | null {
     this.postRepository.update(id, data);
     return this.postRepository.findById(id);
   }

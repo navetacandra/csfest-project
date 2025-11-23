@@ -5,6 +5,23 @@ import type { Class } from "../models/class.model";
 import { randomBytes } from "node:crypto";
 import { Sqlite } from "../config/database";
 
+interface ClassDetails {
+  id: number;
+  name: string;
+  enroll_key: string;
+  schedule: number;
+  start_time: string;
+  end_time: string;
+  actived_at: string;
+  created_at: string;
+  updated_at: string;
+  posts: {
+    id: number;
+    message: string;
+    type: string;
+  }[];
+}
+
 export class ClassService {
   private classRepository: ClassRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
@@ -21,13 +38,13 @@ export class ClassService {
       Class,
       "id" | "created_at" | "updated_at" | "actived_at" | "enroll_key"
     >,
-  ) {
+  ): Class | null {
     const enrollKey = randomBytes(4).toString("hex").toUpperCase();
     const newClassId = this.classRepository.create(data, enrollKey);
     return this.classRepository.findById(Number(newClassId));
   }
 
-  enroll(enroll_key: string, userId: number, role: "mahasiswa" | "dosen") {
+  enroll(enroll_key: string, userId: number, role: "mahasiswa" | "dosen"): Class | null {
     const classToEnroll = this.classRepository.findByEnrollKey(enroll_key);
     if (!classToEnroll) {
       throw new Error("Class with that enroll key not found.");
@@ -54,7 +71,7 @@ export class ClassService {
     return classToEnroll;
   }
 
-  getFollowedClasses(userId: number, role: "mahasiswa" | "dosen" | "admin") {
+  getFollowedClasses(userId: number, role: "mahasiswa" | "dosen" | "admin"): Class[] {
     let enrollments;
     if (role === "admin") {
       const allClasses = this.classRepository.all(1, 1000);
@@ -69,7 +86,7 @@ export class ClassService {
     return this.classRepository.findByIds(classIds);
   }
 
-  getSchedule(userId: number, role: "mahasiswa" | "dosen" | "admin", day?: number) {
+  getSchedule(userId: number, role: "mahasiswa" | "dosen" | "admin", day?: number): Class[] {
     let enrollments;
     if (role === "admin") {
       const allClasses = this.classRepository.all(1, 1000);
@@ -84,7 +101,7 @@ export class ClassService {
     return this.classRepository.findByIds(classIds, day);
   }
 
-  getClassDetails(classId: number) {
+  getClassDetails(classId: number): ClassDetails {
     const classData = this.classRepository.findById(classId);
     if (!classData) {
       throw new Error("Class not found");

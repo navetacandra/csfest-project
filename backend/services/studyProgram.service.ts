@@ -9,16 +9,16 @@ export class StudyProgramService {
     this.studyProgramRepository = new StudyProgramRepository(sqlite);
   }
 
-  getByMajorId(majorId: number) {
+  getByMajorId(majorId: number): StudyProgram[] {
     return this.studyProgramRepository.findByMajorId(majorId);
   }
 
-  create(data: Omit<StudyProgram, "id" | "created_at" | "updated_at">) {
+  create(data: Omit<StudyProgram, "id" | "created_at" | "updated_at">): StudyProgram | null {
     const newStudyProgramId = this.studyProgramRepository.create(data);
     return this.studyProgramRepository.findById(Number(newStudyProgramId));
   }
 
-  delete(id: number) {
+  delete(id: number): StudyProgram {
     const studyProgram = this.studyProgramRepository.findById(id);
     if (!studyProgram) {
       throw new Error("Study Program not found");

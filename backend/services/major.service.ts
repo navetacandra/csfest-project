@@ -9,11 +9,11 @@ export class MajorService {
     this.majorRepository = new MajorRepository(sqlite);
   }
 
-  getAll() {
+  getAll(): Major[] {
     return this.majorRepository.all();
   }
 
-  getById(id: number) {
+  getById(id: number): Major {
     const major = this.majorRepository.findById(id);
     if (!major) {
       throw new Error("Major not found");
@@ -21,7 +21,7 @@ export class MajorService {
     return major;
   }
 
-  create(data: Omit<Major, "id" | "created_at" | "updated_at">) {
+  create(data: Omit<Major, "id" | "created_at" | "updated_at">): Major | null {
     const newMajorId = this.majorRepository.create(data);
     return this.majorRepository.findById(Number(newMajorId));
   }
@@ -29,12 +29,12 @@ export class MajorService {
   update(
     id: number,
     data: Partial<Omit<Major, "id" | "created_at" | "updated_at">>,
-  ) {
+  ): Major | null {
     this.majorRepository.update(id, data);
     return this.majorRepository.findById(id);
   }
 
-  delete(id: number) {
+  delete(id: number): Major {
     const major = this.majorRepository.findById(id);
     if (!major) {
       throw new Error("Major not found");

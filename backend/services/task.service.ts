@@ -4,6 +4,13 @@ import { PostRepository } from "../repositories/post.repository";
 import type { Task } from "../models/task.model";
 import { Sqlite } from "../config/database";
 
+interface TaskItem {
+  id: number;
+  class_id: number;
+  title: string;
+  status: "completed" | "incoming";
+}
+
 export class TaskService {
   private taskRepository: TaskRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
@@ -20,7 +27,7 @@ export class TaskService {
     studentId: number,
     classId: number,
     fileId: number,
-  ) {
+  ): Task | null {
     const enrollments =
       this.classEnrollmentRepository.findByMahasiswaId(studentId);
     const enrollment = enrollments.find((e) => e.class_id === classId);
@@ -50,7 +57,7 @@ export class TaskService {
     return this.taskRepository.findById(Number(newTaskId));
   }
 
-  getTasks(studentId: number, filter: "all" | "completed" | "incoming") {
+  getTasks(studentId: number, filter: "all" | "completed" | "incoming"): TaskItem[] {
     const studentEnrollments =
       this.classEnrollmentRepository.findByMahasiswaId(studentId);
     const classIds = studentEnrollments.map((e) => e.class_id);
@@ -58,7 +65,7 @@ export class TaskService {
     const posts = this.postRepository.findTasksByClassIds(classIds);
     const submittedTasks = this.taskRepository.findByStudentId(studentId);
 
-    const result: any[] = [];
+    const result: TaskItem[] = [];
     for (const post of posts) {
       const submission = submittedTasks.find((t) => t.post_id === post.id);
       const status = submission ? "completed" : "incoming";

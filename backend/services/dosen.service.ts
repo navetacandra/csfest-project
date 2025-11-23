@@ -15,7 +15,7 @@ export class DosenService {
       password: string;
       username?: string;
     },
-  ) {
+  ): Promise<Dosen | null> {
     const hashedPassword = await Password.hash(data.password);
 
     const newDosenData: Omit<
@@ -31,11 +31,11 @@ export class DosenService {
     return this.dosenRepository.findById(Number(newDosenId));
   }
 
-  getAll(page: number, limit: number, nip?: string, name?: string) {
+  getAll(page: number, limit: number, nip?: string, name?: string): Dosen[] {
     return this.dosenRepository.all(page, limit, nip, name);
   }
 
-  getById(id: number) {
+  getById(id: number): Dosen {
     const dosen = this.dosenRepository.findById(id);
     if (!dosen) {
       throw new Error("Dosen not found");
@@ -43,12 +43,12 @@ export class DosenService {
     return dosen;
   }
 
-  async update(id: number, data: Partial<{ nip: string; name: string }>) {
+  async update(id: number, data: Partial<{ nip: string; name: string }>): Promise<Dosen | null> {
     this.dosenRepository.update(id, data);
     return this.dosenRepository.findById(id);
   }
 
-  delete(id: number) {
+  delete(id: number): Dosen {
     const dosen = this.dosenRepository.findById(id);
     if (!dosen) {
       throw new Error("Dosen not found");

@@ -3,6 +3,11 @@ import { ClassEnrollmentRepository } from "../repositories/classEnrollment.repos
 import type { Presence } from "../models/presence.model";
 import { Sqlite } from "../config/database";
 
+interface PresenceRecap {
+  accumulated_late: number;
+  recap: Presence[];
+}
+
 export class PresenceService {
   private presenceRepository: PresenceRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
@@ -21,7 +26,7 @@ export class PresenceService {
       studentId?: number;
       late_time?: number;
     },
-  ) {
+  ): Presence | null {
     let studentIdToSet: number;
     let statusToSet = payload.status;
     let lateTimeToSet = payload.late_time || 0;
@@ -77,7 +82,7 @@ export class PresenceService {
     }
   }
 
-  getRecap(studentId: number) {
+  getRecap(studentId: number): PresenceRecap {
     const enrollments =
       this.classEnrollmentRepository.findByMahasiswaId(studentId);
     if (enrollments.length === 0) {

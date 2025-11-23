@@ -9,11 +9,11 @@ export class NewsService {
     this.newsRepository = new NewsRepository(sqlite);
   }
 
-  getAll(page: number, limit: number) {
+  getAll(page: number, limit: number): News[] {
     return this.newsRepository.all(page, limit);
   }
 
-  getById(id: number) {
+  getById(id: number): News {
     const news = this.newsRepository.findById(id);
     if (!news) {
       throw new Error("News not found");
@@ -21,7 +21,7 @@ export class NewsService {
     return news;
   }
 
-  create(data: Omit<News, "id" | "created_at" | "updated_at">) {
+  create(data: Omit<News, "id" | "created_at" | "updated_at">): News | null {
     const newNewsId = this.newsRepository.create(data);
     return this.newsRepository.findById(Number(newNewsId));
   }
@@ -29,12 +29,12 @@ export class NewsService {
   update(
     id: number,
     data: Partial<Omit<News, "id" | "created_at" | "updated_at">>,
-  ) {
+  ): News | null {
     this.newsRepository.update(id, data);
     return this.newsRepository.findById(id);
   }
 
-  delete(id: number) {
+  delete(id: number): News {
     const news = this.newsRepository.findById(id);
     if (!news) {
       throw new Error("News not found");

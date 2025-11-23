@@ -10,7 +10,7 @@ export class AdminService {
     this.adminRepository = new AdminRepository(sqlite);
   }
 
-  async create(data: Omit<Admin, "id" | "created_at" | "updated_at">) {
+  async create(data: Omit<Admin, "id" | "created_at" | "updated_at">): Promise<Admin | null> {
     if (!data.password) {
       throw new Error("Password is required to create a new admin.");
     }
@@ -21,11 +21,11 @@ export class AdminService {
     return this.adminRepository.findById(Number(newAdminId));
   }
 
-  getAll(page: number, limit: number, name?: string) {
+  getAll(page: number, limit: number, name?: string): Admin[] {
     return this.adminRepository.all(page, limit);
   }
 
-  getById(id: number) {
+  getById(id: number): Admin {
     const admin = this.adminRepository.findById(id);
     if (!admin) {
       throw new Error("Admin not found");
@@ -36,7 +36,7 @@ export class AdminService {
   async update(
     id: number,
     data: Partial<Omit<Admin, "id" | "created_at" | "updated_at">>,
-  ) {
+  ): Promise<Admin | null> {
     if (data.password) {
       data.password = await Password.hash(data.password);
     }
@@ -44,7 +44,7 @@ export class AdminService {
     return this.adminRepository.findById(id);
   }
 
-  delete(id: number) {
+  delete(id: number): Admin {
     const admin = this.adminRepository.findById(id);
     if (!admin) {
       throw new Error("Admin not found");

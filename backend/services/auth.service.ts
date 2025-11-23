@@ -3,6 +3,11 @@ import { Password } from "./password.service";
 import { JWT } from "./jwt.service";
 import { Sqlite } from "../config/database";
 
+interface LoginResult {
+  token: string;
+  role: string;
+}
+
 export class AuthService {
   private userRepository: UserRepository;
 
@@ -10,7 +15,7 @@ export class AuthService {
     this.userRepository = new UserRepository(sqlite);
   }
 
-  async login(username: string, password_plain: string) {
+  async login(username: string, password_plain: string): Promise<LoginResult> {
     const user = this.userRepository.findByUsername(username);
 
     if (!user || !user.password) {
