@@ -919,10 +919,18 @@
 - **Environment Variable**:
 
 ```env
-PORT=
+# Server Configuration
+PORT=5000
+TZ=Asia/Jakarta
+NODE_ENV=development
+
+# Database Configuration
+DB_NAME=sqlite.db
+
+# Security Configuration
 JWT_SECRET_KEY=
 PASSWORD_SECRET_KEY=
-DB_PATH=
+PASSWORD_ALGO=bcrypt
 ```
 
 - **Database Design**:
