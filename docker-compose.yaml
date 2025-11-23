@@ -22,15 +22,24 @@ services:
           cpus: "0.1"
           memory: 64M
 
+  fe-build:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./fe-dist:/app/dist
+
   nginx:
     image: nginx:1-alpine
     ports:
       - 8080:80
     depends_on:
+      - fe-build
       - api-server
     restart: unless-stopped
     volumes:
       - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./fe-dist:/etc/nginx/html
     networks:
       - kulmsin-network
     deploy:
