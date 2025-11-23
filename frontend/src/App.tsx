@@ -20,7 +20,7 @@ function App() {
           path="/dashboard"
           element={
             <>
-              <div className="container mx-auto ">
+              <div className="container mx-auto px-4">
                 <Header />
                 <DashboardPage />
               </div>
@@ -31,7 +31,7 @@ function App() {
           path="/classes"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <ClassesPage />
               </div>
@@ -42,7 +42,7 @@ function App() {
           path="/tasks"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <TasksPage />
               </div>
@@ -53,7 +53,7 @@ function App() {
           path="/task/:id"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <TaskDetailPage />
               </div>
@@ -64,7 +64,7 @@ function App() {
           path="/presence"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <PresenceRecapPage />
               </div>
@@ -75,7 +75,7 @@ function App() {
           path="/news-detail"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <NewsDetailPage />
               </div>
@@ -86,7 +86,7 @@ function App() {
           path="/class"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <ClassPage />
               </div>
@@ -97,7 +97,7 @@ function App() {
           path="/presence-as-lecturer"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto px-4">
                 <Header />
                 <PresenceAsLecturerPage />
               </div>
