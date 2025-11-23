@@ -30,20 +30,14 @@ RUN bun test
 
 FROM prerelease AS builder
 COPY --from=deps /tmp/prod/node_modules node_modules
+RUN mkdir -p /app/database/migrations /app/database/seeds
 RUN bun build --compile ./index.ts --outfile ./server
 
-FROM gcr.io/distroless/base-debian12 AS release
+FROM frolvlad/alpine-glibc AS release
 WORKDIR /app
 
 COPY --from=builder /app/server .
-
-# Create database directory and set permissions
-RUN mkdir -p ./database && chown nonroot:nonroot ./database
-COPY --from=builder /app/database/schema.sql ./database/ 2>/dev/null || true
-COPY --from=builder /app/database/migrations ./database/migrations/
-COPY --from=builder /app/database/seeds ./database/seeds/
-RUN chown -R nonroot:nonroot ./database
+COPY --from=builder /app/database ./database
 
 ENV NODE_ENV=production
-USER nonroot:nonroot
 CMD ["./server"]
