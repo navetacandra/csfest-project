@@ -37,392 +37,6 @@
 
 ### Endpoints {#api-endpoints}
 
-- Data Management
-  - Jurusan dan Prodi
-    - `/api/admin/major`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get list of majors
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string;
-        }[]
-        ```
-      - `POST`
-        - **Role**: admin
-        - **Description**: Create major's data
-        - **Payload**:
-
-        ```ts
-        {
-          name: string;
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string;
-        }
-        ```
-
-    - `/api/admin/major/{id}`
-      - `DELETE`
-        - **Role**: admin
-        - **Description**: Delete specific major
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string;
-        }
-        ```
-    - `/api/admin/major/{major_id}/study_program`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get list of study program
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string;
-        }[]
-        ```
-      - `POST`
-        - **Role**: admin
-        - **Description**: Create study program's data
-        - **Payload**:
-
-        ```ts
-        {
-          name: string;
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string;
-        }
-        ```
-
-    - `/api/admin/major/{major_id}/study_program/{id}`
-      - `DELETE`
-        - **Role**: admin
-        - **Description**: Delete specific study program
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string;
-        }
-        ```
-
-  - Mahasiswa
-    - `/api/admin/mahasiswa`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get list of mahasiswa
-        - **Payload**:
-
-        ```ts
-        {
-          name?: string,
-          major_id?: number,
-          study_program_id?: number,
-          page: number,
-          limit: number,
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string,
-          major: string,
-          study_program: string
-        }[]
-        ```
-
-      - `POST`
-        - **Role**: admin
-        - **Description**: Create mahasiswa's data
-        - **Payload**:
-
-        ```ts
-        {
-          nim: string,
-          name: string,
-          major_id: number,
-          study_program_id: number
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string,
-          major_id: number,
-          study_program_id: number
-        }
-        ```
-
-    - `/api/admin/mahasiswa/{id}`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get mahasiswa's detail
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string,
-          major: string,
-          study_program: string
-        }
-        ```
-      - `PUT`
-        - **Role**: admin
-        - **Description**: Edit specific mahasiswa
-        - **Payload**:
-
-        ```ts
-        {
-          nim: string,
-          name: string,
-          major_id: number,
-          study_program_id: number
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string,
-          major_id: number,
-          study_program_id: number,
-        }
-        ```
-
-      - `DELETE`
-        - **Role**: admin
-        - **Description**: Delete specific mahasiswa
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string,
-          major_id: number,
-          study_program_id: number,
-        }
-        ```
-
-  - Dosen
-    - `/api/admin/dosen`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get list of dosen
-        - **Payload**:
-
-        ```ts
-        {
-          nip?: string,
-          name?: string,
-          page: number,
-          limit: number,
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          nip: string,
-          name: string
-        }[]
-        ```
-
-      - `POST`
-        - **Role**: admin
-        - **Description**: Create dosen's data
-        - **Payload**:
-
-        ```ts
-        {
-          nip: string,
-          name: string
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          nip: string,
-          name: string
-        }
-        ```
-
-    - `/api/admin/dosen/{id}`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get dosen's detail
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          nip: string,
-          name: string
-        }
-        ```
-      - `PUT`
-        - **Role**: admin
-        - **Description**: Edit specific dosen
-        - **Payload**:
-
-        ```ts
-        {
-          nip: string,
-          name: string
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          nip: string,
-          name: string
-        }
-        ```
-
-      - `DELETE`
-        - **Role**: admin
-        - **Description**: Delete specific dosen
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          nip: string,
-          name: string
-        }
-        ```
-
-  - Class
-    - `/api/admin/classes`
-      - `POST`
-        - **Role**: admin
-        - **Description**: Creating new class
-        - **Payload**:
-
-        ```ts
-        {
-          name: string,
-          schedule:  1..7 // based on day
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          name: string,
-          schedule: number,
-          enroll_key: string,
-        }
-        ```
-
-  - News
-    - `/api/admin/news`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get all news, sorted by newest
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          title: string,
-        }[]
-        ```
-      - `POST`
-        - **Role**: admin
-        - **Description**: Create news
-        - **Payload**:
-
-        ```ts
-        {
-          title: string,
-          content: string
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          title: string,
-        }
-        ```
-
-    - `/api/admin/news/{id}`
-      - `GET`
-        - **Role**: admin
-        - **Description**: Get news detail
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          title: string,
-          content: string
-        }
-        ```
-      - `DELETE`
-        - **Role**: admin
-        - **Description**: Delete news
-        - **Response Data**:
-        ```ts
-        {
-          id: number,
-          title: string,
-        }
-        ```
-      - `PUT`
-        - **Role**: admin
-        - **Description**: Edit news
-        - **Payload**:
-
-        ```ts
-        {
-          title: string,
-          content: string
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          title: string,
-        }
-        ```
-
 - Authentication
   - `/api/login`
     - `POST`
@@ -451,50 +65,551 @@
       - **Description**: Authentication (logout) endpoint
       - **Response Data**:
       ```ts
-      {
-      }
+      {}
       ```
 
-- Profile
-  - `/me`
+  - `/api/profile`
     - `GET`
       - **Role**: admin | dosen | mahasiswa
       - **Description**: Get profile detail
       - **Response Data**:
       ```ts
       {
-        nim?: string,
-        nip?: string,
-        name: string,
-        email: string,
-        username: string,
-      }
-      ```
-- News
-  - `/api/news/{id}`
-    - `GET`
-      - **Role**: admin | dosen | mahasiswa
-      - **Description**: Show news
-      - **Response Data**:
-      ```ts
-      {
         id: number,
-        title: string,
-        thumbnail: string,
-        content: string
+        username: string,
+        name: string,
+        email?: string,
+        nip?: string,
+        nim?: string,
+        role: "admin" | "dosen" | "mahasiswa"
       }
       ```
-- Class
-  - General
-    - `/api/classes`
+
+- Data Management
+  - Majors and Study Programs
+    - `/api/admin/major`
       - `GET`
-        - **Role**: admin | dosen | mahasiswa
-        - **Description**: Get list of followed class
+        - **Role**: admin
+        - **Description**: Get list of majors
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }[]
+        ```
+      - `POST`
+        - **Role**: admin
+        - **Description**: Create major's data
+        - **Payload**:
+        ```ts
+        {
+          name: string;
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/major/{id}`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get major details
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+      - `PUT`
+        - **Role**: admin
+        - **Description**: Update major's data
+        - **Payload**:
+        ```ts
+        {
+          name: string;
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+      - `DELETE`
+        - **Role**: admin
+        - **Description**: Delete specific major
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/major/{major_id}/study_program`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get list of study programs for a major
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          major_id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }[]
+        ```
+      - `POST`
+        - **Role**: admin
+        - **Description**: Create study program's data
+        - **Payload**:
+        ```ts
+        {
+          name: string;
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          major_id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/major/{major_id}/study_program/{id}`
+      - `DELETE`
+        - **Role**: admin
+        - **Description**: Delete specific study program
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          major_id: number,
+          name: string;
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+  - Mahasiswa
+    - `/api/admin/mahasiswa`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get list of mahasiswa
+        - **Query Parameters**:
+        ```ts
+        {
+          name?: string,
+          major_id?: number,
+          study_program_id?: number,
+          page: number,
+          limit: number,
+        }
+        ```
         - **Response Data**:
         ```ts
         {
           id: number,
           name: string,
+          major: string,
+          study_program: string
+        }[]
+        ```
+
+      - `POST`
+        - **Role**: admin
+        - **Description**: Create mahasiswa's data
+        - **Payload**:
+        ```ts
+        {
+          nim: string,
+          name: string,
+          email: string,
+          major_id: number,
+          study_program_id: number,
+          username: string,
+          password: string
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          major_id: number,
+          study_program_id: number,
+          nim: string,
+          email: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/mahasiswa/{id}`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get mahasiswa's detail
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          major: string,
+          study_program: string
+        }
+        ```
+      - `PUT`
+        - **Role**: admin
+        - **Description**: Edit specific mahasiswa
+        - **Payload**:
+        ```ts
+        {
+          nim: string,
+          name: string,
+          email: string,
+          major_id: number,
+          study_program_id: number,
+          username: string
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          major_id: number,
+          study_program_id: number,
+          nim: string,
+          email: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+      - `DELETE`
+        - **Role**: admin
+        - **Description**: Delete specific mahasiswa
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          major_id: number,
+          study_program_id: number,
+          nim: string,
+          email: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+  - Dosen
+    - `/api/admin/dosen`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get list of dosen
+        - **Query Parameters**:
+        ```ts
+        {
+          nip?: string,
+          name?: string,
+          page: number,
+          limit: number,
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          nip: string,
+          name: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }[]
+        ```
+
+      - `POST`
+        - **Role**: admin
+        - **Description**: Create dosen's data
+        - **Payload**:
+        ```ts
+        {
+          nip: string,
+          name: string,
+          username?: string
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          nip: string,
+          name: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/dosen/{id}`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get dosen's detail
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          nip: string,
+          name: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+      - `PUT`
+        - **Role**: admin
+        - **Description**: Edit specific dosen
+        - **Payload**:
+        ```ts
+        {
+          nip: string,
+          name: string
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          nip: string,
+          name: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+      - `DELETE`
+        - **Role**: admin
+        - **Description**: Delete specific dosen
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          nip: string,
+          name: string,
+          username: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+  - Classes
+    - `/api/admin/classes`
+      - `POST`
+        - **Role**: admin
+        - **Description**: Creating new class
+        - **Payload**:
+        ```ts
+        {
+          name: string,
+          schedule: 0..6 // 0=Sunday, 6=Saturday
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          enroll_key: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+  - News
+    - `/api/admin/news`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get all news, sorted by newest
+        - **Query Parameters**:
+        ```ts
+        {
+          page: number,
+          limit: number
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          title: string,
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
+        }[]
+        ```
+      - `POST`
+        - **Role**: admin
+        - **Description**: Create news
+        - **Payload**:
+        ```ts
+        {
+          title: string,
+          content: string,
+          thumbnail_file_id: number
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          title: string,
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+    - `/api/admin/news/{id}`
+      - `GET`
+        - **Role**: admin
+        - **Description**: Get news detail
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          title: string,
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+      - `PUT`
+        - **Role**: admin
+        - **Description**: Edit news
+        - **Payload**:
+        ```ts
+        {
+          title: string,
+          content: string,
+          thumbnail_file_id: number
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          title: string,
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+      - `DELETE`
+        - **Role**: admin
+        - **Description**: Delete news
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          title: string,
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
+        }
+        ```
+
+- Public News
+  - `/api/news`
+    - `GET`
+      - **Role**: public
+      - **Description**: Get list of news
+      - **Query Parameters**:
+      ```ts
+      {
+        page: number,
+        limit: number
+      }
+      ```
+      - **Response Data**:
+      ```ts
+      {
+        id: number,
+        title: string,
+        thumbnail_file_id: number,
+        content: string,
+        created_at: string,
+        updated_at: string
+      }[]
+      ```
+
+  - `/api/news/{id}`
+    - `GET`
+      - **Role**: public
+      - **Description**: Get news detail
+      - **Response Data**:
+      ```ts
+      {
+        id: number,
+        title: string,
+        thumbnail_file_id: number,
+        content: string,
+        created_at: string,
+        updated_at: string
+      }
+      ```
+
+- Class
+  - General
+    - `/api/classes`
+      - `GET`
+        - **Role**: admin | dosen | mahasiswa
+        - **Description**: Get list of followed classes
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          name: string,
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string
         }[]
         ```
     - `/api/classes/enroll`
@@ -502,65 +617,77 @@
         - **Role**: dosen | mahasiswa
         - **Description**: Enroll class by key
         - **Payload**:
-
         ```ts
         {
           enroll_key: string;
         }
         ```
-
         - **Response Data**:
-
         ```ts
         {
           id: number,
           name: string,
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string
         }
         ```
 
-    - `/api/classes/{class_id}`
+    - `/api/classes/{id}`
       - `GET`
         - **Role**: admin | dosen | mahasiswa
-        - **Description**: Get current class posts sorted by time
+        - **Description**: Get current class details and posts
         - **Response Data**:
         ```ts
         {
           id: number,
           name: string,
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string,
           posts: {
             id: number,
-            title: string
+            message: string,
+            type: string
           }[]
         }
         ```
 
-  - Post
+  - Posts and Tasks
     - `/api/classes/{class_id}/posts`
       - `POST`
         - **Role**: admin | dosen
         - **Description**: Create new post on class
         - **Payload**:
-
         ```ts
         {
-          title: string,
           message: string,
-          type: "post" | "task",
-          file: File // embedded file (single file)
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
-          title: string,
           type: "post" | "task"
         }
         ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          class_id: number,
+          class_enrollment_id: number,
+          file_id: number | null,
+          message: string,
+          type: "post" | "task",
+          created_at: string,
+          updated_at: string
+        }
+        ```
 
-    - `/api/classes/{class_id}/posts/{post_id}`
+    - `/api/classes/{class_id}/posts/{id}`
       - `GET`
         - **Role**: admin | dosen | mahasiswa
         - **Description**: Get detail of post
@@ -568,10 +695,39 @@
         ```ts
         {
           id: number,
-          title: string,
-          type: "post" | "task",
+          class_id: number,
+          class_enrollment_id: number,
+          file_id: number | null,
           message: string,
-          file: string
+          type: "post" | "task",
+          created_at: string,
+          updated_at: string,
+          file?: any,
+          task?: any | null,
+          tasks?: any[]
+        }
+        ```
+      - `PUT`
+        - **Role**: admin | dosen
+        - **Description**: Edit post
+        - **Payload**:
+        ```ts
+        {
+          message: string,
+          type: "post" | "task"
+        }
+        ```
+        - **Response Data**:
+        ```ts
+        {
+          id: number,
+          class_id: number,
+          class_enrollment_id: number,
+          file_id: number | null,
+          message: string,
+          type: "post" | "task",
+          created_at: string,
+          updated_at: string
         }
         ```
       - `DELETE`
@@ -581,27 +737,13 @@
         ```ts
         {
           id: number,
-        }
-        ```
-      - `PUT`
-        - **Role**: admin | dosen
-        - **Description**: Edit post
-        - **Payload**:
-
-        ```ts
-        {
-          title: string,
+          class_id: number,
+          class_enrollment_id: number,
+          file_id: number | null,
           message: string,
           type: "post" | "task",
-          file: File // embedded file (single file)
-        }
-        ```
-
-        - **Response Data**:
-
-        ```ts
-        {
-          id: number,
+          created_at: string,
+          updated_at: string
         }
         ```
 
@@ -610,18 +752,20 @@
         - **Role**: mahasiswa
         - **Description**: Upload completed task file
         - **Payload**:
-
         ```ts
         {
           file: File; // task's file (single file)
         }
         ```
-
         - **Response Data**:
-
         ```ts
         {
           id: number,
+          post_id: number,
+          class_enrollment_id: number,
+          file_id: number,
+          created_at: string,
+          updated_at: string
         }
         ```
 
@@ -629,27 +773,43 @@
   - `/api/schedule`
     - `GET`
       - **Role**: dosen | mahasiswa
-      - **Description**: Get schedule of followed class
+      - **Description**: Get schedule of followed classes
       - **Response Data**:
         ```ts
         {
           id: number,
           name: string,
-          schedule: 1..7
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string
         }[]
         ```
-  - `/api/schedule/current`
+
+- Tasks
+  - `/api/tasks`
     - `GET`
       - **Role**: dosen | mahasiswa
-      - **Description**: Get today's schedule
+      - **Description**: Get all/completed/incoming tasks on followed classes
+      - **Query Parameters**:
+      ```ts
+      {
+        filter: "all" | "completed" | "incoming";
+      }
+      ```
       - **Response Data**:
-        ```ts
-        {
-          id: number,
-          name: string,
-          schedule: 1..7
-        }[]
-        ```
+      ```ts
+      {
+        id: number,
+        class_id: number,
+        title: string,
+        status: "completed" | "incoming"
+      }[]
+      ```
+
 - Presence
   - `/api/presence/recap`
     - `GET`
@@ -661,43 +821,38 @@
         accumulated_late: number,
         recap: {
           id: number,
-          class_id: string,
-          class_name: string,
-          status: string,
-          late_time: number
+          class_enrollment_id: number,
+          schedule_date: string,
+          status: "hadir" | "sakit" | "izin" | "alpha",
+          late_time: number,
+          created_at: string,
+          updated_at: string
         }[],
       }
       ```
   - `/api/presence/{class_id}`
-    - `GET`
+    - `POST`
       - **Role**: dosen | mahasiswa
-      - **Description**: Get list of class follower (Mahasiswa)
+      - **Description**: Set presence status
+      - **Payload**:
+      ```ts
+      {
+        schedule_date: string,
+        status: "hadir" | "izin" | "sakit" | "alpha", // only able set to "hadir" as mahasiswa
+        studentId?: number, // only allow if sent as dosen
+        late_time?: number, // in minute, only allow if sent as dosen
+      }
+      ```
       - **Response Data**:
       ```ts
       {
         id: number,
-        nim: string,
-        name: string,
-      }[]
-      ```
-  - `/api/presence/{class_id}`
-    - `POST`
-      **Description**: Set presence status
-      **Payload**:
-
-      ```ts
-      {
-        status: "hadir" | "izin" | "sakit" | "alpha", // only able set to "hadir" as mahasiswa
-        mahasiswa_id: number, // only allow if sent as dosen
-        late_time?: 0, // in minute, only allow if sent as dosen
-      }
-      ```
-
-      - **Response Data**:
-
-      ```ts
-      {
-        status: string,
+        class_enrollment_id: number,
+        schedule_date: string,
+        status: "hadir" | "sakit" | "izin" | "alpha",
+        late_time: number,
+        created_at: string,
+        updated_at: string
       }
       ```
 
@@ -712,47 +867,39 @@
         news: {
           id: number,
           title: string,
-          thumbnail: string
+          thumbnail_file_id: number,
+          content: string,
+          created_at: string,
+          updated_at: string
         }[],
         schedule: {
-          class_id: number,
+          id: number,
           name: string,
-          start: string,
-          end: string
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string
         }[],
         tasks: {
           id: number,
-          class: string,
           title: string,
+          status: "completed" | "incoming"
         }[],
         classes: {
           id: number,
           name: string,
-          schedule: number
+          enroll_key: string,
+          schedule: number,
+          start_time: string,
+          end_time: string,
+          actived_at: string,
+          created_at: string,
+          updated_at: string
         }[]
       }
-      ```
-  - `/api/tasks` **Mahasiswa/Dosen Only**
-    - `GET`
-      - **Role**: dosen | mahasiswa
-      - **Description**: Get all/completed/incoming tasks on followed class
-      - **Payload**:
-
-      ```ts
-      {
-        filter: "all" | "completed" | "incoming";
-      }
-      ```
-
-      - **Response Data**:
-
-      ```ts
-      {
-        id: number,
-        class_id: number,
-        title: string,
-        status: "completed" | "incoming"
-      }[]
       ```
 
   - `/storage/{file_id}`
