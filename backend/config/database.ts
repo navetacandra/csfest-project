@@ -46,14 +46,14 @@ export class Sqlite {
 
   constructor(filename: string = "database.sqlite") {
     this.database_path = resolve(`${__dirname}/../database/${filename}`);
-    this.firstRun = Bun.file(this.database_path).size == 0; // no data or not exists
+    this.firstRun = Bun.file(this.database_path).size == 0;
 
     this.db = new Database(this.database_path, {
       create: true,
       readwrite: true,
     });
 
-    if (this.firstRun) this.db.query("PRAGMA journal_mode = WAL;"); // set to WAL
+    if (this.firstRun) this.db.query("PRAGMA journal_mode = WAL;");
   }
 
   query(sql: string, ...args: any) {
@@ -76,3 +76,5 @@ export class Sqlite {
     }
   }
 }
+
+export const sqlite = await Sqlite.createInstance(Bun.env.DB_NAME);
