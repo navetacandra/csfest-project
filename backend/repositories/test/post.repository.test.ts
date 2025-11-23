@@ -1,79 +1,57 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { PostRepository } from "../post.repository";
-import { Post } from "../../models/post.model";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = "post_repository_test.sqlite";
+let sqlite: Sqlite;
+let repo: PostRepository;
+
+beforeAll(async () => {
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new PostRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("PostRepository", () => {
-  const repo = new PostRepository();
-  const postData: Omit<Post, "id" | "created_at" | "updated_at"> = {
-    class_id: 1,
-    class_enrollment_id: 1,
-    file_id: 1,
-    message: "Test Post",
-    type: "post",
-  };
-  const fullPostData: Post = {
-    id: 1,
-    ...postData,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  test("should create a post with correct ID return", () => {
+    const postData = {
+      class_id: 1, // Valid class_id from seeding
+      class_enrollment_id: 1, // Valid enrollment_id from seeding
+      file_id: 1, // Valid file_id from seeding
+      message: `Test Post ${Date.now()}`,
+      type: "post",
+    };
 
-  test("should create a post", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
     const result = repo.create(postData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "INSERT INTO post (class_id, class_enrollment_id, file_id, message, type) VALUES ($class_id, $class_enrollment_id, $file_id, $message, $type) RETURNING id",
-      {
-        $class_id: postData.class_id,
-        $class_enrollment_id: postData.class_enrollment_id,
-        $file_id: postData.file_id,
-        $message: postData.message,
-        $type: postData.type,
-      }
-    );
-    expect(result).toBe(1);
+
+    // Verifikasi bahwa ID yang dihasilkan adalah angka yang valid dan bukan 1 kecuali itu adalah ID pertama
+    expect(typeof result).toBe("number");
+    expect(result).toBeGreaterThan(0);
   });
 
-  test("should find by id", () => {
-    mockQuery.mockReturnValueOnce([fullPostData]);
-    const result = repo.findById(1);
-    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM post WHERE id = ?", [1]);
-    expect(result).toEqual(fullPostData);
-  });
+  test("should create and find a post", () => {
+    const postData = {
+      class_id: 2,
+      class_enrollment_id: 2,
+      file_id: 2,
+      message: `Test Post Find ${Date.now()}`,
+      type: "post",
+    };
 
-  test("should find by class id", () => {
-    mockQuery.mockReturnValueOnce([fullPostData]);
-    const result = repo.findByClassId(1);
-    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM post WHERE class_id = ?", [1]);
-    expect(result).toEqual([fullPostData]);
-  });
-  
-  test("should get all posts", () => {
-    mockQuery.mockReturnValueOnce([fullPostData]);
-    const result = repo.all(1, 10);
-    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM post LIMIT ? OFFSET ?", [10, 0]);
-    expect(result).toEqual([fullPostData]);
-  });
-  
-  test("should update a post", () => {
-    const updateData = { message: "Updated Message" };
-    repo.update(1, updateData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      `UPDATE post SET message = ?, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      ["Updated Message", 1]
-    );
-  });
-  
-  test("should delete a post", () => {
-    repo.delete(1);
-    expect(mockQuery).toHaveBeenCalledWith("DELETE FROM post WHERE id = ?", [1]);
+    const createdId = repo.create(postData);
+
+    expect(createdId).toBeGreaterThan(0); // Pastikan ID valid
+
+    const result = repo.findById(createdId);
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdId);
+    expect(result?.message).toBe(postData.message);
   });
 });

@@ -1,56 +1,70 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { FileRepository } from "../file.repository";
-import { File } from "../../models/file.model";
+import type { File } from "../../models/file.model";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = "file_repository_test.sqlite";
+let sqlite: Sqlite;
+let repo: FileRepository;
+
+beforeAll(async () => {
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new FileRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("FileRepository", () => {
-  const repo = new FileRepository();
   const fileData: Omit<File, "id" | "created_at" | "updated_at"> = {
     mahasiswa_id: 1,
     dosen_id: null,
-    upload_name: "test.pdf",
-    random_name: "randomstring.pdf",
+    upload_name: "integration_test_file.pdf",
+    random_name: "random_integration_test_string.pdf",
     size: 12345,
     mimetype: "application/pdf",
   };
+  let createdFileId: number;
 
   test("should create a file record", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
-    const result = repo.create(fileData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "INSERT INTO file (mahasiswa_id, dosen_id, upload_name, random_name, size, mimetype) VALUES ($mahasiswa_id, $dosen_id, $upload_name, $random_name, $size, $mimetype) RETURNING id",
-      {
-        $mahasiswa_id: fileData.mahasiswa_id,
-        $dosen_id: fileData.dosen_id,
-        $upload_name: fileData.upload_name,
-        $random_name: fileData.random_name,
-        $size: fileData.size,
-        $mimetype: fileData.mimetype,
-      }
-    );
-    expect(result).toBe(1);
+    createdFileId = repo.create(fileData) as number;
+
+    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
+    const result = repo.findById(createdFileId);
+    expect(result).not.toBeNull();
+    expect(result?.upload_name).toBe(fileData.upload_name);
+    expect(result?.random_name).toBe(fileData.random_name);
   });
 
   test("should find by random name", () => {
-    const fullFileData: File = { ...fileData, id: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-    mockQuery.mockReturnValueOnce([fullFileData]);
-    const result = repo.findByRandomName("randomstring.pdf");
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT * FROM file WHERE random_name = ?",
-      ["randomstring.pdf"]
-    );
-    expect(result).toEqual(fullFileData);
+    const result = repo.findByRandomName(fileData.random_name);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdFileId);
+    expect(result?.random_name).toBe(fileData.random_name);
   });
 
   test("should delete a file record", () => {
-    repo.delete(1);
-    expect(mockQuery).toHaveBeenCalledWith("DELETE FROM file WHERE id = ?", [1]);
+    // Buat file baru untuk dihapus
+    const testFileData: Omit<File, "id" | "created_at" | "updated_at"> = {
+      ...fileData,
+      upload_name: "test_delete_file.pdf",
+      random_name: "delete_random_string.pdf",
+    };
+    const testFileId = repo.create(testFileData);
+
+    // Pastikan file ada sebelum dihapus
+    expect(repo.findById(testFileId)).not.toBeNull();
+
+    repo.delete(testFileId);
+
+    // Verifikasi bahwa file sudah dihapus
+    const deletedFile = repo.findById(testFileId);
+    expect(deletedFile).toBeNull();
   });
 });

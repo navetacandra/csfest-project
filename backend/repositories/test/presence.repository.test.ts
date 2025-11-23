@@ -1,71 +1,90 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { PresenceRepository } from "../presence.repository";
-import { Presence } from "../../models/presence.model";
+import type { Presence } from "../../models/presence.model";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = "presence_repository_test.sqlite";
+let sqlite: Sqlite;
+let repo: PresenceRepository;
+
+beforeAll(async () => {
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new PresenceRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("PresenceRepository", () => {
-  const repo = new PresenceRepository();
   const presenceData: Omit<Presence, "id" | "created_at" | "updated_at"> = {
     class_enrollment_id: 1,
+    schedule_date: "2025-11-22",
     status: "hadir",
     late_time: 0,
   };
-  const fullPresenceData: Presence = {
-    id: 1,
-    ...presenceData,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  let createdPresenceId: number;
 
   test("should create a presence record", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
-    const result = repo.create(presenceData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "INSERT INTO presence (class_enrollment_id, status, late_time) VALUES ($class_enrollment_id, $status, $late_time) RETURNING id",
-      {
-        $class_enrollment_id: presenceData.class_enrollment_id,
-        $status: presenceData.status,
-        $late_time: presenceData.late_time,
-      }
-    );
-    expect(result).toBe(1);
+    createdPresenceId = repo.create(presenceData) as number;
+
+    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
+    const result = repo.findById(createdPresenceId);
+    expect(result).not.toBeNull();
+    expect(result?.class_enrollment_id).toBe(presenceData.class_enrollment_id);
+    expect(result?.status).toBe(presenceData.status);
   });
 
   test("should find by id", () => {
-    mockQuery.mockReturnValueOnce([fullPresenceData]);
-    const result = repo.findById(1);
-    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM presence WHERE id = ?", [1]);
-    expect(result).toEqual(fullPresenceData);
+    const result = repo.findById(createdPresenceId);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdPresenceId);
   });
-  
+
   test("should find by class enrollment id", () => {
-      mockQuery.mockReturnValueOnce([fullPresenceData]);
-      const result = repo.findByClassEnrollmentId(1);
-      expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM presence WHERE class_enrollment_id = ?", [1]);
-      expect(result).toEqual([fullPresenceData]);
+    const result = repo.findByClassEnrollmentId(
+      presenceData.class_enrollment_id,
+    );
+
+    expect(result).toContainEqual(
+      expect.objectContaining({
+        id: createdPresenceId,
+        class_enrollment_id: presenceData.class_enrollment_id,
+      }),
+    );
   });
-  
+
   test("should find by class id", () => {
-    mockQuery.mockReturnValueOnce([fullPresenceData]);
     const result = repo.findByClass(1);
-    expect(mockQuery).toHaveBeenCalledWith(`
-      SELECT p.*
-      FROM presence p
-      INNER JOIN class_enrollment ce ON p.class_enrollment_id = ce.id
-      WHERE ce.class_id = ?
-    `, [1]);
-    expect(result).toEqual([fullPresenceData]);
+
+    expect(result).toContainEqual(
+      expect.objectContaining({
+        id: createdPresenceId,
+        class_enrollment_id: presenceData.class_enrollment_id,
+      }),
+    );
   });
 
   test("should delete a presence record", () => {
-    repo.delete(1);
-    expect(mockQuery).toHaveBeenCalledWith("DELETE FROM presence WHERE id = ?", [1]);
+    // Buat data baru untuk dihapus
+    const testData: Omit<Presence, "id" | "created_at" | "updated_at"> = {
+      ...presenceData,
+      class_enrollment_id: 2,
+    };
+    const testPresenceId = repo.create(testData);
+
+    // Pastikan data ada sebelum dihapus
+    expect(repo.findById(testPresenceId)).not.toBeNull();
+
+    repo.delete(testPresenceId);
+
+    // Verifikasi bahwa data sudah dihapus
+    const deletedPresence = repo.findById(testPresenceId);
+    expect(deletedPresence).toBeNull();
   });
 });

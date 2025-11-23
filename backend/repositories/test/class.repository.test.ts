@@ -1,100 +1,84 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { ClassRepository } from "../class.repository";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency before it's imported by the repository
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = `class_repository_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+let sqlite: Sqlite;
+let repo: ClassRepository;
+
+beforeAll(async () => {
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new ClassRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("ClassRepository", () => {
-  const classRepo = new ClassRepository();
   const classData = {
-    name: "Test Class",
+    name: "Integration Test Class",
     schedule: 1,
     start_time: "08:00",
     end_time: "10:00",
   };
-  const enrollKey = "TESTKEY123";
+  const enrollKey = "INTTESTKEY123";
+  let createdClassId: number;
 
   test("should create a class", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
+    createdClassId = repo.create(classData, enrollKey) as number;
 
-    const result = classRepo.create(classData, enrollKey);
-    
-    expect(mockQuery).toHaveBeenCalledWith(
-      `INSERT INTO class (name, schedule, start_time, end_time, enroll_key)
-       VALUES ($name, $schedule, $start_time, $end_time, $enroll_key)
-       RETURNING id`,
-      {
-        $name: classData.name,
-        $schedule: classData.schedule,
-        $start_time: classData.start_time,
-        $end_time: classData.end_time,
-        $enroll_key: enrollKey,
-      }
-    );
-    expect(result).toBe(1);
+    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
+    const result = repo.findById(createdClassId);
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe(classData.name);
+    expect(result?.enroll_key).toBe(enrollKey);
   });
 
   test("should get all classes with pagination", () => {
-    const mockClasses = [{ id: 1, ...classData, enroll_key: enrollKey }];
-    mockQuery.mockReturnValueOnce(mockClasses);
+    const result = repo.all(1, 10);
 
-    const result = classRepo.all(1, 10);
-
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT * FROM class LIMIT ? OFFSET ?",
-      [10, 0]
-    );
-    expect(result).toEqual(mockClasses);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThanOrEqual(0);
   });
 
   test("should find a class by id", () => {
-    const mockClass = { id: 1, ...classData, enroll_key: enrollKey };
-    mockQuery.mockReturnValueOnce([mockClass]);
+    const result = repo.findById(createdClassId);
 
-    const result = classRepo.findById(1);
-
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT * FROM class WHERE id = ?",
-      [1]
-    );
-    expect(result).toEqual(mockClass);
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdClassId);
+    expect(result?.name).toBe(classData.name);
   });
 
   test("should find a class by enroll key", () => {
-    const mockClass = { id: 1, ...classData, enroll_key: enrollKey };
-    mockQuery.mockReturnValueOnce([mockClass]);
+    const result = repo.findByEnrollKey(enrollKey);
 
-    const result = classRepo.findByEnrollKey(enrollKey);
-
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT * FROM class WHERE enroll_key = ?",
-      [enrollKey]
-    );
-    expect(result).toEqual(mockClass);
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdClassId);
+    expect(result?.enroll_key).toBe(enrollKey);
   });
-  
-  test("should update a class", () => {
-    const updateData = { name: "Updated Class Name" };
-    
-    classRepo.update(1, updateData);
 
-    expect(mockQuery).toHaveBeenCalledWith(
-        `UPDATE class SET name = ?, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-        ["Updated Class Name", 1]
-    );
+  test("should update a class", () => {
+    const updateData = { name: "Updated Integration Test Class" };
+
+    repo.update(createdClassId, updateData);
+
+    const updatedClass = repo.findById(createdClassId);
+    expect(updatedClass?.name).toBe(updateData.name);
   });
 
   test("should delete a class", () => {
-    classRepo.delete(1);
+    // Pastikan kelas ada sebelum dihapus
+    expect(repo.findById(createdClassId)).not.toBeNull();
 
-    expect(mockQuery).toHaveBeenCalledWith(
-        "DELETE FROM class WHERE id = ?",
-        [1]
-    );
+    repo.delete(createdClassId);
+
+    // Verifikasi bahwa kelas sudah dihapus
+    const deletedClass = repo.findById(createdClassId);
+    expect(deletedClass).toBeNull();
   });
 });

@@ -1,85 +1,95 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { DosenRepository } from "../dosen.repository";
-import { Dosen } from "../../models/dosen.model";
+import type { Dosen } from "../../models/dosen.model";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = "dosen_repository_test.sqlite";
+let sqlite: Sqlite;
+let repo: DosenRepository;
+
+beforeAll(async () => {
+  // Gunakan createInstance untuk membuat database dengan skema lengkap
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new DosenRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("DosenRepository", () => {
-  const repo = new DosenRepository();
-  const dosenData: Omit<Dosen, "id" | "created_at" | "updated_at" | "password"> & { password?: string } = {
+  const dosenData: Omit<Dosen, "id" | "created_at" | "updated_at"> = {
     nip: "123456789",
-    name: "Test Dosen",
-    username: "test.dosen",
+    name: "Integration Test Dosen",
+    username: "integration.test.dosen",
     password: "password",
   };
-  const fullDosenData: Dosen = {
-    id: 1,
-    ...dosenData,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  let createdDosenId: number;
 
   test("should create a dosen", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
-    const result = repo.create(dosenData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "INSERT INTO dosen (nip, name, username, password) VALUES ($nip, $name, $username, $password) RETURNING id",
-      {
-        $nip: dosenData.nip,
-        $name: dosenData.name,
-        $username: dosenData.username,
-        $password: dosenData.password,
-      }
-    );
-    expect(result).toBe(1);
+    createdDosenId = repo.create(dosenData) as number;
+
+    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
+    const result = repo.findById(createdDosenId);
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe(dosenData.name);
+    expect(result?.username).toBe(dosenData.username);
   });
 
   test("should find by id", () => {
-    const { password, ...dosenWithoutPassword } = fullDosenData;
-    mockQuery.mockReturnValueOnce([dosenWithoutPassword]);
-    const result = repo.findById(1);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT id, username, name, created_at, updated_at FROM dosen WHERE id = ?",
-      [1]
-    );
-    expect(result).toEqual(dosenWithoutPassword);
+    const result = repo.findById(createdDosenId);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdDosenId);
   });
-  
+
   test("should find by username", () => {
-    mockQuery.mockReturnValueOnce([fullDosenData]);
-    const result = repo.findByUsername("test.dosen");
-    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM dosen WHERE username = ?", ["test.dosen"]);
-    expect(result).toEqual(fullDosenData);
+    const result = repo.findByUsername(dosenData.username);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(createdDosenId);
   });
 
   test("should get all dosens", () => {
-    const { password, ...dosenWithoutPassword } = fullDosenData;
-    mockQuery.mockReturnValueOnce([dosenWithoutPassword]);
     const result = repo.all(1, 10);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT id, username, name, created_at, updated_at FROM dosen LIMIT ? OFFSET ?",
-      [10, 0]
+
+    expect(result).toContainEqual(
+      expect.objectContaining({
+        id: createdDosenId,
+        name: dosenData.name,
+      }),
     );
-    expect(result).toEqual([dosenWithoutPassword]);
   });
 
   test("should update a dosen", () => {
-    const updateData = { name: "Updated Name" };
-    repo.update(1, updateData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      `UPDATE dosen SET name = ?, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      ["Updated Name", 1]
-    );
+    const updateData = { name: "Updated Integration Test Dosen" };
+
+    repo.update(createdDosenId, updateData);
+
+    const updatedResult = repo.findById(createdDosenId);
+    expect(updatedResult?.name).toBe(updateData.name);
   });
 
   test("should delete a dosen", () => {
-    repo.delete(1);
-    expect(mockQuery).toHaveBeenCalledWith("DELETE FROM dosen WHERE id = ?", [1]);
+    // Buat dosen baru untuk dihapus
+    const testData: Omit<Dosen, "id" | "created_at" | "updated_at"> = {
+      ...dosenData,
+      name: "Test Delete Dosen",
+      username: "test.delete.dosen",
+    };
+    const testDosenId = repo.create(testData);
+
+    // Pastikan dosen ada sebelum dihapus
+    expect(repo.findById(testDosenId)).not.toBeNull();
+
+    repo.delete(testDosenId);
+
+    // Verifikasi bahwa dosen sudah dihapus
+    const deletedDosen = repo.findById(testDosenId);
+    expect(deletedDosen).toBeNull();
   });
 });

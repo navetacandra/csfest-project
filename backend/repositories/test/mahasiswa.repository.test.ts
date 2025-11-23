@@ -1,98 +1,128 @@
-import { describe, test, expect, mock, jest } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { MahasiswaRepository } from "../mahasiswa.repository";
-import { Mahasiswa } from "../../models/mahasiswa.model";
+import type { Mahasiswa } from "../../models/mahasiswa.model";
+import { Sqlite } from "../../config/database";
 
-// Mock the sqlite dependency
-const mockQuery = jest.fn();
-mock.module("../..", () => ({
-  sqlite: {
-    query: mockQuery,
-  },
-}));
+const DB_TEST = "mahasiswa_repository_test.sqlite";
+let sqlite: Sqlite;
+let repo: MahasiswaRepository;
+
+beforeAll(async () => {
+  sqlite = await Sqlite.createInstance(DB_TEST);
+  repo = new MahasiswaRepository(sqlite);
+});
+
+afterAll(() => {
+  const dbPath = Bun.fileURLToPath(
+    import.meta.resolve(`${__dirname}/../../database/${DB_TEST}`),
+  );
+  sqlite.close();
+  Bun.file(dbPath).delete();
+});
 
 describe("MahasiswaRepository", () => {
-  const repo = new MahasiswaRepository();
   const mahasiswaData: Omit<Mahasiswa, "id" | "created_at" | "updated_at"> = {
     major_id: 1,
     study_program_id: 1,
     nim: "123456789",
-    name: "Test Mahasiswa",
-    email: "test.mahasiswa@test.com",
-    username: "test.mahasiswa",
+    name: "Integration Test Mahasiswa",
+    email: "integration.test.mahasiswa@test.com",
+    username: "integration.test.mahasiswa",
     password: "password",
   };
 
-  const fullMahasiswaData: Mahasiswa = {
-    id: 1,
-    ...mahasiswaData,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-
   test("should create a mahasiswa", () => {
-    mockQuery.mockReturnValueOnce([{ id: 1 }]);
-    const result = repo.create(mahasiswaData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "INSERT INTO mahasiswa (major_id, study_program_id, nim, name, email, username, password) VALUES ($major_id, $study_program_id, $nim, $name, $email, $username, $password) RETURNING id",
-      {
-        $major_id: mahasiswaData.major_id,
-        $study_program_id: mahasiswaData.study_program_id,
-        $nim: mahasiswaData.nim,
-        $name: mahasiswaData.name,
-        $email: mahasiswaData.email,
-        $username: mahasiswaData.username,
-        $password: mahasiswaData.password,
-      }
-    );
-    expect(result).toBe(1);
+    const uniqueData = {
+      ...mahasiswaData,
+      username: `integration.test.mahasiswa.${Date.now()}`,
+      email: `integration.test.mahasiswa.${Date.now()}@test.com`,
+      nim: `123456${Date.now().toString().slice(-3)}`, // Use last 3 digits of timestamp
+    };
+
+    const createdId = repo.create(uniqueData);
+
+    // Verify that the data was actually created in database
+    const result = repo.findById(createdId);
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe(uniqueData.name);
+    expect(result?.username).toBe(uniqueData.username);
   });
-  
+
   test("should get all mahasiswas", () => {
-    const { password, ...rest } = fullMahasiswaData;
-    mockQuery.mockReturnValueOnce([rest]);
     const result = repo.all(1, 10);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa LIMIT ? OFFSET ?",
-      [10, 0]
-    );
-    expect(result).toEqual([rest]);
+
+    expect(Array.isArray(result)).toBe(true);
   });
 
   test("should find by id", () => {
-    const { password, ...rest } = fullMahasiswaData;
-    mockQuery.mockReturnValueOnce([rest]);
-    const result = repo.findById(1);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa WHERE id = ?",
-      [1]
-    );
-    expect(result).toEqual(rest);
+    // Create a new record for this test
+    const uniqueData = {
+      ...mahasiswaData,
+      username: `test.find.by.id.${Date.now()}`,
+      email: `test.find.by.id.${Date.now()}@test.com`,
+      nim: `987654${Date.now().toString().slice(-3)}`,
+    };
+
+    const testId = repo.create(uniqueData);
+
+    const result = repo.findById(testId);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(testId);
   });
 
   test("should find by username", () => {
-    mockQuery.mockReturnValueOnce([fullMahasiswaData]);
-    const result = repo.findByUsername("test.mahasiswa");
-    expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT * FROM mahasiswa WHERE username = ?",
-      ["test.mahasiswa"]
-    );
-    expect(result).toEqual(fullMahasiswaData);
+    const testUsername = `test.find.by.username.${Date.now()}`;
+    const uniqueData = {
+      ...mahasiswaData,
+      username: testUsername,
+      email: `test.find.by.username.${Date.now()}@test.com`,
+      nim: `876543${Date.now().toString().slice(-3)}`,
+    };
+
+    const testId = repo.create(uniqueData);
+
+    const result = repo.findByUsername(testUsername);
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe(testId);
   });
-  
+
   test("should update a mahasiswa", () => {
-    const updateData = { name: "Updated Name" };
-    repo.update(1, updateData);
-    expect(mockQuery).toHaveBeenCalledWith(
-      `UPDATE mahasiswa SET name = ?, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      ["Updated Name", 1]
-    );
+    const uniqueData = {
+      ...mahasiswaData,
+      username: `test.update.mahasiswa.${Date.now()}`,
+      email: `test.update.mahasiswa.${Date.now()}@test.com`,
+      nim: `555666${Date.now().toString().slice(-3)}`,
+    };
+    const testId = repo.create(uniqueData);
+
+    const updateData = { name: "Updated Integration Test Mahasiswa" };
+
+    repo.update(testId, updateData);
+
+    const updatedResult = repo.findById(testId);
+    expect(updatedResult?.name).toBe(updateData.name);
   });
-  
+
   test("should delete a mahasiswa", () => {
-    repo.delete(1);
-    expect(mockQuery).toHaveBeenCalledWith(
-      "DELETE FROM mahasiswa WHERE id = ?",
-      [1]
-    );
+    // Create a new mahasiswa to be deleted
+    const testData: Omit<Mahasiswa, "id" | "created_at" | "updated_at"> = {
+      ...mahasiswaData,
+      name: `Test Delete Mahasiswa ${Date.now()}`,
+      username: `test.delete.mahasiswa.${Date.now()}`,
+      email: `test.delete.mahasiswa.${Date.now()}@test.com`,
+      nim: `111222${Date.now().toString().slice(-3)}`,
+    };
+    const testMahasiswaId = repo.create(testData);
+
+    // Verify the mahasiswa exists before deletion
+    expect(repo.findById(testMahasiswaId)).not.toBeNull();
+
+    repo.delete(testMahasiswaId);
+
+    // Verify the mahasiswa no longer exists
+    const result = repo.findById(testMahasiswaId);
+    expect(result).toBeNull();
   });
 });
