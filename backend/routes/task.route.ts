@@ -1,12 +1,16 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
+import { TaskController } from "../controllers/task.controller";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { sqlite } from "../config/database";
 
 const router: Router = Router();
+const taskController = new TaskController(sqlite);
 
-/**
- * TODO:
- * Implement task route and connect to controller
- */
-
-router.get("/");
+router.post("/", AuthMiddleware.authenticate, (req: Request, res: Response) =>
+  taskController.submitTask(req, res),
+);
+router.get("/", AuthMiddleware.authenticate, (req: Request, res: Response) =>
+  taskController.getTasks(req, res),
+);
 
 export default router;

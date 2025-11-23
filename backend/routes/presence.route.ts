@@ -1,14 +1,20 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
+import { PresenceController } from "../controllers/presence.controller";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { sqlite } from "../config/database";
 
 const router: Router = Router();
+const presenceController = new PresenceController(sqlite);
 
-/**
- * TODO:
- * Implement full presence route and connect to controller
- */
-
-router.get("/recap");
-router.get("/:class_id");
-router.post("/:class_id");
+router.post(
+  "/:class_id",
+  AuthMiddleware.authenticate,
+  (req: Request, res: Response) => presenceController.setPresence(req, res),
+);
+router.get(
+  "/recap",
+  AuthMiddleware.authenticate,
+  (req: Request, res: Response) => presenceController.getRecap(req, res),
+);
 
 export default router;

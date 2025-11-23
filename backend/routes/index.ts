@@ -1,7 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import type { SuccessResponse } from "../config/response";
 
-// Route imports
 import authRoute from "./auth.route";
 import adminClassRoute from "./adminClass.route";
 import adminDosenRoute from "./adminDosen.route";
@@ -14,11 +13,11 @@ import dashboardRoute from "./dashboard.route";
 import presenceRoute from "./presence.route";
 import scheduleRoute from "./schedule.route";
 import taskRoute from "./task.route";
+import storageRoute from "./storage.route";
 
 const router: Router = Router();
 const adminRouter: Router = Router();
 
-// Health-check for the root /api endpoint
 router.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     code: 200,
@@ -26,20 +25,21 @@ router.get("/", (_req: Request, res: Response) => {
   } as SuccessResponse<string>);
 });
 
-// router.use(authRoute);
-// router.use("/classes", classRoute);
-// router.use("/news", newsRoute);
-// router.use("/schedule", scheduleRoute);
-// router.use("/tasks", taskRoute);
-// router.use("/dashboard", dashboardRoute);
-// router.use("/presence", presenceRoute);
+router.use(authRoute);
+router.use("/classes", classRoute);
+router.use("/news", newsRoute);
+router.use("/schedule", scheduleRoute);
+router.use("/tasks", taskRoute);
+router.use("/dashboard", dashboardRoute);
+router.use("/presence", presenceRoute);
+router.use("/storage", storageRoute);
 
-// adminRouter.use("/classes", adminClassRoute);
-// adminRouter.use("/news", adminNewsRoute);
-// adminRouter.use("/dosen", adminDosenRoute);
-// adminRouter.use("/mahasiswa", adminMahasiswaRoute);
-// adminRouter.use("/major", adminMajorRoute);
+adminRouter.use("/classes", adminClassRoute);
+adminRouter.use("/news", adminNewsRoute);
+adminRouter.use("/dosen", adminDosenRoute);
+adminRouter.use("/mahasiswa", adminMahasiswaRoute);
+adminRouter.use("/major", adminMajorRoute);
 
-// router.use("/admin", adminRouter);
+router.use("/admin", adminRouter);
 
 export default router;
