@@ -12,19 +12,26 @@ WORKDIR /app
 COPY --from=alpine /usr/local/bin/bun /usr/local/bin/
 
 FROM base AS deps
+# dev
+RUN mkdir -p /tmp/dev
+COPY package.json bun.lock /tmp/dev/
+RUN cd /tmp/dev/ && bun install --frozen-lockfile
+# prod
 RUN mkdir -p /tmp/prod
 COPY package.json bun.lock /tmp/prod/
 RUN cd /tmp/prod/ && bun install --frozen-lockfile --production
 
 FROM base AS prerelease
 COPY . .
-COPY --from=deps /tmp/prod/node_modules node_modules
+
+FROM prerelease AS test
+COPY --from=deps /tmp/dev/node_modules node_modules
 RUN bun test
 
 FROM prerelease AS builder
+COPY --from=deps /tmp/prod/node_modules node_modules
 RUN bun build --compile ./index.ts --outfile ./server
 
-# STAGE 3: Final release image
 FROM gcr.io/distroless/base-debian12 AS release
 WORKDIR /app
 
