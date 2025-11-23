@@ -36,7 +36,13 @@ FROM gcr.io/distroless/base-debian12 AS release
 WORKDIR /app
 
 COPY --from=builder /app/server .
-COPY --from=builder /app/database ./database
+
+# Create database directory and set permissions
+RUN mkdir -p ./database && chown nonroot:nonroot ./database
+COPY --from=builder /app/database/schema.sql ./database/ 2>/dev/null || true
+COPY --from=builder /app/database/migrations ./database/migrations/
+COPY --from=builder /app/database/seeds ./database/seeds/
+RUN chown -R nonroot:nonroot ./database
 
 ENV NODE_ENV=production
 USER nonroot:nonroot
