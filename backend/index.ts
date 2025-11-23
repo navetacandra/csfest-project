@@ -1,16 +1,22 @@
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction } from "express";
 import apiRouter from "./routes";
+import storageRoute from "./routes/storage.route";
 import cors from "cors";
 import compression from "compression";
-import { sqlite } from "./config/database";
 
 const SERVER_PORT: number = Bun.env.PORT || 5000;
 const app: Express = express();
 
 let corsOptions: cors.CorsOptions | cors.CorsOptionsDelegate<cors.CorsRequest> =
-  { origin: "*", credentials: true };
+  { credentials: true };
 if (Bun.env.NODE_ENV === "production") {
-  corsOptions = { origin: true, credentials: true };
+  corsOptions = {
+    origin: (origin, callback) => {
+      if (!origin) callback(null, !origin);
+      else callback(new Error("Blocked by cors"));
+    },
+    credentials: true,
+  };
 }
 
 app.use(express.urlencoded({ extended: true }));
@@ -19,6 +25,7 @@ app.use(compression());
 app.use(cors(corsOptions));
 
 app.use("/api", apiRouter);
+app.use("/storage", storageRoute);
 
 if (import.meta.main) {
   app.listen(SERVER_PORT, "0.0.0.0", () => {

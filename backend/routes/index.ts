@@ -13,7 +13,6 @@ import dashboardRoute from "./dashboard.route";
 import presenceRoute from "./presence.route";
 import scheduleRoute from "./schedule.route";
 import taskRoute from "./task.route";
-import storageRoute from "./storage.route";
 
 const router: Router = Router();
 const adminRouter: Router = Router();
@@ -32,7 +31,6 @@ router.use("/schedule", scheduleRoute);
 router.use("/tasks", taskRoute);
 router.use("/dashboard", dashboardRoute);
 router.use("/presence", presenceRoute);
-router.use("/storage", storageRoute);
 
 adminRouter.use("/classes", adminClassRoute);
 adminRouter.use("/news", adminNewsRoute);
