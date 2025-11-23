@@ -3,7 +3,7 @@ import { AdminService } from "../admin.service";
 import { Sqlite } from "../../config/database";
 
 describe("AdminService", () => {
-  const DB_TEST = `admin_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `admin_service_test.sqlite`;
   let sqlite: Sqlite;
   let adminService: AdminService;
 
@@ -43,7 +43,6 @@ describe("AdminService", () => {
   });
 
   test("should get an admin by id", async () => {
-    // Create a test admin
     const adminData = {
       name: "Get By ID Test Admin Service",
       username: "test_getbyid_admin_service",
@@ -52,7 +51,6 @@ describe("AdminService", () => {
     const createdAdmin = await adminService.create(adminData);
     expect(createdAdmin).not.toBeNull();
 
-    // Get the admin by id
     const result = adminService.getById(createdAdmin!.id!);
 
     expect(result).not.toBeNull();
@@ -61,7 +59,6 @@ describe("AdminService", () => {
   });
 
   test("should update an admin", async () => {
-    // Create a test admin
     const adminData = {
       name: "Update Test Admin Service",
       username: "test_update_admin_service",
@@ -70,16 +67,17 @@ describe("AdminService", () => {
     const createdAdmin = await adminService.create(adminData);
     expect(createdAdmin).not.toBeNull();
 
-    // Update the admin
     const updateData = { name: "Updated Integration Test Admin Service" };
-    const updatedAdmin = await adminService.update(createdAdmin!.id!, updateData);
+    const updatedAdmin = await adminService.update(
+      createdAdmin!.id!,
+      updateData,
+    );
 
     expect(updatedAdmin).not.toBeNull();
     expect(updatedAdmin?.name).toBe(updateData.name);
   });
 
   test("should delete an admin", async () => {
-    // Create a test admin to delete
     const adminData = {
       name: "Delete Test Admin Service",
       username: "test_delete_admin_service",
@@ -88,17 +86,14 @@ describe("AdminService", () => {
     const createdAdmin = await adminService.create(adminData);
     expect(createdAdmin).not.toBeNull();
 
-    // Verify admin exists before deletion by getting it
     const adminBeforeDelete = adminService.getById(createdAdmin!.id!);
     expect(adminBeforeDelete).not.toBeNull();
 
-    // Delete the admin
     const deletedAdmin = adminService.delete(createdAdmin!.id!);
 
     expect(deletedAdmin).not.toBeNull();
     expect(deletedAdmin.id).toBe(createdAdmin!.id);
 
-    // Verify admin was deleted by trying to get it (should throw error)
     expect(() => {
       adminService.getById(createdAdmin!.id!);
     }).toThrow("Admin not found");
@@ -108,7 +103,6 @@ describe("AdminService", () => {
     const adminData = {
       name: "No Password Test Admin Service",
       username: "test_nopass_admin_service",
-      // password is missing
     } as any;
 
     await expect(async () => {

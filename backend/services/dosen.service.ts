@@ -11,12 +11,9 @@ export class DosenService {
   }
 
   async create(
-    data: Omit<
-      Dosen,
-      "id" | "created_at" | "updated_at" | "password"
-    > & {
+    data: Omit<Dosen, "id" | "created_at" | "updated_at" | "password"> & {
       password: string;
-      username?: string; // Make username optional
+      username?: string;
     },
   ) {
     const hashedPassword = await Password.hash(data.password);
@@ -26,7 +23,7 @@ export class DosenService {
       "id" | "created_at" | "updated_at" | "password"
     > & { password: string } = {
       ...data,
-      username: data.username || data.nip, // Use provided username or fallback to NIP
+      username: data.username || data.nip,
       password: hashedPassword,
     };
 

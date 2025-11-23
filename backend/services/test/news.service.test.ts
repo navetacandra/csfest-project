@@ -3,7 +3,7 @@ import { NewsService } from "../news.service";
 import { Sqlite } from "../../config/database";
 
 describe("NewsService", () => {
-  const DB_TEST = `news_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `news_service_test.sqlite`;
   let sqlite: Sqlite;
   let newsService: NewsService;
 
@@ -42,7 +42,6 @@ describe("NewsService", () => {
   });
 
   test("should get a news by id", () => {
-    // Create a test news
     const newsData = {
       title: "Get By ID Test News Service",
       content: "This is a get by ID test news from service.",
@@ -51,7 +50,6 @@ describe("NewsService", () => {
     const createdNews = newsService.create(newsData);
     expect(createdNews).not.toBeNull();
 
-    // Get the news by id
     const result = newsService.getById(createdNews!.id!);
 
     expect(result).not.toBeNull();
@@ -60,7 +58,6 @@ describe("NewsService", () => {
   });
 
   test("should update a news", () => {
-    // Create a test news
     const newsData = {
       title: "Update Test News Service",
       content: "This is an update test news from service.",
@@ -69,7 +66,6 @@ describe("NewsService", () => {
     const createdNews = newsService.create(newsData);
     expect(createdNews).not.toBeNull();
 
-    // Update the news
     const updateData = { title: "Updated Integration Test News Service" };
     const updatedNews = newsService.update(createdNews!.id!, updateData);
 
@@ -78,7 +74,6 @@ describe("NewsService", () => {
   });
 
   test("should delete a news", () => {
-    // Create a test news to delete
     const newsData = {
       title: "Delete Test News Service",
       content: "This is a delete test news from service.",
@@ -87,17 +82,14 @@ describe("NewsService", () => {
     const createdNews = newsService.create(newsData);
     expect(createdNews).not.toBeNull();
 
-    // Verify news exists before deletion by getting it
     const newsBeforeDelete = newsService.getById(createdNews!.id!);
     expect(newsBeforeDelete).not.toBeNull();
 
-    // Delete the news
     const deletedNews = newsService.delete(createdNews!.id!);
 
     expect(deletedNews).not.toBeNull();
     expect(deletedNews.id).toBe(createdNews!.id);
 
-    // Verify news was deleted by trying to get it again (should throw error)
     expect(() => {
       newsService.getById(createdNews!.id!);
     }).toThrow("News not found");

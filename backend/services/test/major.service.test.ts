@@ -3,7 +3,7 @@ import { MajorService } from "../major.service";
 import { Sqlite } from "../../config/database";
 
 describe("MajorService", () => {
-  const DB_TEST = `major_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `major_service_test.sqlite`;
   let sqlite: Sqlite;
   let majorService: MajorService;
 
@@ -32,7 +32,6 @@ describe("MajorService", () => {
   });
 
   test("should get all majors", () => {
-    // Create a test major first
     const majorData = {
       name: "Get All Test Major Service",
     };
@@ -44,27 +43,53 @@ describe("MajorService", () => {
     expect(result.length).toBeGreaterThanOrEqual(1);
   });
 
+  test("should get a major by id", () => {
+    const majorData = { name: "Get By Id Test" };
+    const createdMajor = majorService.create(majorData);
+    expect(createdMajor).not.toBeNull();
+
+    const result = majorService.getById(createdMajor!.id);
+    expect(result).not.toBeNull();
+    expect(result.id).toBe(createdMajor!.id);
+  });
+
+  test("should throw error when getting non-existent major by id", () => {
+    expect(() => {
+      majorService.getById(999999);
+    }).toThrow("Major not found");
+  });
+
+  test("should update a major", () => {
+    const majorData = { name: "Update Test" };
+    const createdMajor = majorService.create(majorData);
+    expect(createdMajor).not.toBeNull();
+
+    const updatedName = "Updated Major Name";
+    const result = majorService.update(createdMajor!.id, { name: updatedName });
+
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe(updatedName);
+  });
+
   test("should delete a major", () => {
-    // Create a test major to delete
     const majorData = {
       name: "Delete Test Major Service",
     };
     const createdMajor = majorService.create(majorData);
     expect(createdMajor).not.toBeNull();
 
-    // Verify major exists before deletion by getting it via service
-    const majorBeforeDelete = majorService.getAll().find(m => m.id === createdMajor!.id);
+    const majorBeforeDelete = majorService
+      .getAll()
+      .find((m) => m.id === createdMajor!.id);
     expect(majorBeforeDelete).not.toBeNull();
 
-    // Delete the major
     const deletedMajor = majorService.delete(createdMajor!.id!);
 
     expect(deletedMajor).not.toBeNull();
     expect(deletedMajor.id).toBe(createdMajor!.id);
 
-    // Verify major was deleted by trying to find it again
     expect(() => {
-      majorService.delete(createdMajor!.id!); // This should throw since it's already deleted
+      majorService.delete(createdMajor!.id!);
     }).toThrow("Major not found");
   });
 

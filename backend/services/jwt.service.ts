@@ -19,7 +19,6 @@ export class JWT {
     try {
       jwt.verify(token, this.SECRET, {
         algorithms: ["HS512"],
-        clockTolerance: 0,
       });
       return true;
     } catch (_) {

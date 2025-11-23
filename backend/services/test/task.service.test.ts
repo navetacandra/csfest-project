@@ -9,7 +9,7 @@ import { FileRepository } from "../../repositories/file.repository";
 import type { Post } from "../../models/post.model";
 
 describe("TaskService", () => {
-  const DB_TEST = `task_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `task_service_test.sqlite`;
   let sqlite: Sqlite;
   let taskService: TaskService;
   let classService: ClassService;
@@ -37,7 +37,6 @@ describe("TaskService", () => {
   });
 
   test("should submit a task", async () => {
-    // Create a class
     const classData = {
       name: "Test Class for Task Service",
       schedule: 1,
@@ -48,7 +47,6 @@ describe("TaskService", () => {
     expect(createdClass).not.toBeNull();
     expect(createdClass?.id).toBeGreaterThan(0);
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -62,7 +60,6 @@ describe("TaskService", () => {
     expect(createdMahasiswa).not.toBeNull();
     expect(createdMahasiswa?.id).toBeGreaterThan(0);
 
-    // Enroll the mahasiswa in the class using the class service
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -70,18 +67,15 @@ describe("TaskService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
     const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
 
-    // Create a post of type 'task'
     const postData: Omit<Post, "id" | "created_at" | "updated_at"> = {
       class_id: createdClass!.id!,
       class_enrollment_id: enrollment!.id!,
-      file_id: 1, // Use a default file_id for test
       message: "Integration Test Task Service",
       type: "task",
     };
@@ -89,7 +83,6 @@ describe("TaskService", () => {
     expect(createdPost).not.toBeNull();
     expect(createdPost?.id).toBeGreaterThan(0);
 
-    // Create a file for the task submission
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -110,13 +103,11 @@ describe("TaskService", () => {
 
     expect(result).not.toBeNull();
     expect(result?.post_id).toBe(createdPost!.id);
-    // The enrollment ID should match the one we found earlier
     expect(result?.class_enrollment_id).toBe(enrollment?.id);
     expect(result?.file_id).toBe(createdFileId);
   });
 
   test("should get tasks for a student", async () => {
-    // Create a class
     const classData = {
       name: "Test Class Get Tasks for Task Service",
       schedule: 2,
@@ -126,7 +117,6 @@ describe("TaskService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -139,7 +129,6 @@ describe("TaskService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa in the class using the class service
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -147,25 +136,21 @@ describe("TaskService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
     const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
 
-    // Create a post of type 'task'
     const postData: Omit<Post, "id" | "created_at" | "updated_at"> = {
       class_id: createdClass!.id!,
       class_enrollment_id: enrollment!.id!,
-      file_id: 2, // Use a different file_id for test
       message: "Get Tasks Test Task Service",
       type: "task",
     };
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Get tasks without submitting any yet (should return as 'incoming')
     const allTasks = taskService.getTasks(createdMahasiswa!.id!, "all");
     expect(Array.isArray(allTasks)).toBe(true);
 
@@ -175,7 +160,6 @@ describe("TaskService", () => {
     );
     expect(Array.isArray(incomingTasks)).toBe(true);
 
-    // Now submit a task
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -194,7 +178,6 @@ describe("TaskService", () => {
       createdFileId as number,
     );
 
-    // Get completed tasks
     const completedTasks = taskService.getTasks(
       createdMahasiswa!.id!,
       "completed",
@@ -209,7 +192,6 @@ describe("TaskService", () => {
   });
 
   test("should throw error when student is not enrolled in class", async () => {
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -222,7 +204,6 @@ describe("TaskService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Create a class
     const classData = {
       name: "Test Class Not Enrolled for Task Service",
       schedule: 3,
@@ -232,10 +213,9 @@ describe("TaskService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a post of type 'task'
     const postData: Omit<Post, "id" | "created_at" | "updated_at"> = {
       class_id: createdClass!.id!,
-      class_enrollment_id: 1, // Use an enrollment that doesn't belong to the student
+      class_enrollment_id: 1,
       file_id: 3,
       message: "Not Enrolled Test Task Service",
       type: "task",
@@ -243,7 +223,6 @@ describe("TaskService", () => {
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Create a file for the task submission
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -266,7 +245,6 @@ describe("TaskService", () => {
   });
 
   test("should throw error when task post is not found", async () => {
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -279,7 +257,6 @@ describe("TaskService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Create a class
     const classData = {
       name: "Test Class Task Not Found for Task Service",
       schedule: 4,
@@ -289,7 +266,6 @@ describe("TaskService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Enroll the mahasiswa in the class using the class service
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -297,14 +273,12 @@ describe("TaskService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
     const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
 
-    // Create a file for the task submission
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -318,7 +292,7 @@ describe("TaskService", () => {
 
     expect(() => {
       taskService.submitTask(
-        999999, // Non-existent post id
+        999999,
         createdMahasiswa!.id!,
         createdClass!.id!,
         createdFileId as number,
@@ -327,7 +301,6 @@ describe("TaskService", () => {
   });
 
   test("should throw error when task is already submitted", async () => {
-    // Create a class
     const classData = {
       name: "Test Class Already Submitted for Task Service",
       schedule: 5,
@@ -337,7 +310,6 @@ describe("TaskService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -350,7 +322,6 @@ describe("TaskService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa in the class using the class service
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -358,14 +329,12 @@ describe("TaskService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
     const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
 
-    // Create a post of type 'task'
     const postData: Omit<Post, "id" | "created_at" | "updated_at"> = {
       class_id: createdClass!.id!,
       class_enrollment_id: enrollment!.id!,
@@ -376,7 +345,6 @@ describe("TaskService", () => {
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Create a file for the task submission
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -388,7 +356,6 @@ describe("TaskService", () => {
     const createdFileFirst = fileRepo.create(fileData);
     expect(createdFileFirst).toBeGreaterThan(0);
 
-    // Submit the task for the first time
     const firstSubmission = taskService.submitTask(
       createdPost!.id!,
       createdMahasiswa!.id!,
@@ -397,7 +364,6 @@ describe("TaskService", () => {
     );
     expect(firstSubmission).not.toBeNull();
 
-    // Try to submit the same task again with a different file
     const fileData2 = {
       ...fileData,
       upload_name: "test_already_submitted_submission_2.pdf",

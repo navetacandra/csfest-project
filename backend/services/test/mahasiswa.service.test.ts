@@ -3,7 +3,7 @@ import { MahasiswaService } from "../mahasiswa.service";
 import { Sqlite } from "../../config/database";
 
 describe("MahasiswaService", () => {
-  const DB_TEST = `mahasiswa_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `mahasiswa_service_test.sqlite`;
   let sqlite: Sqlite;
   let mahasiswaService: MahasiswaService;
 
@@ -48,7 +48,6 @@ describe("MahasiswaService", () => {
   });
 
   test("should get a mahasiswa by id", async () => {
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -61,7 +60,6 @@ describe("MahasiswaService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Get the mahasiswa by id
     const result = mahasiswaService.getById(createdMahasiswa!.id!);
 
     expect(result).not.toBeNull();
@@ -70,7 +68,6 @@ describe("MahasiswaService", () => {
   });
 
   test("should update a mahasiswa", async () => {
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -83,7 +80,6 @@ describe("MahasiswaService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Update the mahasiswa
     const updateData = { name: "Updated Integration Test Mahasiswa Service" };
     const updatedMahasiswa = await mahasiswaService.update(
       createdMahasiswa!.id!,
@@ -95,7 +91,6 @@ describe("MahasiswaService", () => {
   });
 
   test("should delete a mahasiswa", async () => {
-    // Create a test mahasiswa to delete
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -108,17 +103,16 @@ describe("MahasiswaService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Verify mahasiswa exists before deletion by getting it
-    const mahasiswaBeforeDelete = mahasiswaService.getById(createdMahasiswa!.id!);
+    const mahasiswaBeforeDelete = mahasiswaService.getById(
+      createdMahasiswa!.id!,
+    );
     expect(mahasiswaBeforeDelete).not.toBeNull();
 
-    // Delete the mahasiswa
     const deletedMahasiswa = mahasiswaService.delete(createdMahasiswa!.id!);
 
     expect(deletedMahasiswa).not.toBeNull();
     expect(deletedMahasiswa.id).toBe(createdMahasiswa!.id);
 
-    // Verify mahasiswa was deleted by trying to get it again (should throw error)
     expect(() => {
       mahasiswaService.getById(createdMahasiswa!.id!);
     }).toThrow("Mahasiswa not found");
@@ -132,7 +126,6 @@ describe("MahasiswaService", () => {
       name: "No Password Test Mahasiswa Service",
       email: "test.nopass.service@example.com",
       username: "test_nopass_service",
-      // password is missing
     } as any;
 
     await expect(async () => {

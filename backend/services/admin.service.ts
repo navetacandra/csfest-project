@@ -1,15 +1,16 @@
-import { AdminRepository } from '../repositories/admin.repository';
-import type { Admin } from '../models/admin.model';
-import { Password } from './password.service';
+import { AdminRepository } from "../repositories/admin.repository";
+import type { Admin } from "../models/admin.model";
+import { Password } from "./password.service";
+import type { Sqlite } from "../config/database";
 
 export class AdminService {
   private adminRepository: AdminRepository;
 
-  constructor(sqlite?: Sqlite) {
+  constructor(sqlite: Sqlite) {
     this.adminRepository = new AdminRepository(sqlite);
   }
 
-  async create(data: Omit<Admin, 'id' | 'created_at' | 'updated_at'>) {
+  async create(data: Omit<Admin, "id" | "created_at" | "updated_at">) {
     if (!data.password) {
       throw new Error("Password is required to create a new admin.");
     }
@@ -32,7 +33,10 @@ export class AdminService {
     return admin;
   }
 
-  async update(id: number, data: Partial<Omit<Admin, 'id' | 'created_at' | 'updated_at'>>) {
+  async update(
+    id: number,
+    data: Partial<Omit<Admin, "id" | "created_at" | "updated_at">>,
+  ) {
     if (data.password) {
       data.password = await Password.hash(data.password);
     }

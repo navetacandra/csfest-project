@@ -8,7 +8,7 @@ import { MahasiswaService } from "../mahasiswa.service";
 import type { Post } from "../../models/post.model";
 
 describe("PostService", () => {
-  const DB_TEST = `post_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `post_service_test.sqlite`;
   let sqlite: Sqlite;
   let postService: PostService;
   let classService: ClassService;
@@ -34,7 +34,6 @@ describe("PostService", () => {
   });
 
   test("should create a post", async () => {
-    // First create a class
     const classData = {
       name: "Test Class for Post Service",
       schedule: 1,
@@ -45,7 +44,6 @@ describe("PostService", () => {
     expect(createdClass).not.toBeNull();
     expect(createdClass?.id).toBeGreaterThan(0);
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -59,7 +57,6 @@ describe("PostService", () => {
     expect(createdMahasiswa).not.toBeNull();
     expect(createdMahasiswa?.id).toBeGreaterThan(0);
 
-    // Enroll the mahasiswa in the class
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -67,7 +64,6 @@ describe("PostService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
@@ -75,7 +71,6 @@ describe("PostService", () => {
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
-    // Create a file
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -103,7 +98,6 @@ describe("PostService", () => {
   });
 
   test("should get a post by id", async () => {
-    // First create a class
     const classData = {
       name: "Test Class Get By ID for Post Service",
       schedule: 2,
@@ -113,7 +107,6 @@ describe("PostService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -126,7 +119,6 @@ describe("PostService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa in the class
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -134,7 +126,6 @@ describe("PostService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
@@ -142,7 +133,6 @@ describe("PostService", () => {
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
-    // Create a file
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -164,7 +154,6 @@ describe("PostService", () => {
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Get the post by id
     const result = postService.getById(createdPost!.id!);
 
     expect(result).not.toBeNull();
@@ -173,7 +162,6 @@ describe("PostService", () => {
   });
 
   test("should update a post", async () => {
-    // First create a class
     const classData = {
       name: "Test Class Update for Post Service",
       schedule: 3,
@@ -183,7 +171,6 @@ describe("PostService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -196,7 +183,6 @@ describe("PostService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa in the class
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -204,7 +190,6 @@ describe("PostService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
@@ -212,7 +197,6 @@ describe("PostService", () => {
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
-    // Create a file
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -234,7 +218,6 @@ describe("PostService", () => {
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Update the post
     const updateData = { message: "Updated Integration Test Post Service" };
     const updatedPost = postService.update(createdPost!.id!, updateData);
 
@@ -243,7 +226,6 @@ describe("PostService", () => {
   });
 
   test("should delete a post", async () => {
-    // First create a class
     const classData = {
       name: "Test Class Delete for Post Service",
       schedule: 4,
@@ -253,7 +235,6 @@ describe("PostService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -266,7 +247,6 @@ describe("PostService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa in the class
     const enrolledClass = classService.enroll(
       createdClass?.enroll_key!,
       createdMahasiswa!.id!,
@@ -274,7 +254,6 @@ describe("PostService", () => {
     );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
     const enrollments = classEnrollmentRepo.findByMahasiswaId(
       createdMahasiswa!.id!,
     );
@@ -282,7 +261,6 @@ describe("PostService", () => {
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
-    // Create a file
     const fileData = {
       mahasiswa_id: createdMahasiswa!.id!,
       dosen_id: null,
@@ -304,17 +282,14 @@ describe("PostService", () => {
     const createdPost = postService.create(postData);
     expect(createdPost).not.toBeNull();
 
-    // Verify post exists before deletion by using the service method
     const postBeforeDelete = postService.getById(createdPost!.id!);
     expect(postBeforeDelete).not.toBeNull();
 
-    // Delete the post
     const deletedPost = postService.delete(createdPost!.id!);
 
     expect(deletedPost).not.toBeNull();
     expect(deletedPost.id).toBe(createdPost!.id);
 
-    // Verify post was deleted by using the service method (should throw error)
     expect(() => {
       postService.getById(createdPost!.id!);
     }).toThrow("Post not found");

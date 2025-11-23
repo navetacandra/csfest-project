@@ -7,7 +7,7 @@ import { DosenService } from "../dosen.service";
 import { AdminService } from "../admin.service";
 
 describe("AuthService", () => {
-  const DB_TEST = `auth_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `auth_service_test.sqlite`;
   let sqlite: Sqlite;
   let authService: AuthService;
   let dosenService: DosenService;
@@ -31,7 +31,6 @@ describe("AuthService", () => {
   });
 
   test("should successfully login a mahasiswa", async () => {
-    // Create a test mahasiswa first
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -44,7 +43,6 @@ describe("AuthService", () => {
 
     const mahasiswaId = await mahasiswaService.create(mahasiswaData);
 
-    // Try to login with correct credentials
     const result = await authService.login(
       "test_mahasiswa_auth",
       "password123",
@@ -56,7 +54,6 @@ describe("AuthService", () => {
   });
 
   test("should successfully login a dosen", async () => {
-    // Create a test dosen first
     const dosenData = {
       nip: "987654321",
       name: "Test Dosen",
@@ -65,8 +62,6 @@ describe("AuthService", () => {
     };
 
     const dosenId = await dosenService.create(dosenData);
-
-    // Try to login with correct credentials
     const result = await authService.login("test_dosen_auth", "password123");
 
     expect(result).toHaveProperty("token");
@@ -75,7 +70,6 @@ describe("AuthService", () => {
   });
 
   test("should successfully login an admin", async () => {
-    // Create a test admin first
     const adminData = {
       name: "Test Admin",
       username: "test_admin_auth",
@@ -84,7 +78,6 @@ describe("AuthService", () => {
 
     const adminId = await adminService.create(adminData);
 
-    // Try to login with correct credentials
     const result = await authService.login("test_admin_auth", "password123");
 
     expect(result).toHaveProperty("token");
@@ -93,12 +86,10 @@ describe("AuthService", () => {
   });
 
   test("should throw error when login with invalid credentials", async () => {
-    // Try to login with incorrect username
     await expect(async () => {
       await authService.login("nonexistent_user", "password123");
     }).toThrow("Invalid username or password");
 
-    // Try to login with incorrect password
     await expect(async () => {
       await authService.login("test_mahasiswa_auth", "wrongpassword");
     }).toThrow("Invalid username or password");

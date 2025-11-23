@@ -4,7 +4,7 @@ import { Sqlite } from "../../config/database";
 import type { Dosen } from "../../models/dosen.model";
 
 describe("DosenService", () => {
-  const DB_TEST = `dosen_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `dosen_service_test.sqlite`;
   let sqlite: Sqlite;
   let dosenService: DosenService;
 
@@ -36,7 +36,7 @@ describe("DosenService", () => {
     expect(result?.name).toBe(dosenData.name);
     expect(result?.nip).toBe(dosenData.nip);
     expect(result?.username).toBe(dosenData.nip);
-    expect(result?.password).toBeUndefined(); // Password should not be returned for security
+    expect(result?.password).toBeUndefined();
   });
 
   test("should get all dosens with pagination", () => {
@@ -47,7 +47,6 @@ describe("DosenService", () => {
   });
 
   test("should get a dosen by id", async () => {
-    // Create a test dosen
     const dosenData = {
       nip: "0987654321",
       name: "Get By ID Test Dosen Service",
@@ -58,7 +57,6 @@ describe("DosenService", () => {
     const createdDosen = await dosenService.create(dosenData);
     expect(createdDosen).not.toBeNull();
 
-    // Get the dosen by id
     const result = dosenService.getById(createdDosen!.id!);
 
     expect(result).not.toBeNull();
@@ -67,7 +65,6 @@ describe("DosenService", () => {
   });
 
   test("should update a dosen", async () => {
-    // Create a test dosen
     const dosenData = {
       nip: "1122334455",
       name: "Update Test Dosen Service",
@@ -78,7 +75,6 @@ describe("DosenService", () => {
     const createdDosen = await dosenService.create(dosenData);
     expect(createdDosen).not.toBeNull();
 
-    // Update the dosen
     const updateData = { name: "Updated Integration Test Dosen Service" };
     const updatedDosen = await dosenService.update(
       createdDosen!.id!,
@@ -90,7 +86,6 @@ describe("DosenService", () => {
   });
 
   test("should delete a dosen", async () => {
-    // Create a test dosen to delete
     const dosenData = {
       nip: "5544332211",
       name: "Delete Test Dosen Service",
@@ -101,17 +96,14 @@ describe("DosenService", () => {
     const createdDosen = await dosenService.create(dosenData);
     expect(createdDosen).not.toBeNull();
 
-    // Verify dosen exists before deletion by getting it
     const dosenBeforeDelete = dosenService.getById(createdDosen!.id!);
     expect(dosenBeforeDelete).not.toBeNull();
 
-    // Delete the dosen
     const deletedDosen = dosenService.delete(createdDosen!.id!);
 
     expect(deletedDosen).not.toBeNull();
     expect(deletedDosen.id).toBe(createdDosen!.id);
 
-    // Verify dosen was deleted by trying to get it again (should throw error)
     expect(() => {
       dosenService.getById(createdDosen!.id!);
     }).toThrow("Dosen not found");

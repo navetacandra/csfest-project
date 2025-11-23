@@ -7,7 +7,7 @@ import { ClassEnrollmentRepository } from "../../repositories/classEnrollment.re
 import { DosenService } from "../dosen.service";
 
 describe("PresenceService", () => {
-  const DB_TEST = `presence_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `presence_service_test.sqlite`;
   let sqlite: Sqlite;
   let presenceService: PresenceService;
   let classService: ClassService;
@@ -33,7 +33,6 @@ describe("PresenceService", () => {
   });
 
   test("should set presence for a mahasiswa", async () => {
-    // Create a test class
     const classData = {
       name: "Test Class for Presence Service",
       schedule: 1,
@@ -44,7 +43,6 @@ describe("PresenceService", () => {
     expect(createdClass).not.toBeNull();
     expect(createdClass?.id).toBeGreaterThan(0);
 
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -58,30 +56,33 @@ describe("PresenceService", () => {
     expect(createdMahasiswa).not.toBeNull();
     expect(createdMahasiswa?.id).toBeGreaterThan(0);
 
-    // Enroll the mahasiswa to the class using the class service
-    const enrolledClass = classService.enroll(createdClass?.enroll_key!, createdMahasiswa!.id!, "mahasiswa");
+    const enrolledClass = classService.enroll(
+      createdClass?.enroll_key!,
+      createdMahasiswa!.id!,
+      "mahasiswa",
+    );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
-    const enrollments = classEnrollmentRepo.findByMahasiswaId(createdMahasiswa!.id!);
-    const enrollment = enrollments.find(e => e.class_id === createdClass!.id);
+    const enrollments = classEnrollmentRepo.findByMahasiswaId(
+      createdMahasiswa!.id!,
+    );
+    const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
     const result = presenceService.setPresence(
       createdClass!.id!,
-      { role: 'mahasiswa', id: createdMahasiswa!.id! },
-      { schedule_date: "2025-11-23", status: 'hadir' }
+      { role: "mahasiswa", id: createdMahasiswa!.id! },
+      { schedule_date: "2025-11-23", status: "hadir" },
     );
 
     expect(result).not.toBeNull();
     expect(result?.class_enrollment_id).toBe(enrollment!.id);
-    expect(result?.status).toBe('hadir');
+    expect(result?.status).toBe("hadir");
     expect(result?.schedule_date).toBe("2025-11-23");
   });
 
   test("should set presence for a student by a dosen", async () => {
-    // Create a test class
     const classData = {
       name: "Test Class Dosen for Presence Service",
       schedule: 2,
@@ -91,7 +92,6 @@ describe("PresenceService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -104,7 +104,6 @@ describe("PresenceService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Create a test dosen
     const dosenData = {
       nip: "998877665",
       name: "Test Dosen Presence",
@@ -114,36 +113,39 @@ describe("PresenceService", () => {
     const createdDosen = await dosenService.create(dosenData);
     expect(createdDosen).not.toBeNull();
 
-    // Enroll the mahasiswa to the class using the class service
-    const enrolledClass = classService.enroll(createdClass?.enroll_key!, createdMahasiswa!.id!, "mahasiswa");
+    const enrolledClass = classService.enroll(
+      createdClass?.enroll_key!,
+      createdMahasiswa!.id!,
+      "mahasiswa",
+    );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
-    const enrollments = classEnrollmentRepo.findByMahasiswaId(createdMahasiswa!.id!);
-    const enrollment = enrollments.find(e => e.class_id === createdClass!.id);
+    const enrollments = classEnrollmentRepo.findByMahasiswaId(
+      createdMahasiswa!.id!,
+    );
+    const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
     const result = presenceService.setPresence(
       createdClass!.id!,
-      { role: 'dosen', id: createdDosen!.id! },
+      { role: "dosen", id: createdDosen!.id! },
       {
         schedule_date: "2025-11-23",
-        status: 'hadir',
+        status: "hadir",
         studentId: createdMahasiswa!.id!,
-        late_time: 5
-      }
+        late_time: 5,
+      },
     );
 
     expect(result).not.toBeNull();
     expect(result?.class_enrollment_id).toBe(enrollment!.id);
-    expect(result?.status).toBe('hadir');
+    expect(result?.status).toBe("hadir");
     expect(result?.late_time).toBe(5);
     expect(result?.schedule_date).toBe("2025-11-23");
   });
 
   test("should get presence recap for a student", async () => {
-    // Create a test class
     const classData = {
       name: "Test Class Recap for Presence Service",
       schedule: 3,
@@ -153,7 +155,6 @@ describe("PresenceService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -166,27 +167,30 @@ describe("PresenceService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa to the class using the class service
-    const enrolledClass = classService.enroll(createdClass?.enroll_key!, createdMahasiswa!.id!, "mahasiswa");
+    const enrolledClass = classService.enroll(
+      createdClass?.enroll_key!,
+      createdMahasiswa!.id!,
+      "mahasiswa",
+    );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
-    const enrollments = classEnrollmentRepo.findByMahasiswaId(createdMahasiswa!.id!);
-    const enrollment = enrollments.find(e => e.class_id === createdClass!.id);
+    const enrollments = classEnrollmentRepo.findByMahasiswaId(
+      createdMahasiswa!.id!,
+    );
+    const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
-    // Set some presence records
     presenceService.setPresence(
       createdClass!.id!,
-      { role: 'mahasiswa', id: createdMahasiswa!.id! },
-      { schedule_date: "2025-11-22", status: 'hadir' }
+      { role: "mahasiswa", id: createdMahasiswa!.id! },
+      { schedule_date: "2025-11-22", status: "hadir" },
     );
 
     presenceService.setPresence(
       createdClass!.id!,
-      { role: 'mahasiswa', id: createdMahasiswa!.id! },
-      { schedule_date: "2025-11-23", status: 'hadir' }
+      { role: "mahasiswa", id: createdMahasiswa!.id! },
+      { schedule_date: "2025-11-23", status: "hadir" },
     );
 
     const recap = presenceService.getRecap(createdMahasiswa!.id!);
@@ -198,7 +202,6 @@ describe("PresenceService", () => {
   });
 
   test("should throw error when mahasiswa tries to set invalid status", async () => {
-    // Create a test class
     const classData = {
       name: "Test Class Error for Presence Service",
       schedule: 4,
@@ -208,7 +211,6 @@ describe("PresenceService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a test mahasiswa
     const mahasiswaData = {
       major_id: 1,
       study_program_id: 1,
@@ -221,27 +223,32 @@ describe("PresenceService", () => {
     const createdMahasiswa = await mahasiswaService.create(mahasiswaData);
     expect(createdMahasiswa).not.toBeNull();
 
-    // Enroll the mahasiswa to the class using the class service
-    const enrolledClass = classService.enroll(createdClass?.enroll_key!, createdMahasiswa!.id!, "mahasiswa");
+    const enrolledClass = classService.enroll(
+      createdClass?.enroll_key!,
+      createdMahasiswa!.id!,
+      "mahasiswa",
+    );
     expect(enrolledClass).not.toBeNull();
 
-    // Get the enrollment ID that was created when the mahasiswa was enrolled
-    const enrollments = classEnrollmentRepo.findByMahasiswaId(createdMahasiswa!.id!);
-    const enrollment = enrollments.find(e => e.class_id === createdClass!.id);
+    const enrollments = classEnrollmentRepo.findByMahasiswaId(
+      createdMahasiswa!.id!,
+    );
+    const enrollment = enrollments.find((e) => e.class_id === createdClass!.id);
     expect(enrollment).toBeDefined();
     expect(enrollment?.id).toBeGreaterThan(0);
 
     expect(() => {
       presenceService.setPresence(
         createdClass!.id!,
-        { role: 'mahasiswa', id: createdMahasiswa!.id! },
-        { schedule_date: "2025-11-23", status: 'izin', late_time: 10 }  // Mahasiswa cannot set status to 'izin' or late_time
+        { role: "mahasiswa", id: createdMahasiswa!.id! },
+        { schedule_date: "2025-11-23", status: "izin", late_time: 10 },
       );
-    }).toThrow("Mahasiswa can only set their own status to 'hadir' with no lateness.");
+    }).toThrow(
+      "Mahasiswa can only set their own status to 'hadir' with no lateness.",
+    );
   });
 
   test("should throw error when dosen doesn't provide studentId", async () => {
-    // Create a test class
     const classData = {
       name: "Test Class No Student ID for Presence Service",
       schedule: 5,
@@ -251,7 +258,6 @@ describe("PresenceService", () => {
     const createdClass = classService.create(classData);
     expect(createdClass).not.toBeNull();
 
-    // Create a test dosen
     const dosenData = {
       nip: "112233445",
       name: "Test Dosen No StudentID Presence",
@@ -264,8 +270,8 @@ describe("PresenceService", () => {
     expect(() => {
       presenceService.setPresence(
         createdClass!.id!,
-        { role: 'dosen', id: createdDosen!.id! },
-        { schedule_date: "2025-11-23", status: 'hadir' }  // Missing studentId
+        { role: "dosen", id: createdDosen!.id! },
+        { schedule_date: "2025-11-23", status: "hadir" },
       );
     }).toThrow("studentId is required for dosen to set presence.");
   });

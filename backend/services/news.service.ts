@@ -1,11 +1,11 @@
-import { NewsRepository } from '../repositories/news.repository';
-import type { News } from '../models/news.model';
-import { Sqlite } from '../config/database';
+import { NewsRepository } from "../repositories/news.repository";
+import type { News } from "../models/news.model";
+import { Sqlite } from "../config/database";
 
 export class NewsService {
   private newsRepository: NewsRepository;
 
-  constructor(sqlite?: Sqlite) {
+  constructor(sqlite: Sqlite) {
     this.newsRepository = new NewsRepository(sqlite);
   }
 
@@ -21,12 +21,15 @@ export class NewsService {
     return news;
   }
 
-  create(data: Omit<News, 'id' | 'created_at' | 'updated_at'>) {
+  create(data: Omit<News, "id" | "created_at" | "updated_at">) {
     const newNewsId = this.newsRepository.create(data);
     return this.newsRepository.findById(Number(newNewsId));
   }
-  
-  update(id: number, data: Partial<Omit<News, 'id' | 'created_at' | 'updated_at'>>) {
+
+  update(
+    id: number,
+    data: Partial<Omit<News, "id" | "created_at" | "updated_at">>,
+  ) {
     this.newsRepository.update(id, data);
     return this.newsRepository.findById(id);
   }

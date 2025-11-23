@@ -14,8 +14,6 @@ export class AuthService {
     const user = this.userRepository.findByUsername(username);
 
     if (!user || !user.password) {
-      // In a real app, you might want to use a more generic error message
-      // to prevent username enumeration attacks.
       throw new Error("Invalid username or password");
     }
 
@@ -24,7 +22,6 @@ export class AuthService {
       throw new Error("Invalid username or password");
     }
 
-    // Don't include password in the token payload
     const { password, ...payload } = user;
 
     const token = JWT.sign(payload);

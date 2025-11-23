@@ -4,7 +4,7 @@ import { Sqlite } from "../../config/database";
 import { MajorService } from "../major.service";
 
 describe("StudyProgramService", () => {
-  const DB_TEST = `study_program_service_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `study_program_service_test.sqlite`;
   let sqlite: Sqlite;
   let studyProgramService: StudyProgramService;
   let majorService: MajorService;
@@ -24,7 +24,6 @@ describe("StudyProgramService", () => {
   });
 
   test("should create a study program", async () => {
-    // Create a major first
     const majorData = {
       name: "Test Major for Study Program Service",
     };
@@ -45,14 +44,12 @@ describe("StudyProgramService", () => {
   });
 
   test("should get study programs by major id", async () => {
-    // Create a major first
     const majorData = {
       name: "Test Major Get By Major for Study Program Service",
     };
     const createdMajor = majorService.create(majorData);
     expect(createdMajor).not.toBeNull();
 
-    // Create a study program for the major
     const studyProgramData = {
       name: "Get By Major Test Study Program Service",
       major_id: createdMajor!.id!,
@@ -67,19 +64,17 @@ describe("StudyProgramService", () => {
       expect.objectContaining({
         id: createdStudyProgram?.id,
         major_id: createdMajor!.id,
-      })
+      }),
     );
   });
 
   test("should delete a study program", async () => {
-    // Create a major first
     const majorData = {
       name: "Test Major Delete for Study Program Service",
     };
     const createdMajor = majorService.create(majorData);
     expect(createdMajor).not.toBeNull();
 
-    // Create a study program to delete
     const studyProgramData = {
       name: "Delete Test Study Program Service",
       major_id: createdMajor!.id!,
@@ -87,16 +82,15 @@ describe("StudyProgramService", () => {
     const createdStudyProgram = studyProgramService.create(studyProgramData);
     expect(createdStudyProgram).not.toBeNull();
 
-    // Verify study program exists before deletion by attempting to delete again (should work the first time)
-    // We can check if it still exists by trying to delete it again and expecting an error
-    const deletedStudyProgram = studyProgramService.delete(createdStudyProgram!.id!);
+    const deletedStudyProgram = studyProgramService.delete(
+      createdStudyProgram!.id!,
+    );
 
     expect(deletedStudyProgram).not.toBeNull();
     expect(deletedStudyProgram.id).toBe(createdStudyProgram!.id);
 
-    // Verify study program was deleted by trying to delete it again (should throw an error)
     expect(() => {
-      studyProgramService.delete(createdStudyProgram!.id!); // This should throw since it's already deleted
+      studyProgramService.delete(createdStudyProgram!.id!);
     }).toThrow("Study Program not found");
   });
 
