@@ -3,7 +3,7 @@ import { DosenRepository } from "../dosen.repository";
 import type { Dosen } from "../../models/dosen.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "dosen_repository_test.sqlite";
+const DB_TEST = "dosen_repository_test.db";
 let sqlite: Sqlite;
 let repo: DosenRepository;
 

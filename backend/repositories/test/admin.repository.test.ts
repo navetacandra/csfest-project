@@ -4,7 +4,7 @@ import type { Admin } from "../../models/admin.model";
 import { Sqlite } from "../../config/database";
 
 describe("AdminRepository", () => {
-  const DB_TEST = `admin_repository_test.sqlite`;
+  const DB_TEST = `admin_repository_test.db`;
   let sqlite: Sqlite;
   let repo: AdminRepository;
 

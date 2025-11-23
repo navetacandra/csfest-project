@@ -5,7 +5,7 @@ import { MahasiswaService } from "../mahasiswa.service";
 import { DosenService } from "../dosen.service";
 
 describe("ClassService", () => {
-  const DB_TEST = `class_service_test.sqlite`;
+  const DB_TEST = `class_service_test.db`;
   let sqlite: Sqlite;
   let classService: ClassService;
   let mahasiswaService: MahasiswaService;

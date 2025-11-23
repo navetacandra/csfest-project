@@ -3,7 +3,7 @@ import { MajorService } from "../major.service";
 import { Sqlite } from "../../config/database";
 
 describe("MajorService", () => {
-  const DB_TEST = `major_service_test.sqlite`;
+  const DB_TEST = `major_service_test.db`;
   let sqlite: Sqlite;
   let majorService: MajorService;
 

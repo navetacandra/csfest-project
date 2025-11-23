@@ -3,7 +3,7 @@ import { ClassEnrollmentRepository } from "../classEnrollment.repository";
 import type { ClassEnrollment } from "../../models/class_enrollment.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "class_enrollment_repository_test.sqlite";
+const DB_TEST = "class_enrollment_repository_test.db";
 let sqlite: Sqlite;
 let repo: ClassEnrollmentRepository;
 

@@ -9,7 +9,7 @@ import { FileRepository } from "../../repositories/file.repository";
 import type { Post } from "../../models/post.model";
 
 describe("TaskService", () => {
-  const DB_TEST = `task_service_test.sqlite`;
+  const DB_TEST = `task_service_test.db`;
   let sqlite: Sqlite;
   let taskService: TaskService;
   let classService: ClassService;

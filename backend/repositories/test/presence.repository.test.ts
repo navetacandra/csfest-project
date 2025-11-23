@@ -3,7 +3,7 @@ import { PresenceRepository } from "../presence.repository";
 import type { Presence } from "../../models/presence.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "presence_repository_test.sqlite";
+const DB_TEST = "presence_repository_test.db";
 let sqlite: Sqlite;
 let repo: PresenceRepository;
 

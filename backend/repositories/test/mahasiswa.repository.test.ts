@@ -3,7 +3,7 @@ import { MahasiswaRepository } from "../mahasiswa.repository";
 import type { Mahasiswa } from "../../models/mahasiswa.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "mahasiswa_repository_test.sqlite";
+const DB_TEST = "mahasiswa_repository_test.db";
 let sqlite: Sqlite;
 let repo: MahasiswaRepository;
 

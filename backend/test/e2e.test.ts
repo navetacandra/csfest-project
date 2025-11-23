@@ -16,7 +16,7 @@ Bun.env.PASSWORD_SECRET_KEY =
 
 const { default: apiRouter } = await import("../routes");
 
-const DB_TEST = Bun.env.DB_NAME || `e2e_test.sqlite`;
+const DB_TEST = Bun.env.DB_NAME || `e2e_test.db`;
 
 describe("E2E API Tests - Full API Contract", () => {
   let app: Express;

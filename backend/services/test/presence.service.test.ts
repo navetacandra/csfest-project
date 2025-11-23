@@ -7,7 +7,7 @@ import { ClassEnrollmentRepository } from "../../repositories/classEnrollment.re
 import { DosenService } from "../dosen.service";
 
 describe("PresenceService", () => {
-  const DB_TEST = `presence_service_test.sqlite`;
+  const DB_TEST = `presence_service_test.db`;
   let sqlite: Sqlite;
   let presenceService: PresenceService;
   let classService: ClassService;

@@ -3,7 +3,7 @@ import { MahasiswaService } from "../mahasiswa.service";
 import { Sqlite } from "../../config/database";
 
 describe("MahasiswaService", () => {
-  const DB_TEST = `mahasiswa_service_test.sqlite`;
+  const DB_TEST = `mahasiswa_service_test.db`;
   let sqlite: Sqlite;
   let mahasiswaService: MahasiswaService;
 

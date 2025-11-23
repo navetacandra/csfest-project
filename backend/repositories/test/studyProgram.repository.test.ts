@@ -3,7 +3,7 @@ import { StudyProgramRepository } from "../studyProgram.repository";
 import type { StudyProgram } from "../../models/study_program.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "study_program_repository_test.sqlite";
+const DB_TEST = "study_program_repository_test.db";
 let sqlite: Sqlite;
 let repo: StudyProgramRepository;
 

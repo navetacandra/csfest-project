@@ -3,7 +3,7 @@ import { MajorRepository } from "../major.repository";
 import type { Major } from "../../models/major.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "major_repository_test.sqlite";
+const DB_TEST = "major_repository_test.db";
 let sqlite: Sqlite;
 let repo: MajorRepository;
 

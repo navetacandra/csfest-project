@@ -7,7 +7,7 @@ import { DosenService } from "../dosen.service";
 import { AdminService } from "../admin.service";
 
 describe("AuthService", () => {
-  const DB_TEST = `auth_service_test.sqlite`;
+  const DB_TEST = `auth_service_test.db`;
   let sqlite: Sqlite;
   let authService: AuthService;
   let dosenService: DosenService;

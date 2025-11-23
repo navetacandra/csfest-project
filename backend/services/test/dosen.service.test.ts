@@ -4,7 +4,7 @@ import { Sqlite } from "../../config/database";
 import type { Dosen } from "../../models/dosen.model";
 
 describe("DosenService", () => {
-  const DB_TEST = `dosen_service_test.sqlite`;
+  const DB_TEST = `dosen_service_test.db`;
   let sqlite: Sqlite;
   let dosenService: DosenService;
 

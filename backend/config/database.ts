@@ -22,9 +22,7 @@ export class Sqlite {
   protected db: Database;
   private firstRun: boolean;
 
-  static async createInstance(
-    filename: string = "database.sqlite",
-  ): Promise<Sqlite> {
+  static async createInstance(filename: string = "sqlite.db"): Promise<Sqlite> {
     const sqlite = new Sqlite(filename);
 
     if (!sqlite.firstRun) return sqlite;
@@ -44,7 +42,7 @@ export class Sqlite {
     return sqlite;
   }
 
-  constructor(filename: string = "database.sqlite") {
+  constructor(filename: string = "sqlite.db") {
     this.database_path = resolve(`${__dirname}/../database/${filename}`);
     this.firstRun = Bun.file(this.database_path).size == 0;
 

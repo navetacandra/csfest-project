@@ -3,7 +3,7 @@ import { NewsRepository } from "../news.repository";
 import type { News } from "../../models/news.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "news_repository_test.sqlite";
+const DB_TEST = "news_repository_test.db";
 let sqlite: Sqlite = await Sqlite.createInstance(DB_TEST);
 let repo: NewsRepository = new NewsRepository(sqlite);
 

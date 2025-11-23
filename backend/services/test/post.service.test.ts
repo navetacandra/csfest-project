@@ -8,7 +8,7 @@ import { MahasiswaService } from "../mahasiswa.service";
 import type { Post } from "../../models/post.model";
 
 describe("PostService", () => {
-  const DB_TEST = `post_service_test.sqlite`;
+  const DB_TEST = `post_service_test.db`;
   let sqlite: Sqlite;
   let postService: PostService;
   let classService: ClassService;

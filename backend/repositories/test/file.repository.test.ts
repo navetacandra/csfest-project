@@ -3,7 +3,7 @@ import { FileRepository } from "../file.repository";
 import type { File } from "../../models/file.model";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "file_repository_test.sqlite";
+const DB_TEST = "file_repository_test.db";
 let sqlite: Sqlite;
 let repo: FileRepository;
 

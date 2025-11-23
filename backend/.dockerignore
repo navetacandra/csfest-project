@@ -36,3 +36,4 @@ uploads/
 # Finder (MacOS) folder config
 .DS_Store
 storage
+database/*.db

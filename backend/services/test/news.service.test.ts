@@ -3,7 +3,7 @@ import { NewsService } from "../news.service";
 import { Sqlite } from "../../config/database";
 
 describe("NewsService", () => {
-  const DB_TEST = `news_service_test.sqlite`;
+  const DB_TEST = `news_service_test.db`;
   let sqlite: Sqlite;
   let newsService: NewsService;
 

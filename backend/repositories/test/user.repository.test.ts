@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { UserRepository } from "../user.repository";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = "user_repository_test.sqlite";
+const DB_TEST = "user_repository_test.db";
 let sqlite: Sqlite;
 let repo: UserRepository;
 
