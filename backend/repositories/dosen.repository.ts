@@ -36,12 +36,29 @@ export class DosenRepository {
     return result.length > 0 ? result[0] : null;
   }
 
-  all(page: number = 1, limit: number = 10) {
+  all(page: number = 1, limit: number = 10, nip?: string, name?: string) {
     const offset = (page - 1) * limit;
-    return sqlite.query(
-      "SELECT id, username, name, created_at, updated_at FROM dosen LIMIT ? OFFSET ?",
-      [limit, offset],
-    ) as Omit<Dosen, "password">[];
+    let baseQuery = "SELECT id, nip, name, username, created_at, updated_at FROM dosen";
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (nip) {
+      conditions.push("nip LIKE ?");
+      params.push(`%${nip}%`);
+    }
+    if (name) {
+      conditions.push("name LIKE ?");
+      params.push(`%${name}%`);
+    }
+
+    if (conditions.length > 0) {
+      baseQuery += " WHERE " + conditions.join(" AND ");
+    }
+    
+    baseQuery += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    return sqlite.query(baseQuery, params) as Omit<Dosen, "password">[];
   }
 
   update(id: number, dosenData: DosenForUpdate) {

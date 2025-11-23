@@ -19,18 +19,22 @@ export class NewsRepository {
   }
 
   findById(id: number) {
-    const result = sqlite.query("SELECT * FROM news WHERE id = ?", [
-      id,
-    ]) as News[];
+    const query = `
+      SELECT n.id, n.title, n.content, f.random_name as thumbnail
+      FROM news n
+      JOIN file f ON n.thumbnail_file_id = f.id
+      WHERE n.id = ?
+    `;
+    const result = sqlite.query(query, [id]) as any[];
     return result.length > 0 ? result[0] : null;
   }
 
   all(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
-    return sqlite.query("SELECT * FROM news LIMIT ? OFFSET ?", [
-      limit,
-      offset,
-    ]) as News[];
+    return sqlite.query(
+      "SELECT id, title FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      [limit, offset]
+    ) as { id: number, title: string }[];
   }
 
   update(id: number, data: NewsForUpdate) {

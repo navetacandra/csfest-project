@@ -27,6 +27,13 @@ export class FileRepository {
     return result.length > 0 ? result[0] : null;
   }
 
+  findById(id: number) {
+    const result = sqlite.query("SELECT * FROM file WHERE id = ?", [
+      id,
+    ]) as File[];
+    return result.length > 0 ? result[0] : null;
+  }
+
   delete(id: number) {
     sqlite.query("DELETE FROM file WHERE id = ?", [id]);
   }

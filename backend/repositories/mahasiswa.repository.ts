@@ -22,19 +22,49 @@ export class MahasiswaRepository {
     return firstResult.id;
   }
 
-  all(page: number = 1, limit: number = 10) {
+  all(page: number = 1, limit: number = 10, name?: string, major_id?: number, study_program_id?: number) {
     const offset = (page - 1) * limit;
-    return sqlite.query(
-      "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa LIMIT ? OFFSET ?",
-      [limit, offset],
-    ) as Omit<Mahasiswa, "password">[];
+    let baseQuery = `
+      SELECT m.id, m.name, mj.name as major, sp.name as study_program 
+      FROM mahasiswa m
+      JOIN major mj ON m.major_id = mj.id
+      JOIN study_program sp ON m.study_program_id = sp.id
+    `;
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (name) {
+      conditions.push("m.name LIKE ?");
+      params.push(`%${name}%`);
+    }
+    if (major_id) {
+      conditions.push("m.major_id = ?");
+      params.push(major_id);
+    }
+    if (study_program_id) {
+      conditions.push("m.study_program_id = ?");
+      params.push(study_program_id);
+    }
+
+    if (conditions.length > 0) {
+      baseQuery += " WHERE " + conditions.join(" AND ");
+    }
+    
+    baseQuery += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    return sqlite.query(baseQuery, params);
   }
 
   findById(id: number) {
-    const result = sqlite.query(
-      "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa WHERE id = ?",
-      [id],
-    ) as Omit<Mahasiswa, "password">[];
+    const query = `
+      SELECT m.id, m.name, m.nim, m.email, m.username, mj.name as major, sp.name as study_program
+      FROM mahasiswa m
+      JOIN major mj ON m.major_id = mj.id
+      JOIN study_program sp ON m.study_program_id = sp.id
+      WHERE m.id = ?
+    `;
+    const result = sqlite.query(query, [id]);
     return result.length > 0 ? result[0] : null;
   }
 

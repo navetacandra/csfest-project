@@ -1,7 +1,23 @@
 import { sqlite } from "..";
 import type { ClassEnrollment } from "../models/class_enrollment.model";
 
+type ClassEnrollmentForCreate = Omit<ClassEnrollment, "id" | "created_at" | "updated_at">;
+
 export class ClassEnrollmentRepository {
+  create(data: ClassEnrollmentForCreate) {
+    const result = sqlite.query(
+      "INSERT INTO class_enrollment (class_id, mahasiswa_id, dosen_id, admin_id) VALUES ($class_id, $mahasiswa_id, $dosen_id, $admin_id) RETURNING id",
+      {
+        $class_id: data.class_id,
+        $mahasiswa_id: data.mahasiswa_id,
+        $dosen_id: data.dosen_id,
+        $admin_id: data.admin_id,
+      }
+    );
+    const firstResult = result[0] as { id: number | bigint };
+    return firstResult.id;
+  }
+  
   findById(id: number) {
     const result = sqlite.query("SELECT * FROM class_enrollment WHERE id = ?", [
       id,

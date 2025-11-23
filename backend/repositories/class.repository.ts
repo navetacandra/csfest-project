@@ -46,6 +46,14 @@ export class ClassRepository {
     return result.length > 0 ? result[0] : null;
   }
 
+  findByIds(ids: number[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    return sqlite.query(`SELECT * FROM class WHERE id IN (${placeholders})`, ids) as Class[];
+  }
+
   update(id: number, classData: Partial<ClassForCreate>) {
     const fields = Object.keys(classData)
       .map((key) => `${key} = ?`)

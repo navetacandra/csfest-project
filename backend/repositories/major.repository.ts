@@ -23,6 +23,10 @@ export class MajorRepository {
     return result.length > 0 ? result[0] : null;
   }
 
+  all() {
+    return sqlite.query("SELECT * FROM major") as Major[];
+  }
+
   update(id: number, data: MajorForUpdate) {
     const fields = Object.keys(data)
       .map((key) => `${key} = ?`)

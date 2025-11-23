@@ -38,3 +38,4 @@ uploads/
 
 
 database/*.sqlite
+storage

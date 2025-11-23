@@ -893,6 +893,7 @@ Table task {
 Table presence {
   id int [pk, not null]
   class_enrollment_id int [not null]
+  schedule_date date [not null]
   status enum('hadir', 'sakit', 'izin', 'alpha') [not null, default: 'hadir']
   late_time int [not null, default: 0]
   created_at timestamp [not null, default: `now()`]

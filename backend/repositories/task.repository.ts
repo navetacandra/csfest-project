@@ -39,6 +39,39 @@ export class TaskRepository {
     return sqlite.query(query, [classId]) as Task[];
   }
 
+  findByPostIdAndStudentId(postId: number, studentId: number) {
+    const query = `
+        SELECT t.*
+        FROM task t
+        INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
+        WHERE t.post_id = ? AND ce.mahasiswa_id = ?
+    `;
+    return sqlite.query(query, [postId, studentId]) as Task[];
+  }
+  
+  findByPostIdWithStudent(postId: number) {
+      const query = `
+          SELECT t.*, m.name as mahasiswa_name, m.nim as mahasiswa_nim, f.upload_name, f.random_name
+          FROM task t
+          INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
+          INNER JOIN mahasiswa m ON ce.mahasiswa_id = m.id
+          INNER JOIN file f ON t.file_id = f.id
+          WHERE t.post_id = ?
+          ORDER BY m.name
+      `;
+      return sqlite.query(query, [postId]);
+  }
+
+  findByStudentId(studentId: number) {
+    const query = `
+        SELECT t.*
+        FROM task t
+        INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
+        WHERE ce.mahasiswa_id = ?
+    `;
+    return sqlite.query(query, [studentId]) as Task[];
+  }
+
   all(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
     return sqlite.query("SELECT * FROM task LIMIT ? OFFSET ?", [

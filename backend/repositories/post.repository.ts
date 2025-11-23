@@ -33,6 +33,14 @@ export class PostRepository {
     ]) as Post[];
   }
 
+  findTasksByClassIds(classIds: number[]) {
+    if (classIds.length === 0) {
+      return [];
+    }
+    const placeholders = classIds.map(() => '?').join(',');
+    return sqlite.query(`SELECT * FROM post WHERE type = 'task' AND class_id IN (${placeholders})`, classIds) as Post[];
+  }
+
   all(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
     return sqlite.query("SELECT * FROM post LIMIT ? OFFSET ?", [
