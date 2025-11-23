@@ -1,2 +1,8 @@
-// No Zod schema is needed here as file uploads are handled by Multer,
-// and there is no other data in the request body to validate for this endpoint.
+export interface Task {
+  id: number;
+  post_id: number;
+  class_enrollment_id: number;
+  file_id: number;
+  created_at: string;
+  updated_at: string;
+}

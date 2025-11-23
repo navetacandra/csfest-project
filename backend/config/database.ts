@@ -4,66 +4,74 @@ function resolve(path: string): string {
   return Bun.fileURLToPath(import.meta.resolve(path));
 }
 
+function getDatabaseFiles(type: "migrations" | "seeds"): Promise<string>[] {
+  return Array.from(
+    new Bun.Glob("*.sql").scanSync({
+      onlyFiles: true,
+      followSymlinks: false,
+      absolute: true,
+      cwd: resolve(`${__dirname}/../database/${type}`),
+    }),
+  )
+    .sort()
+    .map((path) => Bun.file(path).text());
+}
+
 export class Sqlite {
   protected database_path: string;
   protected db: Database;
+  private firstRun: boolean;
+
+  static async createInstance(
+    filename: string = "database.sqlite",
+  ): Promise<Sqlite> {
+    const sqlite = new Sqlite(filename);
+
+    if (!sqlite.firstRun) return sqlite;
+
+    try {
+      const initialQueries = [
+        ...getDatabaseFiles("migrations"),
+        ...getDatabaseFiles("seeds"),
+      ];
+      (await Promise.all(initialQueries)).forEach((sql) => sqlite.query(sql));
+    } catch (err) {
+      throw err;
+    } finally {
+      Bun.gc();
+    }
+
+    return sqlite;
+  }
 
   constructor(filename: string = "database.sqlite") {
     this.database_path = resolve(`${__dirname}/../database/${filename}`);
-    const isFirstRun = Bun.file(this.database_path).size == 0; // no data or not exists
+    this.firstRun = Bun.file(this.database_path).size == 0; // no data or not exists
 
     this.db = new Database(this.database_path, {
       create: true,
       readwrite: true,
     });
 
-    if (isFirstRun) {
-      try {
-        const migrationFiles = Array.from(
-          new Bun.Glob("*.sql").scanSync({
-            onlyFiles: true,
-            followSymlinks: false,
-            absolute: true,
-            cwd: resolve(`${__dirname}/../database/migrations`),
-          }),
-        )
-          .sort()
-          .map((path) => Bun.file(path).text());
-        const seedFiles = Array.from(
-          new Bun.Glob("*.sql").scanSync({
-            onlyFiles: true,
-            followSymlinks: false,
-            absolute: true,
-            cwd: resolve(`${__dirname}/../database/seeds`),
-          }),
-        )
-          .sort()
-          .map((path) => Bun.file(path).text());
-
-        this.db.query("PRAGMA journal_mode = WAL;");
-
-        const initialQueries = [...migrationFiles, ...seedFiles];
-        const execute = this.db.transaction(async (sqls: Promise<string>[]) => {
-          for (const sql of sqls) this.db.run(await sql);
-        });
-        execute(initialQueries);
-      } catch (err) {
-        Bun.file(this.database_path).delete(); // remove failed database
-        console.error(`Failed to migrate\nError: `, err);
-        throw err;
-      } finally {
-        Bun.gc(); // trigger gc to clean-up
-      }
-    }
+    if (this.firstRun) this.db.query("PRAGMA journal_mode = WAL;"); // set to WAL
   }
 
   query(sql: string, ...args: any) {
+    const stmt = this.db.prepare(sql);
     try {
-      const stmt = this.db.prepare(sql);
-      const transaction = this.db.transaction(() => stmt.all(...args));
-      return transaction();
+      return stmt.all(...args);
     } catch (err) {
       console.error(`Failed to execute query: ${sql}\nError: `, err);
+      throw err;
+    } finally {
+      stmt.finalize();
+    }
+  }
+
+  close() {
+    try {
+      this.db.close(true);
+    } catch (err) {
       throw err;
     }
   }
