@@ -5,11 +5,11 @@ info:
   version: 1.0.0
   contact:
     name: API Support
-    email: support@kulmsin.edu
+    email: contact@juraganweb.web.id
 servers:
   - url: http://localhost:5000/api
     description: Local development server
-  - url: https://kulmsin-api.com/api
+  - url: https://kulmsin.juraganweb.web.id/api
     description: Production server
 
 paths:
@@ -36,7 +36,7 @@ paths:
                   type: string
                   example: "password123"
       responses:
-        '200':
+        "200":
           description: Successful login
           content:
             application/json:
@@ -56,7 +56,7 @@ paths:
                         type: string
                         enum: [admin, dosen, mahasiswa]
                         example: "mahasiswa"
-        '401':
+        "401":
           description: Invalid credentials
           content:
             application/json:
@@ -85,7 +85,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Successful logout
           content:
             application/json:
@@ -108,7 +108,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: User profile details
           content:
             application/json:
@@ -166,7 +166,7 @@ paths:
             default: 10
           description: Number of items per page
       responses:
-        '200':
+        "200":
           description: List of news articles (id, title, and thumbnail only)
           content:
             application/json:
@@ -179,9 +179,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/NewsListItem'
+                      $ref: "#/components/schemas/NewsListItem"
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
 
   /news/{id}:
     get:
@@ -197,7 +197,7 @@ paths:
             type: integer
           description: News ID
       responses:
-        '200':
+        "200":
           description: News details
           content:
             application/json:
@@ -208,7 +208,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/News'
+                    $ref: "#/components/schemas/News"
 
   /dashboard:
     get:
@@ -219,7 +219,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Dashboard data
           content:
             application/json:
@@ -235,19 +235,19 @@ paths:
                       news:
                         type: array
                         items:
-                          $ref: '#/components/schemas/NewsListItem'
+                          $ref: "#/components/schemas/NewsListItem"
                       schedule:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Class'
+                          $ref: "#/components/schemas/Class"
                       tasks:
                         type: array
                         items:
-                          $ref: '#/components/schemas/TaskItem'
+                          $ref: "#/components/schemas/TaskItem"
                       classes:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Class'
+                          $ref: "#/components/schemas/Class"
 
   /classes:
     get:
@@ -258,7 +258,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: List of classes
           content:
             application/json:
@@ -271,7 +271,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Class'
+                      $ref: "#/components/schemas/Class"
     post:
       tags:
         - Class
@@ -292,7 +292,7 @@ paths:
                   type: string
                   example: "ABC123DEF"
       responses:
-        '200':
+        "200":
           description: Successfully enrolled in class
           content:
             application/json:
@@ -303,7 +303,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Class'
+                    $ref: "#/components/schemas/Class"
 
   /classes/{id}:
     get:
@@ -321,7 +321,7 @@ paths:
             type: integer
           description: Class ID
       responses:
-        '200':
+        "200":
           description: Class details with posts
           content:
             application/json:
@@ -409,7 +409,7 @@ paths:
                   enum: [post, task]
                   example: "task"
       responses:
-        '200':
+        "200":
           description: Successfully created post
           content:
             application/json:
@@ -420,7 +420,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Post'
+                    $ref: "#/components/schemas/Post"
 
   /classes/{class_id}/posts/{id}:
     get:
@@ -444,7 +444,7 @@ paths:
             type: integer
           description: Post ID
       responses:
-        '200':
+        "200":
           description: Post details
           content:
             application/json:
@@ -455,7 +455,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/PostWithFile'
+                    $ref: "#/components/schemas/PostWithFile"
     put:
       tags:
         - Posts
@@ -491,7 +491,7 @@ paths:
                   enum: [post, task]
                   example: "post"
       responses:
-        '200':
+        "200":
           description: Post updated successfully
           content:
             application/json:
@@ -502,7 +502,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Post'
+                    $ref: "#/components/schemas/Post"
     delete:
       tags:
         - Posts
@@ -524,7 +524,7 @@ paths:
             type: integer
           description: Post ID
       responses:
-        '200':
+        "200":
           description: Post deleted successfully
           content:
             application/json:
@@ -535,7 +535,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Post'
+                    $ref: "#/components/schemas/Post"
 
   /classes/{class_id}/posts/{post_id}/task:
     post:
@@ -572,7 +572,7 @@ paths:
                   format: binary
                   description: Task file to submit
       responses:
-        '200':
+        "200":
           description: Task submitted successfully
           content:
             application/json:
@@ -583,7 +583,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Task'
+                    $ref: "#/components/schemas/Task"
 
   /tasks:
     get:
@@ -603,7 +603,7 @@ paths:
             default: "all"
           description: Filter tasks by status
       responses:
-        '200':
+        "200":
           description: List of tasks
           content:
             application/json:
@@ -616,7 +616,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/TaskItem'
+                      $ref: "#/components/schemas/TaskItem"
 
   /schedule:
     get:
@@ -627,7 +627,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: User schedule
           content:
             application/json:
@@ -640,7 +640,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Class'
+                      $ref: "#/components/schemas/Class"
 
   /presence/recap:
     get:
@@ -651,7 +651,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Presence recap
           content:
             application/json:
@@ -662,7 +662,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/PresenceRecap'
+                    $ref: "#/components/schemas/PresenceRecap"
 
   /presence/{class_id}:
     post:
@@ -704,7 +704,7 @@ paths:
                   type: integer
                   description: Late time in minutes, default 0
       responses:
-        '200':
+        "200":
           description: Presence recorded successfully
           content:
             application/json:
@@ -715,7 +715,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Presence'
+                    $ref: "#/components/schemas/Presence"
 
   /admin/major:
     get:
@@ -726,7 +726,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: List of majors
           content:
             application/json:
@@ -739,7 +739,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Major'
+                      $ref: "#/components/schemas/Major"
     post:
       tags:
         - Admin
@@ -760,7 +760,7 @@ paths:
                   type: string
                   example: "Ilmu Komputer"
       responses:
-        '200':
+        "200":
           description: Major created successfully
           content:
             application/json:
@@ -771,7 +771,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Major'
+                    $ref: "#/components/schemas/Major"
 
   /admin/major/{id}:
     get:
@@ -789,7 +789,7 @@ paths:
             type: integer
           description: Major ID
       responses:
-        '200':
+        "200":
           description: Major details
           content:
             application/json:
@@ -800,7 +800,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Major'
+                    $ref: "#/components/schemas/Major"
     put:
       tags:
         - Admin
@@ -826,7 +826,7 @@ paths:
                   type: string
                   example: "Informatika"
       responses:
-        '200':
+        "200":
           description: Major updated successfully
           content:
             application/json:
@@ -837,7 +837,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Major'
+                    $ref: "#/components/schemas/Major"
     delete:
       tags:
         - Admin
@@ -853,7 +853,7 @@ paths:
             type: integer
           description: Major ID
       responses:
-        '200':
+        "200":
           description: Major deleted successfully
           content:
             application/json:
@@ -864,7 +864,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Major'
+                    $ref: "#/components/schemas/Major"
 
   /admin/major/{major_id}/study_program:
     get:
@@ -882,7 +882,7 @@ paths:
             type: integer
           description: Major ID
       responses:
-        '200':
+        "200":
           description: List of study programs
           content:
             application/json:
@@ -895,7 +895,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/StudyProgram'
+                      $ref: "#/components/schemas/StudyProgram"
     post:
       tags:
         - Admin
@@ -923,7 +923,7 @@ paths:
                   type: string
                   example: "Teknik Informatika"
       responses:
-        '200':
+        "200":
           description: Study program created successfully
           content:
             application/json:
@@ -934,7 +934,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/StudyProgram'
+                    $ref: "#/components/schemas/StudyProgram"
 
   /admin/major/{major_id}/study_program/{id}:
     delete:
@@ -958,7 +958,7 @@ paths:
             type: integer
           description: Study Program ID
       responses:
-        '200':
+        "200":
           description: Study program deleted successfully
           content:
             application/json:
@@ -969,7 +969,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/StudyProgram'
+                    $ref: "#/components/schemas/StudyProgram"
 
   /admin/mahasiswa:
     get:
@@ -1013,7 +1013,7 @@ paths:
             default: 10
           description: Number of items per page
       responses:
-        '200':
+        "200":
           description: List of students
           content:
             application/json:
@@ -1041,7 +1041,7 @@ paths:
                           type: string
                           example: "Teknik Informatika"
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
     post:
       tags:
         - Admin
@@ -1087,7 +1087,7 @@ paths:
                   type: string
                   example: "password123"
       responses:
-        '200':
+        "200":
           description: Student created successfully
           content:
             application/json:
@@ -1098,7 +1098,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Mahasiswa'
+                    $ref: "#/components/schemas/Mahasiswa"
 
   /admin/mahasiswa/{id}:
     get:
@@ -1116,7 +1116,7 @@ paths:
             type: integer
           description: Student ID
       responses:
-        '200':
+        "200":
           description: Student details
           content:
             application/json:
@@ -1182,7 +1182,7 @@ paths:
                   type: string
                   example: "agus.setiawan.updated"
       responses:
-        '200':
+        "200":
           description: Student updated successfully
           content:
             application/json:
@@ -1193,7 +1193,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Mahasiswa'
+                    $ref: "#/components/schemas/Mahasiswa"
     delete:
       tags:
         - Admin
@@ -1209,7 +1209,7 @@ paths:
             type: integer
           description: Student ID
       responses:
-        '200':
+        "200":
           description: Student deleted successfully
           content:
             application/json:
@@ -1220,7 +1220,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Mahasiswa'
+                    $ref: "#/components/schemas/Mahasiswa"
 
   /admin/dosen:
     get:
@@ -1258,7 +1258,7 @@ paths:
             default: 10
           description: Number of items per page
       responses:
-        '200':
+        "200":
           description: List of lecturers
           content:
             application/json:
@@ -1271,9 +1271,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/DosenWithUsername'
+                      $ref: "#/components/schemas/DosenWithUsername"
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
     post:
       tags:
         - Admin
@@ -1301,7 +1301,7 @@ paths:
                   type: string
                   example: "budi.hartono"
       responses:
-        '200':
+        "200":
           description: Lecturer created successfully
           content:
             application/json:
@@ -1312,7 +1312,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/DosenWithUsername'
+                    $ref: "#/components/schemas/DosenWithUsername"
 
   /admin/dosen/{id}:
     get:
@@ -1330,7 +1330,7 @@ paths:
             type: integer
           description: Lecturer ID
       responses:
-        '200':
+        "200":
           description: Lecturer details
           content:
             application/json:
@@ -1341,7 +1341,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/DosenWithUsername'
+                    $ref: "#/components/schemas/DosenWithUsername"
     put:
       tags:
         - Admin
@@ -1370,7 +1370,7 @@ paths:
                   type: string
                   example: "Dr. Budi Hartono, M.Kom."
       responses:
-        '200':
+        "200":
           description: Lecturer updated successfully
           content:
             application/json:
@@ -1381,7 +1381,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/DosenWithUsername'
+                    $ref: "#/components/schemas/DosenWithUsername"
     delete:
       tags:
         - Admin
@@ -1397,7 +1397,7 @@ paths:
             type: integer
           description: Lecturer ID
       responses:
-        '200':
+        "200":
           description: Lecturer deleted successfully
           content:
             application/json:
@@ -1408,7 +1408,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/DosenWithUsername'
+                    $ref: "#/components/schemas/DosenWithUsername"
 
   /admin/classes:
     post:
@@ -1437,7 +1437,7 @@ paths:
                   maximum: 6
                   example: 1
       responses:
-        '200':
+        "200":
           description: Class created successfully
           content:
             application/json:
@@ -1448,7 +1448,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/Class'
+                    $ref: "#/components/schemas/Class"
 
   /admin/news:
     get:
@@ -1474,7 +1474,7 @@ paths:
             default: 10
           description: Number of items per page
       responses:
-        '200':
+        "200":
           description: List of news articles (id, title, and thumbnail only)
           content:
             application/json:
@@ -1487,9 +1487,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/NewsListItem'
+                      $ref: "#/components/schemas/NewsListItem"
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
     post:
       tags:
         - Admin
@@ -1518,7 +1518,7 @@ paths:
                   type: integer
                   example: 5
       responses:
-        '200':
+        "200":
           description: News created successfully
           content:
             application/json:
@@ -1529,7 +1529,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/News'
+                    $ref: "#/components/schemas/News"
 
   /admin/news/{id}:
     get:
@@ -1547,7 +1547,7 @@ paths:
             type: integer
           description: News ID
       responses:
-        '200':
+        "200":
           description: News details
           content:
             application/json:
@@ -1558,7 +1558,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/News'
+                    $ref: "#/components/schemas/News"
     put:
       tags:
         - Admin
@@ -1590,7 +1590,7 @@ paths:
                   type: integer
                   example: 6
       responses:
-        '200':
+        "200":
           description: News updated successfully
           content:
             application/json:
@@ -1601,7 +1601,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/News'
+                    $ref: "#/components/schemas/News"
     delete:
       tags:
         - Admin
@@ -1617,7 +1617,7 @@ paths:
             type: integer
           description: News ID
       responses:
-        '200':
+        "200":
           description: News deleted successfully
           content:
             application/json:
@@ -1628,7 +1628,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: '#/components/schemas/News'
+                    $ref: "#/components/schemas/News"
 
   /storage/{file_id}:
     get:
@@ -1646,7 +1646,7 @@ paths:
             type: integer
           description: File ID
       responses:
-        '200':
+        "200":
           description: File for download
           content:
             application/octet-stream:
@@ -1684,10 +1684,10 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     Admin:
       allOf:
-        - $ref: '#/components/schemas/User'
+        - $ref: "#/components/schemas/User"
       type: object
       properties:
         id:
@@ -1707,10 +1707,10 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     Dosen:
       allOf:
-        - $ref: '#/components/schemas/User'
+        - $ref: "#/components/schemas/User"
       type: object
       properties:
         id:
@@ -1733,14 +1733,14 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     DosenWithUsername:
       allOf:
-        - $ref: '#/components/schemas/Dosen'
-    
+        - $ref: "#/components/schemas/Dosen"
+
     Mahasiswa:
       allOf:
-        - $ref: '#/components/schemas/User'
+        - $ref: "#/components/schemas/User"
       type: object
       properties:
         id:
@@ -1772,7 +1772,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     Major:
       type: object
       properties:
@@ -1790,7 +1790,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     StudyProgram:
       type: object
       properties:
@@ -1811,7 +1811,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     Class:
       type: object
       properties:
@@ -1845,7 +1845,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     News:
       type: object
       properties:
@@ -1882,7 +1882,7 @@ components:
         thumbnail:
           type: string
           example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.jpg"
-    
+
     Post:
       type: object
       properties:
@@ -1912,21 +1912,21 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     PostWithFile:
       allOf:
-        - $ref: '#/components/schemas/Post'
+        - $ref: "#/components/schemas/Post"
       type: object
       properties:
         file:
-          $ref: '#/components/schemas/File'
+          $ref: "#/components/schemas/File"
         task:
-          $ref: '#/components/schemas/Task'
+          $ref: "#/components/schemas/Task"
         tasks:
           type: array
           items:
-            $ref: '#/components/schemas/Task'
-    
+            $ref: "#/components/schemas/Task"
+
     File:
       type: object
       properties:
@@ -1959,7 +1959,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     Task:
       type: object
       properties:
@@ -1983,7 +1983,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     TaskItem:
       type: object
       properties:
@@ -2000,7 +2000,7 @@ components:
           type: string
           enum: [completed, incoming]
           example: "incoming"
-    
+
     Presence:
       type: object
       properties:
@@ -2029,7 +2029,7 @@ components:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
-    
+
     PresenceRecap:
       type: object
       properties:
@@ -2039,8 +2039,8 @@ components:
         recap:
           type: array
           items:
-            $ref: '#/components/schemas/Presence'
-    
+            $ref: "#/components/schemas/Presence"
+
     PaginationMeta:
       type: object
       properties:
