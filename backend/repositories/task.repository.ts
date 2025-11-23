@@ -1,56 +1,63 @@
-import { sqlite } from "..";
 import type { Task } from "../models/task.model";
+import type { Sqlite } from "../config/database";
 
 type TaskForCreate = Omit<Task, "id" | "created_at" | "updated_at">;
 
 export class TaskRepository {
-  create(data: TaskForCreate) {
-    const result = sqlite.query(
-      "INSERT INTO task (post_id, class_enrollment_id, file_id) VALUES ($post_id, $class_enrollment_id, $file_id) RETURNING id",
-      {
-        $post_id: data.post_id,
-        $class_enrollment_id: data.class_enrollment_id,
-        $file_id: data.file_id,
-      },
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
+  }
+
+  create(data: TaskForCreate): number {
+    const result = this.db.query(
+      "INSERT INTO task (post_id, class_enrollment_id, file_id) VALUES (?, ?, ?) RETURNING id",
+      data.post_id,
+      data.class_enrollment_id,
+      data.file_id,
     );
     const firstResult = result[0] as { id: number | bigint };
-    return firstResult.id;
+    return firstResult.id as number;
   }
 
-  findById(id: number) {
-    const result = sqlite.query("SELECT * FROM task WHERE id = ?", [
+  findById(id: number): Task | null {
+    const result = this.db.query(
+      "SELECT * FROM task WHERE id = ?",
       id,
-    ]) as Task[];
-    return result.length > 0 ? result[0] : null;
+    ) as Task[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findByClassEnrollmentId(classEnrollmentId: number) {
-    return sqlite.query("SELECT * FROM task WHERE class_enrollment_id = ?", [
+  findByClassEnrollmentId(classEnrollmentId: number): Task[] {
+    return this.db.query(
+      "SELECT * FROM task WHERE class_enrollment_id = ?",
       classEnrollmentId,
-    ]) as Task[];
+    ) as Task[];
   }
 
-  findByClassId(classId: number) {
+  findByClassId(classId: number): Task[] {
     const query = `
         SELECT t.* FROM task t
         INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
         WHERE ce.class_id = ?
     `;
-    return sqlite.query(query, [classId]) as Task[];
+    return this.db.query(query, classId) as Task[];
   }
 
-  findByPostIdAndStudentId(postId: number, studentId: number) {
+  findByPostIdAndStudentId(postId: number, studentId: number): Task[] {
     const query = `
         SELECT t.*
         FROM task t
         INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
         WHERE t.post_id = ? AND ce.mahasiswa_id = ?
     `;
-    return sqlite.query(query, [postId, studentId]) as Task[];
+    return this.db.query(query, postId, studentId) as Task[];
   }
-  
-  findByPostIdWithStudent(postId: number) {
-      const query = `
+
+  findByPostIdWithStudent(postId: number): any[] {
+    // Using any due to JOIN query returning custom object
+    const query = `
           SELECT t.*, m.name as mahasiswa_name, m.nim as mahasiswa_nim, f.upload_name, f.random_name
           FROM task t
           INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
@@ -59,28 +66,29 @@ export class TaskRepository {
           WHERE t.post_id = ?
           ORDER BY m.name
       `;
-      return sqlite.query(query, [postId]);
+    return this.db.query(query, postId);
   }
 
-  findByStudentId(studentId: number) {
+  findByStudentId(studentId: number): Task[] {
     const query = `
         SELECT t.*
         FROM task t
         INNER JOIN class_enrollment ce ON t.class_enrollment_id = ce.id
         WHERE ce.mahasiswa_id = ?
     `;
-    return sqlite.query(query, [studentId]) as Task[];
+    return this.db.query(query, studentId) as Task[];
   }
 
-  all(page: number = 1, limit: number = 10) {
+  all(page: number = 1, limit: number = 10): Task[] {
     const offset = (page - 1) * limit;
-    return sqlite.query("SELECT * FROM task LIMIT ? OFFSET ?", [
+    return this.db.query(
+      "SELECT * FROM task LIMIT ? OFFSET ?",
       limit,
       offset,
-    ]) as Task[];
+    ) as Task[];
   }
 
-  delete(id: number) {
-    sqlite.query("DELETE FROM task WHERE id = ?", [id]);
+  delete(id: number): void {
+    this.db.query("DELETE FROM task WHERE id = ?", id);
   }
 }

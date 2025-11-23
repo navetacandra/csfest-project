@@ -1,49 +1,73 @@
-import { sqlite } from "..";
 import type { Admin } from "../models/admin.model";
 import type { Dosen } from "../models/dosen.model";
 import type { Mahasiswa } from "../models/mahasiswa.model";
+import type { Sqlite } from "../config/database";
 
 export class UserRepository {
-  findByUsername(username: string) {
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
+  }
+
+  findByUsername(
+    username: string,
+  ):
+    | ({ role: "mahasiswa" } & Mahasiswa)
+    | ({ role: "dosen" } & Dosen)
+    | ({ role: "admin" } & Admin)
+    | null {
     const mahasiswaQuery = "SELECT * FROM mahasiswa WHERE username = ?";
-    let mResult = sqlite.query(mahasiswaQuery, [username]) as Mahasiswa[];
+    let mResult = this.db.query(mahasiswaQuery, username) as Mahasiswa[];
     if (mResult.length > 0) {
-      return { ...mResult[0], role: "mahasiswa" as const };
+      return { ...mResult[0], role: "mahasiswa" as const } as {
+        role: "mahasiswa";
+      } & Mahasiswa;
     }
 
     const dosenQuery = "SELECT * FROM dosen WHERE username = ?";
-    let dResult = sqlite.query(dosenQuery, [username]) as Dosen[];
+    let dResult = this.db.query(dosenQuery, username) as Dosen[];
     if (dResult.length > 0) {
-      return { ...dResult[0], role: "dosen" as const };
+      return { ...dResult[0], role: "dosen" as const } as {
+        role: "dosen";
+      } & Dosen;
     }
 
     const adminQuery = "SELECT * FROM admin WHERE username = ?";
-    let aResult = sqlite.query(adminQuery, [username]) as Admin[];
+    let aResult = this.db.query(adminQuery, username) as Admin[];
     if (aResult.length > 0) {
-      return { ...aResult[0], role: "admin" as const };
+      return { ...aResult[0], role: "admin" as const } as {
+        role: "admin";
+      } & Admin;
     }
 
     return null;
   }
 
-  findById(id: number, role: "mahasiswa" | "dosen" | "admin") {
+  findById(
+    id: number,
+    role: "mahasiswa" | "dosen" | "admin",
+  ):
+    | ({ role: "mahasiswa" | "dosen" | "admin" } & (Mahasiswa | Dosen | Admin))
+    | null {
     let query: string;
     let result: any[];
 
     switch (role) {
-              case "mahasiswa":
-                  query =
-                    "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa WHERE id = ?";
-                  result = sqlite.query(query, [id]);
-                  break;      case "dosen":
+      case "mahasiswa":
+        query =
+          "SELECT id, username, name, nim, study_program_id, created_at, updated_at FROM mahasiswa WHERE id = ?";
+        result = this.db.query(query, id);
+        break;
+      case "dosen":
         query =
           "SELECT id, username, name, created_at, updated_at FROM dosen WHERE id = ?";
-        result = sqlite.query(query, [id]);
+        result = this.db.query(query, id);
         break;
       case "admin":
         query =
           "SELECT id, username, name, created_at, updated_at FROM admin WHERE id = ?";
-        result = sqlite.query(query, [id]);
+        result = this.db.query(query, id);
         break;
     }
 

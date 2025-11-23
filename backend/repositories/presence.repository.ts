@@ -1,52 +1,58 @@
-import { sqlite } from "..";
 import type { Presence } from "../models/presence.model";
+import type { Sqlite } from "../config/database";
 
 type PresenceForCreate = Omit<Presence, "id" | "created_at" | "updated_at">;
 
 export class PresenceRepository {
-  create(data: PresenceForCreate) {
-    const result = sqlite.query(
-      "INSERT INTO presence (class_enrollment_id, schedule_date, status, late_time) VALUES ($class_enrollment_id, $schedule_date, $status, $late_time) RETURNING id",
-      {
-        $class_enrollment_id: data.class_enrollment_id,
-        $schedule_date: data.schedule_date,
-        $status: data.status,
-        $late_time: data.late_time,
-      },
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
+  }
+
+  create(data: PresenceForCreate): number {
+    const result = this.db.query(
+      "INSERT INTO presence (class_enrollment_id, schedule_date, status, late_time) VALUES (?, ?, ?, ?) RETURNING id",
+      data.class_enrollment_id,
+      data.schedule_date,
+      data.status,
+      data.late_time,
     );
     const firstResult = result[0] as { id: number | bigint };
-    return firstResult.id;
+    return firstResult.id as number;
   }
 
-  findById(id: number) {
-    const result = sqlite.query("SELECT * FROM presence WHERE id = ?", [
+  findById(id: number): Presence | null {
+    const result = this.db.query(
+      "SELECT * FROM presence WHERE id = ?",
       id,
-    ]) as Presence[];
-    return result.length > 0 ? result[0] : null;
+    ) as Presence[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findByClassEnrollmentId(classEnrollmentId: number) {
-    return sqlite.query(
+  findByClassEnrollmentId(classEnrollmentId: number): Presence[] {
+    return this.db.query(
       "SELECT * FROM presence WHERE class_enrollment_id = ?",
-      [classEnrollmentId],
+      classEnrollmentId,
     ) as Presence[];
   }
 
-  findByClass(classId: number) {
+  findByClass(classId: number): Presence[] {
     const query = `
       SELECT p.*
       FROM presence p
       INNER JOIN class_enrollment ce ON p.class_enrollment_id = ce.id
       WHERE ce.class_id = ?
     `;
-    return sqlite.query(query, [classId]) as Presence[];
+    return this.db.query(query, classId) as Presence[];
   }
 
-  findByEnrollmentIds(enrollmentIds: number[]) {
+  findByEnrollmentIds(enrollmentIds: number[]): any[] {
+    // Using any due to JOIN query returning custom object
     if (enrollmentIds.length === 0) {
       return [];
     }
-    const placeholders = enrollmentIds.map(() => '?').join(',');
+    const placeholders = enrollmentIds.map(() => "?").join(",");
     const query = `
       SELECT p.id, p.status, p.late_time, p.class_enrollment_id, c.id as class_id, c.name as class_name
       FROM presence p
@@ -54,32 +60,41 @@ export class PresenceRepository {
       JOIN class c ON ce.class_id = c.id
       WHERE p.class_enrollment_id IN (${placeholders})
     `;
-    return sqlite.query(query, enrollmentIds) as any[];
+    return this.db.query(query, ...enrollmentIds);
   }
 
-  delete(id: number) {
-    sqlite.query("DELETE FROM presence WHERE id = ?", [id]);
+  delete(id: number): void {
+    this.db.query("DELETE FROM presence WHERE id = ?", id);
   }
-  
-  findByEnrollmentIdAndDate(enrollmentId: number, date: string) {
-    const result = sqlite.query(
+
+  findByEnrollmentIdAndDate(
+    enrollmentId: number,
+    date: string,
+  ): Presence | null {
+    const result = this.db.query(
       "SELECT * FROM presence WHERE class_enrollment_id = ? AND schedule_date = ?",
-      [enrollmentId, date]
+      enrollmentId,
+      date,
     ) as Presence[];
-    return result.length > 0 ? result[0] : null;
+    return result.length > 0 ? result[0]! : null;
   }
-  
-  update(id: number, data: Partial<Omit<Presence, 'id' | 'created_at' | 'updated_at'>>) {
-    const fields = Object.keys(data)
-      .map((key) => `${key} = ?`)
-      .join(", ");
+
+  update(
+    id: number,
+    data: Partial<Omit<Presence, "id" | "created_at" | "updated_at">>,
+  ): void {
+    const fields = Object.keys(data);
     if (fields.length === 0) {
       return;
     }
-    const values = Object.values(data);
-    sqlite.query(
-      `UPDATE presence SET ${fields}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      [...values, id]
+
+    const setClause = fields.map((field) => `${field} = ?`).join(", ");
+    const values = fields.map((field) => (data as any)[field]);
+    values.push(id); // Add ID for WHERE clause
+
+    this.db.query(
+      `UPDATE presence SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
+      ...values,
     );
   }
 }

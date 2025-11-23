@@ -1,31 +1,42 @@
-import { sqlite } from "..";
 import type { Mahasiswa } from "../models/mahasiswa.model";
+import type { Sqlite } from "../config/database";
 
 type MahasiswaForCreate = Omit<Mahasiswa, "id" | "created_at" | "updated_at">;
 type MahasiswaForUpdate = Partial<MahasiswaForCreate>;
 
 export class MahasiswaRepository {
-  create(data: MahasiswaForCreate) {
-    const result = sqlite.query(
-      "INSERT INTO mahasiswa (major_id, study_program_id, nim, name, email, username, password) VALUES ($major_id, $study_program_id, $nim, $name, $email, $username, $password) RETURNING id",
-      {
-        $major_id: data.major_id,
-        $study_program_id: data.study_program_id,
-        $nim: data.nim,
-        $name: data.name,
-        $email: data.email,
-        $username: data.username,
-        $password: data.password,
-      },
-    );
-    const firstResult = result[0] as { id: number | bigint };
-    return firstResult.id;
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
   }
 
-  all(page: number = 1, limit: number = 10, name?: string, major_id?: number, study_program_id?: number) {
+  create(data: MahasiswaForCreate): number {
+    const result = this.db.query(
+      "INSERT INTO mahasiswa (major_id, study_program_id, nim, name, email, username, password) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id",
+      data.major_id,
+      data.study_program_id,
+      data.nim,
+      data.name,
+      data.email,
+      data.username,
+      data.password,
+    );
+    const firstResult = result[0] as { id: number | bigint };
+    return firstResult.id as number;
+  }
+
+  all(
+    page: number = 1,
+    limit: number = 10,
+    name?: string,
+    major_id?: number,
+    study_program_id?: number,
+  ): any[] {
+    // Using any for now since the JOIN query returns a custom object
     const offset = (page - 1) * limit;
     let baseQuery = `
-      SELECT m.id, m.name, mj.name as major, sp.name as study_program 
+      SELECT m.id, m.name, mj.name as major, sp.name as study_program
       FROM mahasiswa m
       JOIN major mj ON m.major_id = mj.id
       JOIN study_program sp ON m.study_program_id = sp.id
@@ -49,14 +60,15 @@ export class MahasiswaRepository {
     if (conditions.length > 0) {
       baseQuery += " WHERE " + conditions.join(" AND ");
     }
-    
+
     baseQuery += " LIMIT ? OFFSET ?";
     params.push(limit, offset);
 
-    return sqlite.query(baseQuery, params);
+    return this.db.query(baseQuery, ...params);
   }
 
-  findById(id: number) {
+  findById(id: number): any {
+    // Using any for now since the JOIN query returns a custom object
     const query = `
       SELECT m.id, m.name, m.nim, m.email, m.username, mj.name as major, sp.name as study_program
       FROM mahasiswa m
@@ -64,33 +76,36 @@ export class MahasiswaRepository {
       JOIN study_program sp ON m.study_program_id = sp.id
       WHERE m.id = ?
     `;
-    const result = sqlite.query(query, [id]);
-    return result.length > 0 ? result[0] : null;
+    const result = this.db.query(query, id);
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findByUsername(username: string) {
+  findByUsername(username: string): Mahasiswa | null {
     // This method might be used for authentication, so we select the password.
-    const result = sqlite.query("SELECT * FROM mahasiswa WHERE username = ?", [
+    const result = this.db.query(
+      "SELECT * FROM mahasiswa WHERE username = ?",
       username,
-    ]) as Mahasiswa[];
-    return result.length > 0 ? result[0] : null;
+    ) as Mahasiswa[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  update(id: number, data: MahasiswaForUpdate) {
-    const fields = Object.keys(data)
-      .map((key) => `${key} = ?`)
-      .join(", ");
+  update(id: number, data: MahasiswaForUpdate): void {
+    const fields = Object.keys(data);
     if (fields.length === 0) {
       return;
     }
-    const values = Object.values(data);
-    sqlite.query(
-      `UPDATE mahasiswa SET ${fields}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      [...values, id],
+
+    const setClause = fields.map((field) => `${field} = ?`).join(", ");
+    const values = fields.map((field) => (data as any)[field]);
+    values.push(id); // Add ID for WHERE clause
+
+    this.db.query(
+      `UPDATE mahasiswa SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
+      ...values,
     );
   }
 
-  delete(id: number) {
-    sqlite.query("DELETE FROM mahasiswa WHERE id = ?", [id]);
+  delete(id: number): void {
+    this.db.query("DELETE FROM mahasiswa WHERE id = ?", id);
   }
 }

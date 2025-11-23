@@ -1,40 +1,46 @@
-import { sqlite } from "..";
 import type { File } from "../models/file.model";
+import type { Sqlite } from "../config/database";
 
 type FileForCreate = Omit<File, "id" | "created_at" | "updated_at">;
 
 export class FileRepository {
-  create(fileData: Omit<File, "id" | "created_at" | "updated_at">) {
-    const result = sqlite.query(
-      "INSERT INTO file (mahasiswa_id, dosen_id, upload_name, random_name, size, mimetype) VALUES ($mahasiswa_id, $dosen_id, $upload_name, $random_name, $size, $mimetype) RETURNING id",
-      {
-        $mahasiswa_id: fileData.mahasiswa_id,
-        $dosen_id: fileData.dosen_id,
-        $upload_name: fileData.upload_name,
-        $random_name: fileData.random_name,
-        $size: fileData.size,
-        $mimetype: fileData.mimetype,
-      },
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
+  }
+
+  create(fileData: FileForCreate): number {
+    const result = this.db.query(
+      "INSERT INTO file (mahasiswa_id, dosen_id, upload_name, random_name, size, mimetype) VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
+      fileData.mahasiswa_id,
+      fileData.dosen_id,
+      fileData.upload_name,
+      fileData.random_name,
+      fileData.size,
+      fileData.mimetype,
     );
     const firstResult = result[0] as { id: number | bigint };
-    return firstResult.id;
+    return firstResult.id as number;
   }
 
-  findByRandomName(randomName: string) {
-    const result = sqlite.query("SELECT * FROM file WHERE random_name = ?", [
+  findByRandomName(randomName: string): File | null {
+    const result = this.db.query(
+      "SELECT * FROM file WHERE random_name = ?",
       randomName,
-    ]) as File[];
-    return result.length > 0 ? result[0] : null;
+    ) as File[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findById(id: number) {
-    const result = sqlite.query("SELECT * FROM file WHERE id = ?", [
+  findById(id: number): File | null {
+    const result = this.db.query(
+      "SELECT * FROM file WHERE id = ?",
       id,
-    ]) as File[];
-    return result.length > 0 ? result[0] : null;
+    ) as File[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  delete(id: number) {
-    sqlite.query("DELETE FROM file WHERE id = ?", [id]);
+  delete(id: number): void {
+    this.db.query("DELETE FROM file WHERE id = ?", id);
   }
 }

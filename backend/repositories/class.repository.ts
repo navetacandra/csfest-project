@@ -1,5 +1,5 @@
-import { sqlite } from "..";
 import type { Class } from "../models/class.model";
+import type { Sqlite } from "../config/database";
 
 type ClassForCreate = Omit<
   Class,
@@ -7,68 +7,79 @@ type ClassForCreate = Omit<
 >;
 
 export class ClassRepository {
-  create(classData: ClassForCreate, enrollKey: string) {
-    const result = sqlite.query(
+  private db: Sqlite;
+
+  constructor(db: Sqlite) {
+    this.db = db;
+  }
+
+  create(classData: ClassForCreate, enrollKey: string): number {
+    const result = this.db.query(
       `INSERT INTO class (name, schedule, start_time, end_time, enroll_key)
-       VALUES ($name, $schedule, $start_time, $end_time, $enroll_key)
-       RETURNING id`,
-      {
-        $name: classData.name,
-        $schedule: classData.schedule,
-        $start_time: classData.start_time,
-        $end_time: classData.end_time,
-        $enroll_key: enrollKey,
-      },
+       VALUES (?, ?, ?, ?, ?) RETURNING id`,
+      classData.name,
+      classData.schedule,
+      classData.start_time,
+      classData.end_time,
+      enrollKey,
     );
     const firstResult = result[0] as { id: number | bigint };
-    return firstResult.id;
+    return firstResult.id as number;
   }
 
-  all(page: number = 1, limit: number = 10) {
+  all(page: number = 1, limit: number = 10): Class[] {
     const offset = (page - 1) * limit;
-    return sqlite.query("SELECT * FROM class LIMIT ? OFFSET ?", [
+    return this.db.query(
+      "SELECT * FROM class LIMIT ? OFFSET ?",
       limit,
       offset,
-    ]) as Class[];
+    ) as Class[];
   }
 
-  findById(id: number) {
-    const result = sqlite.query("SELECT * FROM class WHERE id = ?", [
+  findById(id: number): Class | null {
+    const result = this.db.query(
+      "SELECT * FROM class WHERE id = ?",
       id,
-    ]) as Class[];
-    return result.length > 0 ? result[0] : null;
+    ) as Class[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findByEnrollKey(enrollKey: string) {
-    const result = sqlite.query("SELECT * FROM class WHERE enroll_key = ?", [
+  findByEnrollKey(enrollKey: string): Class | null {
+    const result = this.db.query(
+      "SELECT * FROM class WHERE enroll_key = ?",
       enrollKey,
-    ]) as Class[];
-    return result.length > 0 ? result[0] : null;
+    ) as Class[];
+    return result.length > 0 ? result[0]! : null;
   }
 
-  findByIds(ids: number[]) {
+  findByIds(ids: number[]): Class[] {
     if (ids.length === 0) {
       return [];
     }
-    const placeholders = ids.map(() => '?').join(',');
-    return sqlite.query(`SELECT * FROM class WHERE id IN (${placeholders})`, ids) as Class[];
+    const placeholders = ids.map(() => "?").join(",");
+    return this.db.query(
+      `SELECT * FROM class WHERE id IN (${placeholders})`,
+      ...ids,
+    ) as Class[];
   }
 
-  update(id: number, classData: Partial<ClassForCreate>) {
-    const fields = Object.keys(classData)
-      .map((key) => `${key} = ?`)
-      .join(", ");
+  update(id: number, classData: Partial<ClassForCreate>): void {
+    const fields = Object.keys(classData);
     if (fields.length === 0) {
       return;
     }
-    const values = Object.values(classData);
-    sqlite.query(
-      `UPDATE class SET ${fields}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
-      [...values, id],
+
+    const setClause = fields.map((field) => `${field} = ?`).join(", ");
+    const values = fields.map((field) => (classData as any)[field]);
+    values.push(id); // Add ID for WHERE clause
+
+    this.db.query(
+      `UPDATE class SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
+      ...values,
     );
   }
 
-  delete(id: number) {
-    sqlite.query("DELETE FROM class WHERE id = ?", [id]);
+  delete(id: number): void {
+    this.db.query("DELETE FROM class WHERE id = ?", id);
   }
 }
