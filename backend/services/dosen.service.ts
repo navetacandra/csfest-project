@@ -1,27 +1,35 @@
-import { DosenRepository } from '../repositories/dosen.repository';
-import type { Dosen } from '../models/dosen.model';
-import { Password } from './password.service';
+import { DosenRepository } from "../repositories/dosen.repository";
+import type { Dosen } from "../models/dosen.model";
+import { Password } from "./password.service";
+import { Sqlite } from "../config/database";
 
 export class DosenService {
   private dosenRepository: DosenRepository;
 
-  constructor() {
-    this.dosenRepository = new DosenRepository();
+  constructor(sqlite: Sqlite) {
+    this.dosenRepository = new DosenRepository(sqlite);
   }
 
-  async create(data: { nip: string, name: string }) {
-    // Assuming username and initial password are based on NIP
-    const username = data.nip;
-    const password = data.nip;
-    
-    const hashedPassword = await Password.hash(password);
-    
-    const newDosenData: Omit<Dosen, 'id' | 'created_at' | 'updated_at' | 'password'> & { password?: string } = {
+  async create(
+    data: Omit<
+      Dosen,
+      "id" | "created_at" | "updated_at" | "password"
+    > & {
+      password: string;
+      username?: string; // Make username optional
+    },
+  ) {
+    const hashedPassword = await Password.hash(data.password);
+
+    const newDosenData: Omit<
+      Dosen,
+      "id" | "created_at" | "updated_at" | "password"
+    > & { password: string } = {
       ...data,
-      username,
+      username: data.username || data.nip, // Use provided username or fallback to NIP
       password: hashedPassword,
     };
-    
+
     const newDosenId = this.dosenRepository.create(newDosenData);
     return this.dosenRepository.findById(Number(newDosenId));
   }
@@ -38,7 +46,7 @@ export class DosenService {
     return dosen;
   }
 
-  async update(id: number, data: Partial<{ nip: string, name: string }>) {
+  async update(id: number, data: Partial<{ nip: string; name: string }>) {
     this.dosenRepository.update(id, data);
     return this.dosenRepository.findById(id);
   }

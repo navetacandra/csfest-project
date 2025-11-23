@@ -1,11 +1,12 @@
 import { StudyProgramRepository } from '../repositories/studyProgram.repository';
 import type { StudyProgram } from '../models/study_program.model';
+import { Sqlite } from '../config/database';
 
 export class StudyProgramService {
   private studyProgramRepository: StudyProgramRepository;
 
-  constructor() {
-    this.studyProgramRepository = new StudyProgramRepository();
+  constructor(sqlite?: Sqlite) {
+    this.studyProgramRepository = new StudyProgramRepository(sqlite);
   }
 
   getByMajorId(majorId: number) {

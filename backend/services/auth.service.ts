@@ -1,12 +1,13 @@
-import { UserRepository } from '../repositories/user.repository';
-import { Password } from './password.service';
-import { JWT } from './jwt.service';
+import { UserRepository } from "../repositories/user.repository";
+import { Password } from "./password.service";
+import { JWT } from "./jwt.service";
+import { Sqlite } from "../config/database";
 
 export class AuthService {
   private userRepository: UserRepository;
 
-  constructor() {
-    this.userRepository = new UserRepository();
+  constructor(sqlite: Sqlite) {
+    this.userRepository = new UserRepository(sqlite);
   }
 
   async login(username: string, password_plain: string) {
@@ -22,7 +23,7 @@ export class AuthService {
     if (!passwordMatch) {
       throw new Error("Invalid username or password");
     }
-    
+
     // Don't include password in the token payload
     const { password, ...payload } = user;
 

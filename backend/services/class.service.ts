@@ -3,16 +3,17 @@ import { ClassEnrollmentRepository } from '../repositories/classEnrollment.repos
 import { PostRepository } from '../repositories/post.repository';
 import type { Class } from '../models/class.model';
 import { randomBytes } from 'crypto';
+import { Sqlite } from '../config/database';
 
 export class ClassService {
   private classRepository: ClassRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
   private postRepository: PostRepository;
 
-  constructor() {
-    this.classRepository = new ClassRepository();
-    this.classEnrollmentRepository = new ClassEnrollmentRepository();
-    this.postRepository = new PostRepository();
+  constructor(sqlite?: Sqlite) {
+    this.classRepository = new ClassRepository(sqlite);
+    this.classEnrollmentRepository = new ClassEnrollmentRepository(sqlite);
+    this.postRepository = new PostRepository(sqlite);
   }
 
   create(data: Omit<Class, 'id' | 'created_at' | 'updated_at' | 'actived_at' | 'enroll_key'>) {

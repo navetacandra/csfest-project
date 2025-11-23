@@ -2,16 +2,17 @@ import { TaskRepository } from '../repositories/task.repository';
 import { ClassEnrollmentRepository } from '../repositories/classEnrollment.repository';
 import { PostRepository } from '../repositories/post.repository';
 import type { Task } from '../models/task.model';
+import { Sqlite } from '../config/database';
 
 export class TaskService {
   private taskRepository: TaskRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
   private postRepository: PostRepository;
 
-  constructor() {
-    this.taskRepository = new TaskRepository();
-    this.classEnrollmentRepository = new ClassEnrollmentRepository();
-    this.postRepository = new PostRepository();
+  constructor(sqlite?: Sqlite) {
+    this.taskRepository = new TaskRepository(sqlite);
+    this.classEnrollmentRepository = new ClassEnrollmentRepository(sqlite);
+    this.postRepository = new PostRepository(sqlite);
   }
 
   submitTask(postId: number, studentId: number, classId: number, fileId: number) {

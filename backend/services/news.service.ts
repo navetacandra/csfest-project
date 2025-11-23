@@ -1,11 +1,12 @@
 import { NewsRepository } from '../repositories/news.repository';
 import type { News } from '../models/news.model';
+import { Sqlite } from '../config/database';
 
 export class NewsService {
   private newsRepository: NewsRepository;
 
-  constructor() {
-    this.newsRepository = new NewsRepository();
+  constructor(sqlite?: Sqlite) {
+    this.newsRepository = new NewsRepository(sqlite);
   }
 
   getAll(page: number, limit: number) {

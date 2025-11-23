@@ -1,11 +1,12 @@
 import { MajorRepository } from '../repositories/major.repository';
 import type { Major } from '../models/major.model';
+import { Sqlite } from '../config/database';
 
 export class MajorService {
   private majorRepository: MajorRepository;
 
-  constructor() {
-    this.majorRepository = new MajorRepository();
+  constructor(sqlite?: Sqlite) {
+    this.majorRepository = new MajorRepository(sqlite);
   }
 
   getAll() {

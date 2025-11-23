@@ -1,14 +1,15 @@
 import { PresenceRepository } from '../repositories/presence.repository';
 import { ClassEnrollmentRepository } from '../repositories/classEnrollment.repository';
 import type { Presence } from '../models/presence.model';
+import { Sqlite } from '../config/database';
 
 export class PresenceService {
   private presenceRepository: PresenceRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
 
-  constructor() {
-    this.presenceRepository = new PresenceRepository();
-    this.classEnrollmentRepository = new ClassEnrollmentRepository();
+  constructor(sqlite?: Sqlite) {
+    this.presenceRepository = new PresenceRepository(sqlite);
+    this.classEnrollmentRepository = new ClassEnrollmentRepository(sqlite);
   }
 
   setPresence(
