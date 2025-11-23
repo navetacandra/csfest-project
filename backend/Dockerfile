@@ -35,6 +35,7 @@ RUN bun build --compile ./index.ts --outfile ./server
 
 FROM frolvlad/alpine-glibc AS release
 WORKDIR /app
+RUN apk add --no-cache wget # healthchek tools
 
 COPY --from=builder /app/server .
 COPY --from=builder /app/database ./database

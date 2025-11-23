@@ -1,28 +1,44 @@
-import express, { type Express, type NextFunction } from "express";
+import express, {
+  type Express,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import apiRouter from "./routes";
 import storageRoute from "./routes/storage.route";
-import cors from "cors";
 import compression from "compression";
 
-const SERVER_PORT: number = Bun.env.PORT || 5000;
+const SERVER_PORT: number = parseInt(Bun.env.PORT || "5000");
 const app: Express = express();
 
-let corsOptions: cors.CorsOptions | cors.CorsOptionsDelegate<cors.CorsRequest> =
-  { credentials: true };
-if (Bun.env.NODE_ENV === "production") {
-  corsOptions = {
-    origin: (origin, callback) => {
-      if (!origin) callback(null, !origin);
-      else callback(new Error("Blocked by cors"));
-    },
-    credentials: true,
-  };
-}
+const corsWhitelist = [
+  `http://localhost:${SERVER_PORT}`, // self
+  "http://localhost:5173", // vite dev
+  "http://localhost:4173", // vite preview
+  "http://naveta.local", // my local
+  "https://naveta.local", // my local
+  "https://kulmsin.juraganweb.web.id", // prod
+];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(compression());
-app.use(cors(corsOptions));
+
+// CORS
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (Bun.env.NODE_ENV !== "production") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    return next();
+  }
+
+  const origin = req.headers.origin;
+  if (!origin || corsWhitelist.includes(origin)) {
+    origin && res.setHeader("Access-Control-Allow-Origin", origin);
+    return next();
+  }
+  return res.sendStatus(418); // teapot
+});
 
 app.use("/api", apiRouter);
 app.use("/storage", storageRoute);
