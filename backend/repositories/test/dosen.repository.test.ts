@@ -8,7 +8,6 @@ let sqlite: Sqlite;
 let repo: DosenRepository;
 
 beforeAll(async () => {
-  // Gunakan createInstance untuk membuat database dengan skema lengkap
   sqlite = await Sqlite.createInstance(DB_TEST);
   repo = new DosenRepository(sqlite);
 });
@@ -33,7 +32,6 @@ describe("DosenRepository", () => {
   test("should create a dosen", () => {
     createdDosenId = repo.create(dosenData) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdDosenId);
     expect(result).not.toBeNull();
     expect(result?.name).toBe(dosenData.name);
@@ -75,7 +73,6 @@ describe("DosenRepository", () => {
   });
 
   test("should delete a dosen", () => {
-    // Buat dosen baru untuk dihapus
     const testData: Omit<Dosen, "id" | "created_at" | "updated_at"> = {
       ...dosenData,
       name: "Test Delete Dosen",
@@ -83,12 +80,10 @@ describe("DosenRepository", () => {
     };
     const testDosenId = repo.create(testData);
 
-    // Pastikan dosen ada sebelum dihapus
     expect(repo.findById(testDosenId)).not.toBeNull();
 
     repo.delete(testDosenId);
 
-    // Verifikasi bahwa dosen sudah dihapus
     const deletedDosen = repo.findById(testDosenId);
     expect(deletedDosen).toBeNull();
   });

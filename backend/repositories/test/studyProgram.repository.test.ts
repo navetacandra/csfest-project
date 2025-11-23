@@ -33,7 +33,6 @@ describe("StudyProgramRepository", () => {
   test("should create a study program", () => {
     createdStudyProgramId = repo.create(studyProgramData) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdStudyProgramId);
     expect(result).not.toBeNull();
     expect(result?.name).toBe(studyProgramData.name);
@@ -68,19 +67,16 @@ describe("StudyProgramRepository", () => {
   });
 
   test("should delete a study program", () => {
-    // Buat data baru untuk dihapus
     const testData: Omit<StudyProgram, "id" | "created_at" | "updated_at"> = {
       ...studyProgramData,
       name: "Test Delete Study Program",
     };
     const testStudyProgramId = repo.create(testData);
 
-    // Pastikan data ada sebelum dihapus
     expect(repo.findById(testStudyProgramId)).not.toBeNull();
 
     repo.delete(testStudyProgramId);
 
-    // Verifikasi bahwa data sudah dihapus
     const deletedStudyProgram = repo.findById(testStudyProgramId);
     expect(deletedStudyProgram).toBeNull();
   });

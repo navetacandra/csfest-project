@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { ClassRepository } from "../class.repository";
 import { Sqlite } from "../../config/database";
 
-const DB_TEST = `class_repository_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+const DB_TEST = `class_repository_test.sqlite`;
 let sqlite: Sqlite;
 let repo: ClassRepository;
 
@@ -32,7 +32,6 @@ describe("ClassRepository", () => {
   test("should create a class", () => {
     createdClassId = repo.create(classData, enrollKey) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdClassId);
     expect(result).not.toBeNull();
     expect(result?.name).toBe(classData.name);
@@ -72,12 +71,10 @@ describe("ClassRepository", () => {
   });
 
   test("should delete a class", () => {
-    // Pastikan kelas ada sebelum dihapus
     expect(repo.findById(createdClassId)).not.toBeNull();
 
     repo.delete(createdClassId);
 
-    // Verifikasi bahwa kelas sudah dihapus
     const deletedClass = repo.findById(createdClassId);
     expect(deletedClass).toBeNull();
   });

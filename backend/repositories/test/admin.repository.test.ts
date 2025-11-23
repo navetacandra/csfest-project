@@ -4,7 +4,7 @@ import type { Admin } from "../../models/admin.model";
 import { Sqlite } from "../../config/database";
 
 describe("AdminRepository", () => {
-  const DB_TEST = `admin_repository_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.sqlite`;
+  const DB_TEST = `admin_repository_test.sqlite`;
   let sqlite: Sqlite;
   let repo: AdminRepository;
 
@@ -31,7 +31,6 @@ describe("AdminRepository", () => {
   test("should create an admin", () => {
     createdAdminId = repo.create(adminData) as number;
 
-    // Verify that the data was actually created in database
     const result = repo.findById(createdAdminId);
 
     expect(result).not.toBeNull();
@@ -54,7 +53,6 @@ describe("AdminRepository", () => {
   });
 
   test("should get all admins with seeded data", () => {
-    // Create additional admin to test with seeded data
     const additionalAdminData: Omit<Admin, "id" | "created_at" | "updated_at"> =
       {
         name: "Additional Test Admin",
@@ -66,9 +64,8 @@ describe("AdminRepository", () => {
     const result = repo.all(1, 10);
 
     expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBeGreaterThanOrEqual(1); // At least our created admin
+    expect(result.length).toBeGreaterThanOrEqual(1);
 
-    // Check that our created admin is in the results
     expect(result).toContainEqual(
       expect.objectContaining({
         id: createdAdminId,
@@ -78,7 +75,6 @@ describe("AdminRepository", () => {
   });
 
   test("should find admin from seeded data by ID", () => {
-    // Test with the first seeded admin (ID 1: Super Admin)
     const seededAdmin = repo.findById(1);
 
     expect(seededAdmin).not.toBeNull();
@@ -90,7 +86,6 @@ describe("AdminRepository", () => {
   });
 
   test("should find admin from seeded data by username", () => {
-    // Test with the first seeded admin username
     const seededAdmin = repo.findByUsername("superadmin");
 
     expect(seededAdmin).not.toBeNull();
@@ -111,7 +106,6 @@ describe("AdminRepository", () => {
   });
 
   test("should delete an admin", () => {
-    // Create admin for deletion test
     const testData: Omit<Admin, "id" | "created_at" | "updated_at"> = {
       ...adminData,
       name: "Test Delete Admin",
@@ -119,12 +113,10 @@ describe("AdminRepository", () => {
     };
     const testAdminId = repo.create(testData);
 
-    // Verify admin exists before deletion
     expect(repo.findById(testAdminId)).not.toBeNull();
 
     repo.delete(testAdminId);
 
-    // Verify that admin was deleted
     const deletedAdmin = repo.findById(testAdminId);
     expect(deletedAdmin).toBeNull();
   });

@@ -36,12 +36,11 @@ describe("MahasiswaRepository", () => {
       ...mahasiswaData,
       username: `integration.test.mahasiswa.${Date.now()}`,
       email: `integration.test.mahasiswa.${Date.now()}@test.com`,
-      nim: `123456${Date.now().toString().slice(-3)}`, // Use last 3 digits of timestamp
+      nim: `123456${Date.now().toString().slice(-3)}`,
     };
 
     const createdId = repo.create(uniqueData);
 
-    // Verify that the data was actually created in database
     const result = repo.findById(createdId);
     expect(result).not.toBeNull();
     expect(result?.name).toBe(uniqueData.name);
@@ -55,7 +54,6 @@ describe("MahasiswaRepository", () => {
   });
 
   test("should find by id", () => {
-    // Create a new record for this test
     const uniqueData = {
       ...mahasiswaData,
       username: `test.find.by.id.${Date.now()}`,
@@ -106,7 +104,6 @@ describe("MahasiswaRepository", () => {
   });
 
   test("should delete a mahasiswa", () => {
-    // Create a new mahasiswa to be deleted
     const testData: Omit<Mahasiswa, "id" | "created_at" | "updated_at"> = {
       ...mahasiswaData,
       name: `Test Delete Mahasiswa ${Date.now()}`,
@@ -116,12 +113,10 @@ describe("MahasiswaRepository", () => {
     };
     const testMahasiswaId = repo.create(testData);
 
-    // Verify the mahasiswa exists before deletion
     expect(repo.findById(testMahasiswaId)).not.toBeNull();
 
     repo.delete(testMahasiswaId);
 
-    // Verify the mahasiswa no longer exists
     const result = repo.findById(testMahasiswaId);
     expect(result).toBeNull();
   });

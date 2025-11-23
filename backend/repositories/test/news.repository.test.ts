@@ -30,7 +30,6 @@ describe("NewsRepository", () => {
   test("should create a news", () => {
     const createdId = repo.create(newsData);
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdId);
 
     expect(result).not.toBeNull();
@@ -41,7 +40,7 @@ describe("NewsRepository", () => {
   test("should find by id", () => {
     const createdId = repo.create({
       ...newsData,
-      title: `Find By ID Test News ${Date.now()}`, // Make unique
+      title: `Find By ID Test News ${Date.now()}`,
     });
 
     const result = repo.findById(createdId);
@@ -60,7 +59,7 @@ describe("NewsRepository", () => {
   test("should update a news", () => {
     const createdId = repo.create({
       ...newsData,
-      title: `Update Test News ${Date.now()}`, // Make unique
+      title: `Update Test News ${Date.now()}`,
     });
 
     const updateData = { title: "Updated Integration Test News" };
@@ -72,7 +71,6 @@ describe("NewsRepository", () => {
   });
 
   test("should delete a news", () => {
-    // Buat news baru untuk dihapus
     const testData: Omit<News, "id" | "created_at" | "updated_at"> = {
       title: "Test Delete News",
       content: "This is a test news for deletion.",
@@ -81,12 +79,10 @@ describe("NewsRepository", () => {
 
     const testNewsId = repo.create(testData);
 
-    // Pastikan news ada sebelum dihapus
     expect(repo.findById(testNewsId)).not.toBeNull();
 
     repo.delete(testNewsId);
 
-    // Verifikasi bahwa news sudah dihapus
     const deletedNews = repo.findById(testNewsId);
     expect(deletedNews).toBeNull();
   });

@@ -32,7 +32,6 @@ describe("PresenceRepository", () => {
   test("should create a presence record", () => {
     createdPresenceId = repo.create(presenceData) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdPresenceId);
     expect(result).not.toBeNull();
     expect(result?.class_enrollment_id).toBe(presenceData.class_enrollment_id);
@@ -71,19 +70,16 @@ describe("PresenceRepository", () => {
   });
 
   test("should delete a presence record", () => {
-    // Buat data baru untuk dihapus
     const testData: Omit<Presence, "id" | "created_at" | "updated_at"> = {
       ...presenceData,
       class_enrollment_id: 2,
     };
     const testPresenceId = repo.create(testData);
 
-    // Pastikan data ada sebelum dihapus
     expect(repo.findById(testPresenceId)).not.toBeNull();
 
     repo.delete(testPresenceId);
 
-    // Verifikasi bahwa data sudah dihapus
     const deletedPresence = repo.findById(testPresenceId);
     expect(deletedPresence).toBeNull();
   });

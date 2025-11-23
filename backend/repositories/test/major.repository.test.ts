@@ -29,7 +29,6 @@ describe("MajorRepository", () => {
   test("should create a major", () => {
     createdMajorId = repo.create(majorData) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdMajorId);
     expect(result).not.toBeNull();
     expect(result?.name).toBe(majorData.name);
@@ -52,18 +51,15 @@ describe("MajorRepository", () => {
   });
 
   test("should delete a major", () => {
-    // Buat major baru untuk dihapus
     const testData: Omit<Major, "id" | "created_at" | "updated_at"> = {
       name: "Test Delete Major",
     };
     const testMajorId = repo.create(testData);
 
-    // Pastikan major ada sebelum dihapus
     expect(repo.findById(testMajorId)).not.toBeNull();
 
     repo.delete(testMajorId);
 
-    // Verifikasi bahwa major sudah dihapus
     const deletedMajor = repo.findById(testMajorId);
     expect(deletedMajor).toBeNull();
   });

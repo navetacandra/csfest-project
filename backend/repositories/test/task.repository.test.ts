@@ -21,16 +21,14 @@ afterAll(() => {
 
 describe("TaskRepository", () => {
   test("should create a task", () => {
-    // Using existing data in the seeded database
     const taskData = {
-      post_id: 1, // Assuming post with id 1 exists from seeding
-      class_enrollment_id: 1, // Assuming class_enrollment with id 1 exists from seeding
-      file_id: 1, // Assuming file with id 1 exists from seeding
+      post_id: 1,
+      class_enrollment_id: 1,
+      file_id: 1,
     };
 
     const taskId = repo.create(taskData);
 
-    // Verify that the task was actually created in database
     const result = repo.findById(taskId);
 
     expect(result).not.toBeNull();
@@ -43,7 +41,7 @@ describe("TaskRepository", () => {
     const taskId = repo.create({
       post_id: 1,
       class_enrollment_id: 1,
-      file_id: 2, // using a different file_id to create unique entry
+      file_id: 2,
     });
 
     const result = repo.findById(taskId);
@@ -53,50 +51,45 @@ describe("TaskRepository", () => {
   });
 
   test("should find by class enrollment id", () => {
-    const enrollmentId = 2; // using existing enrollment id from seeding
+    const enrollmentId = 2;
 
     const results = repo.findByClassEnrollmentId(enrollmentId);
 
-    expect(results.length).toBeGreaterThanOrEqual(0); // May have zero or more results depending on seeded data
+    expect(results.length).toBeGreaterThanOrEqual(0);
     if (results.length > 0) {
       expect(results[0]!.class_enrollment_id).toBe(enrollmentId);
     }
   });
 
   test("should find by class id", () => {
-    const classId = 1; // using existing class id from seeding
+    const classId = 1;
 
     const results = repo.findByClassId(classId);
 
     expect(results.length).toBeGreaterThanOrEqual(0);
     if (results.length > 0) {
-      // Result should be associated with the class through class_enrollment
     }
   });
 
   test("should get all tasks", () => {
-    const results = repo.all(1, 10); // page 1, limit 10
+    const results = repo.all(1, 10);
 
     expect(Array.isArray(results)).toBe(true);
     expect(results.length).toBeGreaterThanOrEqual(0);
   });
 
   test("should delete a task", () => {
-    // Create a new task to be deleted
     const taskData = {
       post_id: 1,
       class_enrollment_id: 1,
-      file_id: 3, // using a different file_id
+      file_id: 3,
     };
     const taskId = repo.create(taskData);
 
-    // Verify the task exists before deletion
     expect(repo.findById(taskId)).not.toBeNull();
 
-    // Delete the task
     repo.delete(taskId);
 
-    // Verify the task no longer exists
     const result = repo.findById(taskId);
     expect(result).toBeNull();
   });

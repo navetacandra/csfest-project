@@ -34,7 +34,6 @@ describe("FileRepository", () => {
   test("should create a file record", () => {
     createdFileId = repo.create(fileData) as number;
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdFileId);
     expect(result).not.toBeNull();
     expect(result?.upload_name).toBe(fileData.upload_name);
@@ -50,7 +49,6 @@ describe("FileRepository", () => {
   });
 
   test("should delete a file record", () => {
-    // Buat file baru untuk dihapus
     const testFileData: Omit<File, "id" | "created_at" | "updated_at"> = {
       ...fileData,
       upload_name: "test_delete_file.pdf",
@@ -58,12 +56,10 @@ describe("FileRepository", () => {
     };
     const testFileId = repo.create(testFileData);
 
-    // Pastikan file ada sebelum dihapus
     expect(repo.findById(testFileId)).not.toBeNull();
 
     repo.delete(testFileId);
 
-    // Verifikasi bahwa file sudah dihapus
     const deletedFile = repo.findById(testFileId);
     expect(deletedFile).toBeNull();
   });

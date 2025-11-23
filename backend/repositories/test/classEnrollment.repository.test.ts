@@ -34,7 +34,6 @@ describe("ClassEnrollmentRepository", () => {
   test("should create an enrollment", () => {
     const createdId = repo.create(enrollmentData);
 
-    // Verifikasi bahwa data benar-benar ada di database dengan mengaksesnya kembali
     const result = repo.findById(createdId);
     expect(result).not.toBeNull();
     expect(result?.class_id).toBe(enrollmentData.class_id);
@@ -42,7 +41,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should find by id", () => {
-    // Buat data baru untuk test ini
     const createdEnrollmentId = repo.create({
       ...enrollmentData,
       class_id: 2,
@@ -56,7 +54,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should find by class id", () => {
-    // Buat data untuk test ini
     const classId = 3;
     const testEnrollment = {
       ...enrollmentData,
@@ -75,7 +72,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should find by mahasiswa id", () => {
-    // Buat data untuk test ini
     const mahasiswaId = 3;
     const testEnrollment = {
       ...enrollmentData,
@@ -95,7 +91,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should find by dosen id", () => {
-    // Buat enrollment untuk dosen
     const dosenEnrollmentData: Omit<
       ClassEnrollment,
       "id" | "created_at" | "updated_at"
@@ -118,7 +113,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should find by admin id", () => {
-    // Buat enrollment untuk admin
     const adminEnrollmentData: Omit<
       ClassEnrollment,
       "id" | "created_at" | "updated_at"
@@ -141,7 +135,6 @@ describe("ClassEnrollmentRepository", () => {
   });
 
   test("should delete an enrollment", () => {
-    // Buat enrollment baru untuk dihapus
     const testEnrollment = {
       ...enrollmentData,
       class_id: 7,
@@ -149,12 +142,10 @@ describe("ClassEnrollmentRepository", () => {
     };
     const createdEnrollmentId = repo.create(testEnrollment);
 
-    // Pastikan enrollment ada sebelum dihapus
     expect(repo.findById(createdEnrollmentId)).not.toBeNull();
 
     repo.delete(createdEnrollmentId);
 
-    // Verifikasi bahwa enrollment sudah dihapus
     const deletedEnrollment = repo.findById(createdEnrollmentId);
     expect(deletedEnrollment).toBeNull();
   });

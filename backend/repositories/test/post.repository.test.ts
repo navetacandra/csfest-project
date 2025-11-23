@@ -22,16 +22,15 @@ afterAll(() => {
 describe("PostRepository", () => {
   test("should create a post with correct ID return", () => {
     const postData = {
-      class_id: 1, // Valid class_id from seeding
-      class_enrollment_id: 1, // Valid enrollment_id from seeding
-      file_id: 1, // Valid file_id from seeding
+      class_id: 1,
+      class_enrollment_id: 1,
+      file_id: 1,
       message: `Test Post ${Date.now()}`,
       type: "post",
     };
 
     const result = repo.create(postData);
 
-    // Verifikasi bahwa ID yang dihasilkan adalah angka yang valid dan bukan 1 kecuali itu adalah ID pertama
     expect(typeof result).toBe("number");
     expect(result).toBeGreaterThan(0);
   });
@@ -47,7 +46,7 @@ describe("PostRepository", () => {
 
     const createdId = repo.create(postData);
 
-    expect(createdId).toBeGreaterThan(0); // Pastikan ID valid
+    expect(createdId).toBeGreaterThan(0);
 
     const result = repo.findById(createdId);
     expect(result).not.toBeNull();
