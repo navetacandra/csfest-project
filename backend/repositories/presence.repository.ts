@@ -48,7 +48,6 @@ export class PresenceRepository {
   }
 
   findByEnrollmentIds(enrollmentIds: number[]): any[] {
-    // Using any due to JOIN query returning custom object
     if (enrollmentIds.length === 0) {
       return [];
     }
@@ -90,7 +89,7 @@ export class PresenceRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (data as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(
       `UPDATE presence SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,

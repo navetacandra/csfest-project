@@ -27,12 +27,11 @@ export class DosenRepository {
     const result = this.db.query(
       "SELECT id, nip, username, name, created_at, updated_at FROM dosen WHERE id = ?",
       id,
-    ) as Dosen[]; // Include nip in the select to match the Dosen interface
+    ) as Dosen[];
     return result.length > 0 ? result[0]! : null;
   }
 
   findByUsername(username: string): Dosen | null {
-    // This method might be used for authentication, so we select the password.
     const result = this.db.query(
       "SELECT * FROM dosen WHERE username = ?",
       username,
@@ -48,7 +47,7 @@ export class DosenRepository {
   ): Dosen[] {
     const offset = (page - 1) * limit;
     let baseQuery =
-      "SELECT id, nip, name, username, created_at, updated_at FROM dosen"; // Include nip to match Dosen interface
+      "SELECT id, nip, name, username, created_at, updated_at FROM dosen";
     const conditions: string[] = [];
     const params: any[] = [];
 
@@ -79,7 +78,7 @@ export class DosenRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (dosenData as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(
       `UPDATE dosen SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,

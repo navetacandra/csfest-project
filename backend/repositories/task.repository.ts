@@ -56,7 +56,6 @@ export class TaskRepository {
   }
 
   findByPostIdWithStudent(postId: number): any[] {
-    // Using any due to JOIN query returning custom object
     const query = `
           SELECT t.*, m.name as mahasiswa_name, m.nim as mahasiswa_nim, f.upload_name, f.random_name
           FROM task t

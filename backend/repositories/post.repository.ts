@@ -67,7 +67,7 @@ export class PostRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (data as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(
       `UPDATE post SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,

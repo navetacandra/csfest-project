@@ -52,15 +52,20 @@ export class ClassRepository {
     return result.length > 0 ? result[0]! : null;
   }
 
-  findByIds(ids: number[]): Class[] {
+  findByIds(ids: number[], day?: number): Class[] {
     if (ids.length === 0) {
       return [];
     }
     const placeholders = ids.map(() => "?").join(",");
-    return this.db.query(
-      `SELECT * FROM class WHERE id IN (${placeholders})`,
-      ...ids,
-    ) as Class[];
+    let query = `SELECT * FROM class WHERE id IN (${placeholders})`;
+    const params: (number | string)[] = [...ids];
+
+    if (day !== undefined) {
+      query += " AND schedule = ?";
+      params.push(day);
+    }
+
+    return this.db.query(query, ...params) as Class[];
   }
 
   update(id: number, classData: Partial<ClassForCreate>): void {
@@ -71,7 +76,7 @@ export class ClassRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (classData as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(
       `UPDATE class SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,

@@ -59,7 +59,7 @@ export class AdminRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (data as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(`UPDATE admin SET ${setClause} WHERE id = ?`, ...values);
   }

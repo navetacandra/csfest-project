@@ -33,14 +33,13 @@ export class MahasiswaRepository {
     major_id?: number,
     study_program_id?: number,
   ): any[] {
-    // Using any for now since the JOIN query returns a custom object
     const offset = (page - 1) * limit;
     let baseQuery = `
-      SELECT m.id, m.name, mj.name as major, sp.name as study_program
-      FROM mahasiswa m
-      JOIN major mj ON m.major_id = mj.id
-      JOIN study_program sp ON m.study_program_id = sp.id
-    `;
+        SELECT m.id, m.name, mj.name as major, sp.name as study_program
+        FROM mahasiswa m
+        JOIN major mj ON m.major_id = mj.id
+        JOIN study_program sp ON m.study_program_id = sp.id
+      `;
     const conditions: string[] = [];
     const params: any[] = [];
 
@@ -68,7 +67,6 @@ export class MahasiswaRepository {
   }
 
   findById(id: number): any {
-    // Using any for now since the JOIN query returns a custom object
     const query = `
       SELECT m.id, m.name, m.nim, m.email, m.username, mj.name as major, sp.name as study_program
       FROM mahasiswa m
@@ -81,7 +79,6 @@ export class MahasiswaRepository {
   }
 
   findByUsername(username: string): Mahasiswa | null {
-    // This method might be used for authentication, so we select the password.
     const result = this.db.query(
       "SELECT * FROM mahasiswa WHERE username = ?",
       username,
@@ -97,7 +94,7 @@ export class MahasiswaRepository {
 
     const setClause = fields.map((field) => `${field} = ?`).join(", ");
     const values = fields.map((field) => (data as any)[field]);
-    values.push(id); // Add ID for WHERE clause
+    values.push(id);
 
     this.db.query(
       `UPDATE mahasiswa SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
