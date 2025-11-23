@@ -59,7 +59,7 @@ const PresenceAsLecturerPage: React.FC = () => {
       <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main className="flex-grow">
             <div className="mb-6">
-                <h2 className="text-4xl font-bold text-primary">Presence Class</h2>
+                <h2 className="text-3xl sm:text-4xl font-bold text-primary">Presence Class</h2>
                 <p className="mt-1 text-text-secondary-light dark:text-text-secondary-dark">Class 1</p>
             </div>
             <div className="overflow-x-auto">
@@ -68,18 +68,18 @@ const PresenceAsLecturerPage: React.FC = () => {
                         <table className="min-w-full divide-y dark:divide-gray-700">
                             <thead className="bg-primary">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3.5 text-left text-sm font-bold">NIM</th>
-                                    <th scope="col" className="px-6 py-3.5 text-left text-sm font-bold">Name</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center text-sm font-bold">Status</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center text-sm font-bold">Lateness (min)</th>
+                                    <th scope="col" className="px-4 py-3 sm:px-6 sm:py-3.5 text-left text-sm font-bold">NIM</th>
+                                    <th scope="col" className="px-4 py-3 sm:px-6 sm:py-3.5 text-left text-sm font-bold">Name</th>
+                                    <th scope="col" className="px-4 py-3 sm:px-6 sm:py-3.5 text-center text-sm font-bold">Status</th>
+                                    <th scope="col" className="px-4 py-3 sm:px-6 sm:py-3.5 text-center text-sm font-bold">Lateness (min)</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y dark:divide-gray-700 bg-secondary-background">
                                 {students.map((student, index) => (
                                     <tr key={index}>
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{student.nim}</td>
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm font-bold text-primary">{student.name}</td>
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm text-center">
+                                        <td className="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{student.nim}</td>
+                                        <td className="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4 text-sm font-bold text-primary">{student.name}</td>
+                                        <td className="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4 text-sm text-center">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     {getStatusButton(student.status)}
@@ -93,7 +93,7 @@ const PresenceAsLecturerPage: React.FC = () => {
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </td>
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm">
+                                        <td className="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4 text-sm">
                                             <Input
                                                 type="number"
                                                 value={student.lateness}
@@ -110,7 +110,7 @@ const PresenceAsLecturerPage: React.FC = () => {
             </div>
             <div className="mt-6 flex justify-end">
                 <Button
-                    className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none"
+                    className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto"
                     onClick={handleSave}
                 >
                     Save Presence

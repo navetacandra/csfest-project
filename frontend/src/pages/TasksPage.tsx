@@ -17,9 +17,9 @@ const TasksPage: React.FC = () => {
     <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
       <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main>
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-4xl font-bold text-primary">Your Tasks</h2>
-            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-primary">Your Tasks</h2>
+            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
               All
             </Button>
           </div>
@@ -28,7 +28,7 @@ const TasksPage: React.FC = () => {
               <div
                 key={index}
                 className="
-                        flex justify-between items-center p-6
+                        flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6
                         border-2 border-primary rounded-lg
                         bg-[#E0FFE8] cursor-pointer
                         transition-all duration-200
@@ -38,9 +38,9 @@ const TasksPage: React.FC = () => {
                       "
                 onClick={() => navigate("/task/" + task.id)}
               >
-                <div>
-                  <h2 className="text-xl font-bold text-primary">{task.title}</h2>
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                <div className='mb-4 sm:mb-0'>
+                  <h2 className="text-lg sm:text-xl font-bold text-primary">{task.title}</h2>
+                  <p className="text-sm sm:text-base text-text-secondary-light dark:text-text-secondary-dark mt-1">
                     {task.className}
                   </p>
                 </div>
@@ -50,7 +50,7 @@ const TasksPage: React.FC = () => {
                         bg-danger text-white rounded-lg font-bold
                         shadow-[-3px_4px_0px_0px_black]
                         hover:translate-y-[2px] hover:shadow-none
-                        transition-all
+                        transition-all w-full sm:w-auto
                       ">
                   View Task
                 </Button>

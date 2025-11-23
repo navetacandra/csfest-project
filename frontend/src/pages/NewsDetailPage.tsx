@@ -7,7 +7,7 @@ const NewsDetailPage: React.FC = () => {
         <main className="mt-8">
           <article>
             <header className="mb-8">
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mb-2">Example of Long Headline News Title to Show on News Page</h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">Example of Long Headline News Title to Show on News Page</h2>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">posted at: &lt;timestamp&gt;</p>
             </header>
             <div className="mb-12 flex justify-center">

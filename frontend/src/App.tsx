@@ -20,7 +20,7 @@ function App() {
           path="/dashboard"
           element={
             <>
-              <div className="container mx-auto">
+              <div className="container mx-auto ">
                 <Header />
                 <DashboardPage />
               </div>

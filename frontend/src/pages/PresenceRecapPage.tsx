@@ -39,7 +39,7 @@ const PresenceRecapPage: React.FC = () => {
        <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base  dark:border-gray-600 sm:p-8">
         <main className="flex-grow w-full">
           <div className="mb-6">
-            <h1 className="text-4xl font-bold text-primary">Presence Recap</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-primary">Presence Recap</h1>
             <p className="mt-2 text-text-secondary-light dark:text-text-secondary-dark">
               Total Lateness: <span className="font-semibold">{presenceRecapData.totalLateness} minutes</span>
             </p>
@@ -47,22 +47,22 @@ const PresenceRecapPage: React.FC = () => {
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
               <div className="grid grid-flow-col auto-cols-max gap-3 md:gap-4">
-                <div className="flex flex-col gap-3 md:gap-4 pt-12 items-end">
+                <div className="flex flex-col gap-3 md:gap-4 pt-10 sm:pt-12 items-end">
                   {presenceRecapData.weeks.map((week, index) => (
-                    <div key={index} className="h-16 flex items-center justify-end font-semibold text-text-secondary-light dark:text-text-secondary-dark">
+                    <div key={index} className="h-14 sm:h-16 flex items-center justify-end font-semibold text-text-secondary-light dark:text-text-secondary-dark text-sm sm:text-base">
                       {week}
                     </div>
                   ))}
                 </div>
                 {presenceRecapData.classes.map((classItem, classIndex) => (
-                  <div key={classIndex} className="flex flex-col gap-3 md:gap-4 w-28">
-                    <div className="h-12 flex items-center justify-center font-bold text-primary">
+                  <div key={classIndex} className="flex flex-col gap-3 md:gap-4 w-24 sm:w-28">
+                    <div className="h-10 sm:h-12 flex items-center justify-center font-bold text-primary text-center text-sm sm:text-base">
                       {classItem.name}
                     </div>
                     {classItem.statuses.map((status, statusIndex) => (
                       <div
                         key={statusIndex}
-                        className={`h-16 text-white flex items-center justify-center font-bold
+                        className={`h-14 sm:h-16 text-white flex items-center justify-center font-bold text-xs sm:text-sm
                         border-2 border-primary 
                         ${getStatusBgColor(status)}
                         shadow-shadow
