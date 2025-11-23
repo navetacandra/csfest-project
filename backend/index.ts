@@ -7,6 +7,7 @@ import express, {
 import apiRouter from "./routes";
 import storageRoute from "./routes/storage.route";
 import compression from "compression";
+import { docRouter } from "./doc";
 
 const SERVER_PORT: number = parseInt(Bun.env.PORT || "5000");
 const app: Express = express();
@@ -42,6 +43,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api", apiRouter);
 app.use("/storage", storageRoute);
+app.use("/doc", docRouter);
 
 if (import.meta.main) {
   app.listen(SERVER_PORT, "0.0.0.0", () => {
