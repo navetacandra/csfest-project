@@ -1,17 +1,32 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import type { Class } from "@/types"
+
+const getDayName = (dayIndex: number) => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[dayIndex];
+}
 
 const ClassesPage = () => {
   const navigate = useNavigate()
-  const classes = [
-    { name: "class name here", schedule: "Schedule (day start-end)" },
-    { name: "class name here", schedule: "Schedule (day start-end)" },
-    { name: "class name here", schedule: "Schedule (day start-end)" },
-    { name: "class name here", schedule: "Schedule (day start-end)" },
-  ]
+  const [classes, setClasses] = useState<Class[]>([]);
 
-  const handleClassClick = () => {
-    navigate("/class")
+  useEffect(() => {
+    const fetchClasses = () => {
+      const dummyClasses: Class[] = [
+        { id: 1, name: 'Pemrograman Web Lanjutan', schedule: 1, start_time: '08:00', end_time: '10:00' },
+        { id: 2, name: 'Struktur Data', schedule: 2, start_time: '10:00', end_time: '12:00' },
+        { id: 3, name: 'Basis Data', schedule: 3, start_time: '13:00', end_time: '15:00' },
+      ];
+      setClasses(dummyClasses);
+    };
+
+    fetchClasses();
+  }, []);
+
+  const handleClassClick = (id: number) => {
+    navigate(`/class?id=${id}`)
   }
 
   return (
@@ -26,9 +41,9 @@ const ClassesPage = () => {
               </Button>
             </div>
             <div className="space-y-6">
-              {classes.map((c, index) => (
+              {classes.map((c) => (
                 <div
-                  key={index}
+                  key={c.id}
                   className="
                         flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6
                         border-2 border-primary rounded-lg 
@@ -38,12 +53,12 @@ const ClassesPage = () => {
                         hover:shadow-none
                         shadow-shadow
                       "
-                  onClick={handleClassClick}
+                  onClick={() => handleClassClick(c.id)}
                 >
                   <div className="mb-4 sm:mb-0">
                     <h2 className="text-lg sm:text-xl font-bold text-primary">{c.name}</h2>
                     <p className="text-sm sm:text-base text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                      {c.schedule}
+                      {getDayName(c.schedule)}, {c.start_time} - {c.end_time}
                     </p>
                   </div>
                   <Button className="

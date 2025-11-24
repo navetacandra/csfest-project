@@ -8,9 +8,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import api from '@/lib/api';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await api.delete('/logout');
+    } catch (error) {
+      console.error('Logout failed', error);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      navigate('/');
+    }
+  };
 
   return (
     <header className="flex justify-between items-center mb-10 max-w-7xl mx-auto pt-4 sm:pt-6 lg:pt-8">
@@ -25,6 +38,9 @@ const Header: React.FC = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
+              Profile
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/classes')}>
               Classes
             </DropdownMenuItem>
@@ -34,7 +50,7 @@ const Header: React.FC = () => {
             <DropdownMenuItem onClick={() => navigate('/presence')}>
               Presence
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -44,6 +60,11 @@ const Header: React.FC = () => {
       {/* Desktop Navigation */}
       <nav className="hidden md:block">
         <ul className="flex items-center space-x-2 text-lg text-primary">
+          <li>
+            <Button className="hover:underline" onClick={() => {navigate('/profile')}}>
+              Profile
+            </Button>
+          </li>
           <li>
             <Button className="hover:underline" onClick={() => {navigate('/classes')}}>
               Classes
@@ -60,7 +81,7 @@ const Header: React.FC = () => {
             </Button>
           </li>
           <li>
-            <Button className="hover:underline" >
+            <Button className="hover:underline" onClick={handleLogout}>
               Logout
             </Button>
           </li>
