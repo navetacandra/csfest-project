@@ -140,7 +140,15 @@ export interface ApiResponse<T> {
     meta?: {
       page: number;
       limit: number;
-      total_data: number;
-      total_page: number;
+      totalData: number;
+      totalPage: number;
     }
+}
+
+export interface PaginationMeta {
+    size: number;
+    page: number;
+    limit: number;
+    totalData: number;
+    totalPage: number;
 }

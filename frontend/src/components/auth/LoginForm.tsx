@@ -22,6 +22,7 @@ export function LoginForm() {
       const response = await api.post("/login", { username, password });
       localStorage.setItem("token", response.data.data.token);
       localStorage.setItem("role", response.data.data.role);
+      localStorage.setItem("loginTimestamp", new Date().getTime().toString());
       navigate("/dashboard");
     } catch (err) {
       setError("Invalid username or password");

@@ -1,3 +1,4 @@
+import { clearAuth } from '@/lib/auth';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -12,16 +13,19 @@ import api from '@/lib/api';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('role');
 
   const handleLogout = async () => {
     try {
       await api.delete('/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('loginTimestamp');
     } catch (error) {
       console.error('Logout failed', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      navigate('/');
+      clearAuth();
+      navigate('/login');
     }
   };
 
@@ -38,6 +42,11 @@ const Header: React.FC = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            {userRole === 'admin' && (
+              <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
+                Admin
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               Profile
             </DropdownMenuItem>
@@ -60,6 +69,37 @@ const Header: React.FC = () => {
       {/* Desktop Navigation */}
       <nav className="hidden md:block">
         <ul className="flex items-center space-x-2 text-lg text-primary">
+          {userRole === 'admin' && (
+            <li>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="hover:underline">
+                    Admin
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => navigate('/admin/majors')}>
+                    Major
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/study-programs')}>
+                    Study Program
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/dosen')}>
+                    Dosen
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/mahasiswa')}>
+                    Mahasiswa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/news')}>
+                    News
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/classes')}>
+                    Class
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+          )}
           <li>
             <Button className="hover:underline" onClick={() => {navigate('/profile')}}>
               Profile
