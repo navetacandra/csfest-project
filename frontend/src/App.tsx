@@ -53,7 +53,7 @@ function App() {
             }
           />
           <Route
-            path="/task/:id"
+            path="/class/:class_id/task/:id"
             element={
               <>
                 <div className="container mx-auto px-4">
@@ -75,7 +75,7 @@ function App() {
             }
           />
           <Route
-            path="/news-detail"
+            path="/news/:id"
             element={
               <>
                 <div className="container mx-auto px-4">
@@ -86,7 +86,7 @@ function App() {
             }
           />
           <Route
-            path="/class"
+            path="/class/:id"
             element={
               <>
                 <div className="container mx-auto px-4">
@@ -97,7 +97,7 @@ function App() {
             }
           />
           <Route
-            path="/presence-as-lecturer"
+            path="/class/:id/presence"
             element={
               <>
                 <div className="container mx-auto px-4">

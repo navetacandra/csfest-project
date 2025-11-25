@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import type { User, Dosen, Mahasiswa } from '@/types';
+
+type Profile = User | Dosen | Mahasiswa;
 
 const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,9 +36,9 @@ const ProfilePage: React.FC = () => {
           <p><strong>Username:</strong> {profile.username}</p>
           <p><strong>Name:</strong> {profile.name}</p>
           <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>Role:</strong> {profile.role}</p>
-          {profile.nim && <p><strong>NIM:</strong> {profile.nim}</p>}
-          {profile.nip && <p><strong>NIP:</strong> {profile.nip}</p>}
+          <p><strong>Role:</strong> {(profile as any).role}</p>
+          {(profile as Mahasiswa).nim && <p><strong>NIM:</strong> {(profile as Mahasiswa).nim}</p>}
+          {(profile as Dosen).nip && <p><strong>NIP:</strong> {(profile as Dosen).nip}</p>}
         </div>
         <Button onClick={() => navigate('/dashboard')} className="mt-8">Back to Dashboard</Button>
       </div>

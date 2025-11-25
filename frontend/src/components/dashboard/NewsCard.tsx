@@ -10,7 +10,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const navigate = useNavigate();
 
   const handleNewsClick = (id: number) => {
-    navigate(`/news-detail?id=${id}`);
+    navigate(`/news/${id}`);
   };
 
   return (

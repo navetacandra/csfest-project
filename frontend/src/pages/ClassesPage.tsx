@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import type { Class } from "@/types"
+import api from "@/lib/api"
+import type { Class, ApiResponse } from "@/types"
 
 const getDayName = (dayIndex: number) => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -13,20 +14,20 @@ const ClassesPage = () => {
   const [classes, setClasses] = useState<Class[]>([]);
 
   useEffect(() => {
-    const fetchClasses = () => {
-      const dummyClasses: Class[] = [
-        { id: 1, name: 'Pemrograman Web Lanjutan', schedule: 1, start_time: '08:00', end_time: '10:00' },
-        { id: 2, name: 'Struktur Data', schedule: 2, start_time: '10:00', end_time: '12:00' },
-        { id: 3, name: 'Basis Data', schedule: 3, start_time: '13:00', end_time: '15:00' },
-      ];
-      setClasses(dummyClasses);
+    const fetchClasses = async () => {
+      try {
+        const response = await api.get<ApiResponse<Class[]>>('/classes');
+        setClasses(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch classes', error);
+      }
     };
 
     fetchClasses();
   }, []);
 
   const handleClassClick = (id: number) => {
-    navigate(`/class?id=${id}`)
+    navigate(`/class/${id}`)
   }
 
   return (

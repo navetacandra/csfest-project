@@ -1,32 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ClipboardList, FileText, HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import type { ClassDetails } from '@/types';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import api from '@/lib/api';
+import type { ClassDetails, ApiResponse } from '@/types';
 
 const ClassPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [classDetails, setClassDetails] = useState<ClassDetails | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock API call based on URL parameter in a real app
-    const fetchClassDetails = () => {
-      const dummyClassDetails: ClassDetails = {
-        id: 1,
-        name: 'Pemrograman Web Lanjutan',
-        schedule: 1,
-        start_time: '08:00',
-        end_time: '10:00',
-        posts: [
-          { id: 1, message: 'Tugas 1: Web Lanjutan', type: 'task', created_at: '2024-11-23T10:00:00Z' },
-          { id: 2, message: 'Selamat datang di kelas!', type: 'post', created_at: '2024-11-22T10:00:00Z' },
-          { id: 3, message: 'Quiz 1', type: 'quiz', created_at: '2024-11-21T10:00:00Z' },
-        ],
-      };
-      setClassDetails(dummyClassDetails);
+    const fetchClassDetails = async () => {
+      try {
+        const response = await api.get<ApiResponse<ClassDetails>>(`/classes/${id}`);
+        setClassDetails(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch class details', error);
+      }
     };
 
-    fetchClassDetails();
-  }, []);
+    if (id) {
+      fetchClassDetails();
+    }
+  }, [id]);
 
   const getPostIcon = (type: string) => {
     switch (type) {
@@ -50,7 +47,7 @@ const ClassPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between  sm:items-center mb-8 gap-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary">{classDetails.name}</h2>
             <div className='flex flex-col sm:flex-row gap-4'>
-              <Link to="/presence-as-lecturer">
+              <Link to={`/class/${classDetails.id}/presence`}>
                 <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
                   Presence
                 </Button>
@@ -64,6 +61,7 @@ const ClassPage: React.FC = () => {
             {classDetails.posts.map((post) => (
               <div
                 key={post.id}
+                onClick={() => navigate(`/class/${classDetails.id}/task/${post.id}`)}
                 className="flex items-center gap-4 sm:gap-5 p-4 sm:p-6 border-2 border-primary rounded-lg bg-[#E0FFE8] cursor-pointer transition-all duration-200 hover:-translate-x-1 hover:shadow-none shadow-shadow"
               >
                 <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-green-200 text-primary rounded-lg flex items-center justify-center border-2 border-primary">

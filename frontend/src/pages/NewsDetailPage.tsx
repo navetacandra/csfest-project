@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import type { News } from '@/types';
+import { useParams } from 'react-router-dom';
+import api from '@/lib/api';
+import type { News, ApiResponse } from '@/types';
 
 const NewsDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [news, setNews] = useState<News | null>(null);
 
   useEffect(() => {
-    const fetchNews = () => {
-      const dummyNews: News = {
-        id: 1,
-        title: 'Pembukaan Pendaftaran Semester Baru 2025/2026',
-        thumbnail: 'https://via.placeholder.com/800x450',
-        content: 'Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026. Segera lakukan pendaftaran ulang melalui portal akademik. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.',
-        created_at: '2024-11-23T10:00:00Z',
-      };
-      setNews(dummyNews);
+    const fetchNews = async () => {
+      try {
+        const response = await api.get<ApiResponse<News>>(`/news/${id}`);
+        setNews(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch news', error);
+      }
     };
 
-    fetchNews();
-  }, []);
+    if (id) {
+      fetchNews();
+    }
+  }, [id]);
 
   if (!news) {
     return <div>Loading...</div>;

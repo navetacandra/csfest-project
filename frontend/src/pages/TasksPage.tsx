@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from "react-router-dom"
-import type { TaskItem } from '@/types';
+import api from '@/lib/api';
+import type { TaskItem, ApiResponse } from '@/types';
 
 const TasksPage: React.FC = () => {
   const navigate = useNavigate()
   const [tasks, setTasks] = useState<TaskItem[]>([]);
 
   useEffect(() => {
-    const fetchTasks = () => {
-      const dummyTasks: TaskItem[] = [
-        { id: 1, class_id: 1, title: 'Tugas 1: Web Lanjutan', status: 'incoming' },
-        { id: 2, class_id: 2, title: 'Tugas 2: Struktur Data', status: 'completed' },
-        { id: 3, class_id: 3, title: 'Tugas 3: Basis Data', status: 'incoming' },
-      ];
-      setTasks(dummyTasks);
+    const fetchTasks = async () => {
+      try {
+        const response = await api.get<ApiResponse<TaskItem[]>>('/tasks');
+        setTasks(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch tasks', error);
+      }
     }
 
     fetchTasks();
@@ -43,7 +44,7 @@ const TasksPage: React.FC = () => {
                         hover:shadow-none
                         shadow-shadow
                       "
-                onClick={() => navigate("/task/" + task.id)}
+                onClick={() => navigate(`/class/${task.class_id}/task/${task.id}`)}
               >
                 <div className='mb-4 sm:mb-0'>
                   <h2 className="text-lg sm:text-xl font-bold text-primary">{task.title}</h2>

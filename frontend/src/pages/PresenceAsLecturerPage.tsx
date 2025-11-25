@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,16 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import api from '@/lib/api';
 
 const PresenceAsLecturerPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [students, setStudents] = useState([
-    { nim: '153435354', name: 'Adasdadas', status: null, lateness: 0 },
-    { nim: '115343543', name: 'Adasdsadsa', status: 'Hadir', lateness: 0 },
-    { nim: '115343543', name: 'Adad', status: 'Izin', lateness: 0 },
-    { nim: '115343543', name: 'Adasdsadsadadsa dadasd', status: 'Sakit', lateness: 0 },
-    { nim: '115343543', name: 'Adasdada dasdasd dadas', status: 'Alpha', lateness: 0 },
-    { nim: '115343543', name: 'Adadsadsa dadsada dadsadada', status: 'Hadir', lateness: 20 },
+    { studentId: 1, nim: '153435354', name: 'Adasdadas', status: null as string | null, lateness: 0 },
+    { studentId: 2, nim: '115343543', name: 'Adasdsadsa', status: 'hadir' as string | null, lateness: 0 },
+    { studentId: 3, nim: '115343543', name: 'Adad', status: 'izin' as string | null, lateness: 0 },
+    { studentId: 4, nim: '115343543', name: 'Adasdsadsadadsa dadasd', status: 'sakit' as string | null, lateness: 0 },
+    { studentId: 5, nim: '115343543', name: 'Adasdada dasdasd dadas', status: 'alpha' as string | null, lateness: 0 },
+    { studentId: 6, nim: '115343543', name: 'Adadsadsa dadsada dadsadada', status: 'hadir' as string | null, lateness: 20 },
   ]);
 
   const handleStatusChange = (index: number, newStatus: string | null) => {
@@ -31,23 +34,39 @@ const PresenceAsLecturerPage: React.FC = () => {
     setStudents(updatedStudents);
   };
 
-  const handleSave = () => {
-    console.log('Saving presence data:', students);
-    // Implement actual save logic here (e.g., API call)
-    alert('Presence data saved!');
+  const handleSave = async () => {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    for (const student of students) {
+      if (student.status) {
+        try {
+          await api.post(`/presence/${id}`, {
+            schedule_date: today,
+            status: student.status,
+            studentId: student.studentId,
+            late_time: student.lateness,
+          });
+        } catch (error) {
+          console.error(`Failed to save presence for student ${student.name}`, error);
+          alert(`Failed to save presence for student ${student.name}. Please try again.`);
+          return; 
+        }
+      }
+    }
+    alert('Presence data saved successfully!');
   };
 
   const getStatusButton = (status: string | null) => {
     const baseButtonClasses = "w-24 border-2 border-black shadow-[-3px_4px_0px_0px_black] hover:translate-y-[2px] hover:shadow-none transition-all font-bold";
 
     switch (status) {
-      case 'Hadir':
+      case 'hadir':
         return <Button className={`${baseButtonClasses} bg-green-400 text-white`}>Hadir</Button>;
-      case 'Izin':
+      case 'izin':
         return <Button className={`${baseButtonClasses} bg-yellow-400 text-white`}>Izin</Button>;
-      case 'Sakit':
+      case 'sakit':
         return <Button className={`${baseButtonClasses} bg-orange-400 text-white`}>Sakit</Button>;
-      case 'Alpha':
+      case 'alpha':
         return <Button className={`${baseButtonClasses} bg-red-400 text-white`}>Alpha</Button>;
       default:
         return <Button className={`${baseButtonClasses} bg-gray-400 text-white`}>-</Button>;
@@ -85,10 +104,10 @@ const PresenceAsLecturerPage: React.FC = () => {
                                                     {getStatusButton(student.status)}
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent>
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'Hadir')}>Hadir</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'Izin')}>Izin</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'Sakit')}>Sakit</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'Alpha')}>Alpha</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'hadir')}>Hadir</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'izin')}>Izin</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'sakit')}>Sakit</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(index, 'alpha')}>Alpha</DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleStatusChange(index, null)}>-</DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
