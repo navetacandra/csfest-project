@@ -14,13 +14,15 @@ services:
       - ./backend/database:/app/database
     networks:
       - kulmsin-network
+    depends_on:
+      fe-build:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5000/api"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 5s
-
     deploy:
       resources:
         limits:
@@ -29,6 +31,20 @@ services:
         reservations:
           cpus: "0.1"
           memory: 64M
+
+  api-doc-server:
+    image: docker.swagger.io/swaggerapi/swagger-ui:v5.30.2
+    restart: unless-stopped
+    networks:
+      - kulmsin-network
+    volumes:
+      - ./backend/openapi.yaml:/usr/share/nginx/html/openapi.yaml
+    environment:
+      - TZ=Asia/Jakarta
+      - API_URL=openapi.yaml
+    depends_on:
+      api-server:
+        condition: service_healthy
 
   fe-build:
     image: oven/bun:1
