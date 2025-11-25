@@ -1,14 +1,17 @@
 import type { Request, Response } from "express";
 import { NewsService } from "../services/news.service";
+import { FileRepository } from "../repositories/file.repository";
 import { Sqlite } from "../config/database";
 import type { SuccessResponse, ErrorResponse } from "../config/response";
 import type { News } from "../models/news.model";
 
 export class NewsController {
   private newsService: NewsService;
+  private fileRepo: FileRepository;
 
   constructor(sqlite: Sqlite) {
     this.newsService = new NewsService(sqlite);
+    this.fileRepo = new FileRepository(sqlite);
   }
 
   getAll(req: Request, res: Response) {
@@ -84,7 +87,18 @@ export class NewsController {
 
   create(req: Request, res: Response) {
     try {
-      const { title, thumbnail_file_id, content } = req.body;
+      const { title, content } = req.body;
+      let thumbnail_file_id: number | null = null;
+      if (req.file) {
+        thumbnail_file_id = this.fileRepo.create({
+          dosen_id: null,
+          mahasiswa_id: null,
+          mimetype: req.file!.mimetype,
+          random_name: req.file.path.replace(Bun.env.UPLOAD_PATH || "", ""),
+          size: req.file!.size,
+          upload_name: req.file!.originalname,
+        });
+      }
 
       if (!title || !thumbnail_file_id || !content) {
         return res.status(400).json({
