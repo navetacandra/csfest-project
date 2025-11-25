@@ -4,8 +4,9 @@ import { PostRepository } from "../repositories/post.repository";
 import type { Class } from "../models/class.model";
 import { randomBytes } from "node:crypto";
 import { Sqlite } from "../config/database";
+import { MahasiswaRepository } from "../repositories/mahasiswa.repository";
 
-interface ClassDetails {
+export interface ClassDetails {
   id: number;
   name: string;
   enroll_key: string;
@@ -20,15 +21,21 @@ interface ClassDetails {
     message: string;
     type: string;
   }[];
+  members: {
+    name: string;
+    nim: string;
+  }[];
 }
 
 export class ClassService {
   private classRepository: ClassRepository;
   private classEnrollmentRepository: ClassEnrollmentRepository;
   private postRepository: PostRepository;
+  private mahasiswaRepository: MahasiswaRepository;
 
   constructor(sqlite: Sqlite) {
     this.classRepository = new ClassRepository(sqlite);
+    this.mahasiswaRepository = new MahasiswaRepository(sqlite);
     this.classEnrollmentRepository = new ClassEnrollmentRepository(sqlite);
     this.postRepository = new PostRepository(sqlite);
   }
@@ -44,7 +51,11 @@ export class ClassService {
     return this.classRepository.findById(Number(newClassId));
   }
 
-  enroll(enroll_key: string, userId: number, role: "mahasiswa" | "dosen"): Class | null {
+  enroll(
+    enroll_key: string,
+    userId: number,
+    role: "mahasiswa" | "dosen",
+  ): Class | null {
     const classToEnroll = this.classRepository.findByEnrollKey(enroll_key);
     if (!classToEnroll) {
       throw new Error("Class with that enroll key not found.");
@@ -71,7 +82,10 @@ export class ClassService {
     return classToEnroll;
   }
 
-  getFollowedClasses(userId: number, role: "mahasiswa" | "dosen" | "admin"): Class[] {
+  getFollowedClasses(
+    userId: number,
+    role: "mahasiswa" | "dosen" | "admin",
+  ): Class[] {
     let enrollments;
     if (role === "admin") {
       const allClasses = this.classRepository.all(1, 1000);
@@ -86,7 +100,11 @@ export class ClassService {
     return this.classRepository.findByIds(classIds);
   }
 
-  getSchedule(userId: number, role: "mahasiswa" | "dosen" | "admin", day?: number): Class[] {
+  getSchedule(
+    userId: number,
+    role: "mahasiswa" | "dosen" | "admin",
+    day?: number,
+  ): Class[] {
     let enrollments;
     if (role === "admin") {
       const allClasses = this.classRepository.all(1, 1000);
@@ -107,8 +125,10 @@ export class ClassService {
       throw new Error("Class not found");
     }
     const posts = this.postRepository.findByClassId(classId);
+    const members = this.mahasiswaRepository.findByClassId(classId);
     return {
       ...classData,
+      members,
       posts: posts.map((p) => ({ id: p.id, message: p.message, type: p.type })),
     };
   }
