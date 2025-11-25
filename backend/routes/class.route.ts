@@ -14,19 +14,18 @@ const taskController = new TaskController(sqlite);
 router.get("/", AuthMiddleware.authenticate, (req: Request, res: Response) =>
   classController.getFollowedClasses(req, res),
 );
-router.get("/:id", AuthMiddleware.authenticate, (req: Request, res: Response) =>
-  classController.getClassDetails(req, res),
+router.post("/", AuthMiddleware.authenticate, (req: Request, res: Response) =>
+  classController.enroll(req, res),
 );
 
-router.post(
-  "/enroll",
-  AuthMiddleware.authenticate,
-  (req: Request, res: Response) => classController.enroll(req, res),
+router.get("/:id", AuthMiddleware.authenticate, (req: Request, res: Response) =>
+  classController.getById(req, res),
 );
 
 router.post(
   "/:class_id/posts",
   AuthMiddleware.authenticate,
+  multerUpload("post_attachment").single("file"),
   (req: Request, res: Response) => postController.create(req, res),
 );
 router.get(
@@ -48,7 +47,7 @@ router.delete(
 router.post(
   "/:class_id/posts/:post_id/task",
   AuthMiddleware.authenticate,
-  multerUpload().single("file"),
+  multerUpload("task_attachment").single("file"),
   (req: Request, res: Response) => taskController.submitTask(req, res),
 );
 

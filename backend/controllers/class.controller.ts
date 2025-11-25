@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
-import { ClassService } from "../services/class.service";
+import { ClassService, type ClassDetails } from "../services/class.service";
 import { Sqlite } from "../config/database";
 import type { SuccessResponse, ErrorResponse } from "../config/response";
 import type { Class } from "../models/class.model";
+import { ClassEnrollmentRepository } from "../repositories/classEnrollment.repository";
 
 interface ClassCreateRequest {
   name: string;
@@ -20,9 +21,11 @@ interface ClassUpdateRequest {
 
 export class ClassController {
   private classService: ClassService;
+  private classEnrollmentRepository: ClassEnrollmentRepository;
 
   constructor(sqlite: Sqlite) {
     this.classService = new ClassService(sqlite);
+    this.classEnrollmentRepository = new ClassEnrollmentRepository(sqlite);
   }
 
   async getAll(req: Request, res: Response) {
@@ -38,6 +41,7 @@ export class ClassController {
 
   async getById(req: Request, res: Response) {
     try {
+      const { id: userId, role } = req.user!;
       const id = parseInt(req.params.id as string);
 
       if (isNaN(id)) {
@@ -50,13 +54,29 @@ export class ClassController {
         } as ErrorResponse);
       }
 
-      return res.status(501).json({
-        code: 501,
-        error: {
-          message: "Get by ID is not implemented in ClassService",
-          code: "NOT_IMPLEMENTED",
-        },
-      } as ErrorResponse);
+      if (role !== "admin") {
+        const enrollment = this.classEnrollmentRepository.find(
+          userId,
+          id,
+          role,
+        );
+        if (!enrollment) {
+          return res.status(403).json({
+            code: 403,
+            error: {
+              message: "User not enrolled to this class",
+              code: "FORBIDDEN",
+            },
+          } as ErrorResponse);
+        }
+      }
+
+      const data = this.classService.getClassDetails(id);
+
+      return res.status(200).json({
+        code: 200,
+        data,
+      } as SuccessResponse<ClassDetails>);
     } catch (error) {
       res.status(500).json({
         code: 500,
@@ -189,7 +209,8 @@ export class ClassController {
 
   async enroll(req: Request, res: Response) {
     try {
-      const { enroll_key, userId, role } = req.body;
+      const { id: userId, role } = req.user!;
+      const { enroll_key } = req.body;
 
       if (!enroll_key || !userId || !role) {
         return res.status(400).json({
@@ -214,7 +235,7 @@ export class ClassController {
       const classEnrolled = this.classService.enroll(
         enroll_key,
         Number(userId),
-        role,
+        role as "mahasiswa" | "dosen",
       );
 
       res.json({
@@ -254,8 +275,8 @@ export class ClassController {
 
   async getFollowedClasses(req: Request, res: Response) {
     try {
-      const userId = parseInt(req.params.userId as string);
-      const role = req.params.role as "mahasiswa" | "dosen" | "admin";
+      const userId = req.user?.id!;
+      const role = req.user?.role!;
 
       if (isNaN(userId) || !["mahasiswa", "dosen", "admin"].includes(role)) {
         return res.status(400).json({
