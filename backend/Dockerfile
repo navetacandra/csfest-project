@@ -38,7 +38,6 @@ WORKDIR /app
 RUN apk add --no-cache wget # healthchek tools
 
 COPY --from=builder /app/server .
-COPY --from=builder /app/openapi.yaml .
 COPY --from=builder /app/database ./database
 
 ENV NODE_ENV=production
