@@ -28,6 +28,7 @@ router.put(
   "/:id",
   AuthMiddleware.authenticate,
   RoleMiddleware.requireRole(["admin"]),
+  multerUpload("news_thumbnail", true).single("thumbnail"),
   (req: Request, res: Response) => newsController.update(req, res),
 );
 router.delete(

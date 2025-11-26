@@ -147,7 +147,35 @@ export class NewsController {
         } as ErrorResponse);
       }
 
-      const { title, thumbnail_file_id, content } = req.body;
+      const current = this.newsService.getById(id);
+      if (!current) {
+        return res.status(404).json({
+          code: 404,
+          error: {
+            message: "News not found",
+            code: "NOT_FOUND",
+          },
+        } as ErrorResponse);
+      }
+
+      const { title, content } = req.body;
+      let thumbnail_file_id: number | null = null;
+      if (req.file) {
+        thumbnail_file_id = this.fileRepo.create({
+          dosen_id: null,
+          mahasiswa_id: null,
+          mimetype: req.file!.mimetype,
+          random_name: req.file.path.replace(Bun.env.UPLOAD_PATH || "", ""),
+          size: req.file!.size,
+          upload_name: req.file!.originalname,
+        });
+
+        const oldFile = this.fileRepo.findById(current.thumbnail_file_id);
+        if (oldFile) {
+          this.fileRepo.delete(current.thumbnail_file_id);
+          Bun.file(`${Bun.env.UPLOAD_PATH}/${oldFile?.random_name}`).delete();
+        }
+      }
 
       const updateData: any = {};
       if (title) updateData.title = title;
@@ -186,7 +214,23 @@ export class NewsController {
         } as ErrorResponse);
       }
 
+      const current = this.newsService.getById(id);
+      if (!current) {
+        return res.status(404).json({
+          code: 404,
+          error: {
+            message: "News not found",
+            code: "NOT_FOUND",
+          },
+        } as ErrorResponse);
+      }
+
       const deletedNews = this.newsService.delete(id);
+      const oldFile = this.fileRepo.findById(current.thumbnail_file_id);
+      if (oldFile) {
+        this.fileRepo.delete(current.thumbnail_file_id);
+        Bun.file(`${Bun.env.UPLOAD_PATH}/${oldFile?.random_name}`).delete();
+      }
 
       res.json({
         code: 200,
