@@ -39,7 +39,7 @@ services:
     networks:
       - kulmsin-network
     volumes:
-      - ./backend/openapi.yaml:/usr/share/nginx/html/openapi.yaml
+      - ./backend/openapi-rev.yaml:/usr/share/nginx/html/openapi.yaml
     environment:
       - TZ=Asia/Jakarta
       - API_URL=openapi.yaml

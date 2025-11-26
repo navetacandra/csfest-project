@@ -381,7 +381,7 @@ paths:
       tags:
         - Posts
       summary: Create post in class
-      description: Create a new post or task in a class
+      description: Create a new post or task in a class with optional file attachment
       security:
         - bearerAuth: []
       parameters:
@@ -394,7 +394,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               required:
@@ -408,6 +408,10 @@ paths:
                   type: string
                   enum: [post, task]
                   example: "task"
+                file:
+                  type: string
+                  format: binary
+                  description: Optional file attachment for the post
       responses:
         "200":
           description: Successfully created post
@@ -460,7 +464,7 @@ paths:
       tags:
         - Posts
       summary: Update post
-      description: Update an existing post
+      description: Update an existing post with optional file attachment
       security:
         - bearerAuth: []
       parameters:
@@ -479,7 +483,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -490,6 +494,10 @@ paths:
                   type: string
                   enum: [post, task]
                   example: "post"
+                file:
+                  type: string
+                  format: binary
+                  description: Optional file attachment for the post
       responses:
         "200":
           description: Post updated successfully
@@ -642,34 +650,12 @@ paths:
                     items:
                       $ref: "#/components/schemas/Class"
 
-  /presence/recap:
-    get:
-      tags:
-        - Presence
-      summary: Get presence recap
-      description: Retrieve presence records and accumulated lateness for student
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Presence recap
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: number
-                    example: 200
-                  data:
-                    $ref: "#/components/schemas/PresenceRecap"
-
   /presence/{class_id}:
     post:
       tags:
         - Presence
       summary: Set presence
-      description: Record attendance for a class
+      description: Record attendance for a class. For mahasiswa, can only set own presence for today as "hadir" with no late time. For dosen, can set presence for multiple students using an array payload.
       security:
         - bearerAuth: []
       parameters:
@@ -684,25 +670,35 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - schedule_date
-                - status
-              properties:
-                schedule_date:
-                  type: string
-                  format: date
-                  example: "2024-11-24"
-                status:
-                  type: string
-                  enum: [hadir, izin, sakit, alpha]
-                  example: "hadir"
-                studentId:
-                  type: integer
-                  description: Required when setting for another student (by dosen)
-                late_time:
-                  type: integer
-                  description: Late time in minutes, default 0
+              oneOf:
+                - type: object
+                  description: For mahasiswa - set own presence (only date and status are ignored, sets for today automatically)
+                  additionalProperties: false
+                - type: array
+                  description: For dosen - set presence for multiple students
+                  items:
+                    type: object
+                    required:
+                      - schedule_date
+                      - status
+                      - studentId
+                    properties:
+                      schedule_date:
+                        type: string
+                        format: date
+                        example: "2024-11-24"
+                      status:
+                        type: string
+                        enum: [hadir, izin, sakit, alpha]
+                        example: "hadir"
+                      studentId:
+                        type: integer
+                        description: Student ID for whom to set presence
+                        example: 123
+                      late_time:
+                        type: integer
+                        description: Late time in minutes, default 0
+                        example: 5
       responses:
         "200":
           description: Presence recorded successfully
@@ -715,7 +711,171 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: "#/components/schemas/Presence"
+                    type: object
+                    example: {}
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 400
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Mahasiswa cannot set presence for other students or specify lateness."
+                      code:
+                        type: string
+                        example: "VALIDATION_ERROR"
+        "404":
+          description: Class or student not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 404
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Class not found"
+                      code:
+                        type: string
+                        example: "NOT_FOUND"
+
+  /presence/recap:
+    get:
+      tags:
+        - Presence
+      summary: Get presence recap for mahasiswa
+      description: Retrieve presence records and accumulated lateness for a student across all classes
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Mahasiswa presence recap
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      lateness_time:
+                        type: number
+                        example: 15
+                        description: Total accumulated lateness time in minutes
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            class_id:
+                              type: number
+                              example: 1
+                            class_name:
+                              type: string
+                              example: "Pemrograman Web Lanjutan"
+                            recap:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  schedule_date:
+                                    type: string
+                                    format: date
+                                    example: "2025-01-01"
+                                  status:
+                                    type: string
+                                    enum: [hadir, izin, sakit, alpha, null]
+                                    example: "hadir"
+                                    description: null if no presence record exists
+                                  late_time:
+                                    type: number
+                                    example: 5
+                                    description: 0 if no presence record exists
+  /presence/{class_id}/recap:
+    get:
+      tags:
+        - Presence
+      summary: Get presence recap for dosen
+      description: Retrieve presence records for all students in a specific class
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: class_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      responses:
+        "200":
+          description: Dosen presence recap for a class
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      members:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            mahasiswa_id:
+                              type: number
+                              example: 1
+                            nim:
+                              type: string
+                              example: "235150200111001"
+                            name:
+                              type: string
+                              example: "Agus Setiawan"
+                      recap:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            schedule_date:
+                              type: string
+                              format: date
+                              example: "2025-01-01"
+                            data:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  mahasiswa_id:
+                                    type: number
+                                    example: 1
+                                  status:
+                                    type: string
+                                    enum: [hadir, izin, sakit, alpha, null]
+                                    example: "hadir"
+                                    description: null if no presence record exists
+                                  late_time:
+                                    type: number
+                                    example: 5
+                                    description: 0 if no presence record exists
 
   /admin/major:
     get:
@@ -936,7 +1096,71 @@ paths:
                   data:
                     $ref: "#/components/schemas/StudyProgram"
 
-  /admin/major/{major_id}/study_program/{id}:
+  /admin/study_program/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get study program details
+      description: Retrieve details of a specific study program (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Study Program ID
+      responses:
+        "200":
+          description: Study program details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/StudyProgram"
+    put:
+      tags:
+        - Admin
+      summary: Update study program
+      description: Update an existing study program (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Study Program ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Sistem Informasi"
+      responses:
+        "200":
+          description: Study program updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/StudyProgram"
     delete:
       tags:
         - Admin
@@ -945,12 +1169,6 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: major_id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: Major ID
         - name: id
           in: path
           required: true
@@ -971,50 +1189,24 @@ paths:
                   data:
                     $ref: "#/components/schemas/StudyProgram"
 
-  /admin/mahasiswa:
+  /admin/study_program/{study_program_id}/mahasiswa:
     get:
       tags:
         - Admin
-      summary: Get list of mahasiswa
-      description: Retrieve paginated list of students (admin only)
+      summary: Get students in a study program
+      description: Retrieve all students in a specific study program (admin only)
       security:
         - bearerAuth: []
       parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by name
-        - name: major_id
-          in: query
-          required: false
-          schema:
-            type: integer
-          description: Filter by major ID
         - name: study_program_id
-          in: query
-          required: false
+          in: path
+          required: true
           schema:
             type: integer
-          description: Filter by study program ID
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 1
-          description: Page number
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 10
-          description: Number of items per page
+          description: Study Program ID
       responses:
         "200":
-          description: List of students
+          description: List of students in the study program
           content:
             application/json:
               schema:
@@ -1026,29 +1218,22 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: number
-                          example: 1
-                        name:
-                          type: string
-                          example: "Agus Setiawan"
-                        major:
-                          type: string
-                          example: "Ilmu Komputer"
-                        study_program:
-                          type: string
-                          example: "Teknik Informatika"
-                  meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                      $ref: "#/components/schemas/Mahasiswa"
+
     post:
       tags:
         - Admin
-      summary: Create mahasiswa
-      description: Create a new student (admin only)
+      summary: Create student in study program
+      description: Create a new student in a specific study program (admin only)
       security:
         - bearerAuth: []
+      parameters:
+        - name: study_program_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Study Program ID
       requestBody:
         required: true
         content:
@@ -1056,14 +1241,16 @@ paths:
             schema:
               type: object
               required:
+                - major_id
                 - nim
                 - name
                 - email
-                - major_id
-                - study_program_id
                 - username
                 - password
               properties:
+                major_id:
+                  type: integer
+                  example: 1
                 nim:
                   type: string
                   example: "235150200111001"
@@ -1074,12 +1261,6 @@ paths:
                   type: string
                   format: email
                   example: "agus.s@student.college.id"
-                major_id:
-                  type: integer
-                  example: 1
-                study_program_id:
-                  type: integer
-                  example: 1
                 username:
                   type: string
                   example: "agus.setiawan"
@@ -1104,7 +1285,7 @@ paths:
     get:
       tags:
         - Admin
-      summary: Get mahasiswa details
+      summary: Get student details
       description: Retrieve details of a specific student (admin only)
       security:
         - bearerAuth: []
@@ -1127,24 +1308,11 @@ paths:
                     type: number
                     example: 200
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: number
-                        example: 1
-                      name:
-                        type: string
-                        example: "Agus Setiawan"
-                      major:
-                        type: string
-                        example: "Ilmu Komputer"
-                      study_program:
-                        type: string
-                        example: "Teknik Informatika"
+                    $ref: "#/components/schemas/Mahasiswa"
     put:
       tags:
         - Admin
-      summary: Update mahasiswa
+      summary: Update student
       description: Update an existing student (admin only)
       security:
         - bearerAuth: []
@@ -1162,25 +1330,28 @@ paths:
             schema:
               type: object
               properties:
+                major_id:
+                  type: integer
+                  example: 1
+                study_program_id:
+                  type: integer
+                  example: 1
                 nim:
                   type: string
                   example: "235150200111001"
                 name:
                   type: string
-                  example: "Agus Setiawan Updated"
+                  example: "Agus Setiawan"
                 email:
                   type: string
                   format: email
-                  example: "agus.updated@student.college.id"
-                major_id:
-                  type: integer
-                  example: 2
-                study_program_id:
-                  type: integer
-                  example: 2
+                  example: "agus.s@student.college.id"
                 username:
                   type: string
-                  example: "agus.setiawan.updated"
+                  example: "agus.setiawan"
+                password:
+                  type: string
+                  example: "newpassword123"
       responses:
         "200":
           description: Student updated successfully
@@ -1197,7 +1368,7 @@ paths:
     delete:
       tags:
         - Admin
-      summary: Delete mahasiswa
+      summary: Delete student
       description: Delete a specific student (admin only)
       security:
         - bearerAuth: []
@@ -1222,27 +1393,15 @@ paths:
                   data:
                     $ref: "#/components/schemas/Mahasiswa"
 
-  /admin/dosen:
+  /admin/class:
     get:
       tags:
         - Admin
-      summary: Get list of dosen
-      description: Retrieve paginated list of lecturers (admin only)
+      summary: Get all classes
+      description: Retrieve all classes (admin only)
       security:
         - bearerAuth: []
       parameters:
-        - name: nip
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by NIP
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by name
         - name: page
           in: query
           required: false
@@ -1259,7 +1418,7 @@ paths:
           description: Number of items per page
       responses:
         "200":
-          description: List of lecturers
+          description: List of all classes
           content:
             application/json:
               schema:
@@ -1271,13 +1430,193 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/DosenWithUsername"
+                      $ref: "#/components/schemas/Class"
                   meta:
                     $ref: "#/components/schemas/PaginationMeta"
     post:
       tags:
         - Admin
-      summary: Create dosen
+      summary: Create class
+      description: Create a new class (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - schedule
+                - start_time
+                - end_time
+              properties:
+                name:
+                  type: string
+                  example: "Pemrograman Web Lanjutan"
+                schedule:
+                  type: integer
+                  description: Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+                  example: 1
+                start_time:
+                  type: string
+                  example: "08:00"
+                end_time:
+                  type: string
+                  example: "10:00"
+                activated_at:
+                  type: string
+                  format: date-time
+                  example: "2025-01-01 00:00:00"
+      responses:
+        "200":
+          description: Class created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Class"
+
+  /admin/class/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get class details
+      description: Retrieve details of a specific class (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      responses:
+        "200":
+          description: Class details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Class"
+    put:
+      tags:
+        - Admin
+      summary: Update class
+      description: Update an existing class (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Pemrograman Web Lanjutan"
+                schedule:
+                  type: integer
+                  description: Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+                  example: 1
+                start_time:
+                  type: string
+                  example: "08:00"
+                end_time:
+                  type: string
+                  example: "10:00"
+                activated_at:
+                  type: string
+                  format: date-time
+                  example: "2025-01-01 00:00:00"
+      responses:
+        "200":
+          description: Class updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Class"
+    delete:
+      tags:
+        - Admin
+      summary: Delete class
+      description: Delete a specific class (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Class ID
+      responses:
+        "200":
+          description: Class deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Class"
+
+  /admin/dosen:
+    get:
+      tags:
+        - Admin
+      summary: Get all lecturers
+      description: Retrieve all lecturers (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all lecturers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Dosen"
+    post:
+      tags:
+        - Admin
+      summary: Create lecturer
       description: Create a new lecturer (admin only)
       security:
         - bearerAuth: []
@@ -1290,6 +1629,8 @@ paths:
               required:
                 - nip
                 - name
+                - username
+                - password
               properties:
                 nip:
                   type: string
@@ -1300,6 +1641,9 @@ paths:
                 username:
                   type: string
                   example: "budi.hartono"
+                password:
+                  type: string
+                  example: "password123"
       responses:
         "200":
           description: Lecturer created successfully
@@ -1312,13 +1656,13 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: "#/components/schemas/DosenWithUsername"
+                    $ref: "#/components/schemas/Dosen"
 
   /admin/dosen/{id}:
     get:
       tags:
         - Admin
-      summary: Get dosen details
+      summary: Get lecturer details
       description: Retrieve details of a specific lecturer (admin only)
       security:
         - bearerAuth: []
@@ -1341,11 +1685,11 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: "#/components/schemas/DosenWithUsername"
+                    $ref: "#/components/schemas/Dosen"
     put:
       tags:
         - Admin
-      summary: Update dosen
+      summary: Update lecturer
       description: Update an existing lecturer (admin only)
       security:
         - bearerAuth: []
@@ -1369,6 +1713,12 @@ paths:
                 name:
                   type: string
                   example: "Dr. Budi Hartono, M.Kom."
+                username:
+                  type: string
+                  example: "budi.hartono"
+                password:
+                  type: string
+                  example: "newpassword123"
       responses:
         "200":
           description: Lecturer updated successfully
@@ -1381,11 +1731,11 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: "#/components/schemas/DosenWithUsername"
+                    $ref: "#/components/schemas/Dosen"
     delete:
       tags:
         - Admin
-      summary: Delete dosen
+      summary: Delete lecturer
       description: Delete a specific lecturer (admin only)
       security:
         - bearerAuth: []
@@ -1408,47 +1758,7 @@ paths:
                     type: number
                     example: 200
                   data:
-                    $ref: "#/components/schemas/DosenWithUsername"
-
-  /admin/classes:
-    post:
-      tags:
-        - Admin
-      summary: Create class
-      description: Create a new class (admin only)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - schedule
-              properties:
-                name:
-                  type: string
-                  example: "Pemrograman Web Lanjutan"
-                schedule:
-                  type: integer
-                  minimum: 0
-                  maximum: 6
-                  example: 1
-      responses:
-        "200":
-          description: Class created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: number
-                    example: 200
-                  data:
-                    $ref: "#/components/schemas/Class"
+                    $ref: "#/components/schemas/Dosen"
 
   /admin/news:
     get:
@@ -1494,19 +1804,19 @@ paths:
       tags:
         - Admin
       summary: Create news
-      description: Create a new news article (admin only)
+      description: Create a new news article with thumbnail (admin only)
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               required:
                 - title
                 - content
-                - thumbnail_file_id
+                - thumbnail
               properties:
                 title:
                   type: string
@@ -1514,9 +1824,10 @@ paths:
                 content:
                   type: string
                   example: "Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026..."
-                thumbnail_file_id:
-                  type: integer
-                  example: 5
+                thumbnail:
+                  type: string
+                  format: binary
+                  description: News thumbnail image file
       responses:
         "200":
           description: News created successfully
@@ -1563,7 +1874,7 @@ paths:
       tags:
         - Admin
       summary: Update news
-      description: Update an existing news article (admin only)
+      description: Update an existing news article with optional new thumbnail (admin only)
       security:
         - bearerAuth: []
       parameters:
@@ -1576,7 +1887,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -1586,9 +1897,10 @@ paths:
                 content:
                   type: string
                   example: "Updated news content..."
-                thumbnail_file_id:
-                  type: integer
-                  example: 6
+                thumbnail:
+                  type: string
+                  format: binary
+                  description: Optional new news thumbnail image file
       responses:
         "200":
           description: News updated successfully
@@ -1630,29 +1942,8 @@ paths:
                   data:
                     $ref: "#/components/schemas/News"
 
-  /storage/{file_id}:
-    get:
-      tags:
-        - Storage
-      summary: Download file
-      description: Download a file by ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: file_id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: File ID
-      responses:
-        "200":
-          description: File for download
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
+security:
+  - bearerAuth: []
 
 components:
   securitySchemes:
@@ -1660,22 +1951,20 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
-    User:
+    NewsListItem:
       type: object
       properties:
         id:
           type: number
           example: 1
-        name:
+        title:
           type: string
-          example: "Test User"
-        username:
-          type: string
-          example: "testuser"
-        email:
-          type: string
-          example: "test@example.com"
+          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
+        thumbnail_file_id:
+          type: number
+          example: 5
         created_at:
           type: string
           format: date-time
@@ -1685,20 +1974,21 @@ components:
           format: date-time
           example: "2024-11-23T10:00:00Z"
 
-    Admin:
-      allOf:
-        - $ref: "#/components/schemas/User"
+    News:
       type: object
       properties:
         id:
           type: number
           example: 1
-        name:
+        title:
           type: string
-          example: "Admin User"
-        username:
+          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
+        thumbnail_file_id:
+          type: number
+          example: 5
+        content:
           type: string
-          example: "admin"
+          example: "Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026. Segera lakukan pendaftaran ulang melalui portal akademik."
         created_at:
           type: string
           format: date-time
@@ -1708,23 +1998,76 @@ components:
           format: date-time
           example: "2024-11-23T10:00:00Z"
 
-    Dosen:
-      allOf:
-        - $ref: "#/components/schemas/User"
+    Class:
       type: object
       properties:
         id:
           type: number
           example: 1
-        nip:
-          type: string
-          example: "198501012010011001"
         name:
           type: string
-          example: "Dr. Budi Hartono, M.Kom."
-        username:
+          example: "Pemrograman Web Lanjutan"
+        enroll_key:
           type: string
-          example: "budi.hartono"
+          example: "WEB2025ADV"
+        schedule:
+          type: integer
+          description: Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+          example: 1
+        start_time:
+          type: string
+          example: "08:00"
+        end_time:
+          type: string
+          example: "10:00"
+        activated_at:
+          type: string
+          example: "2024-11-23T10:00:00Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        posts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 1
+              message:
+                type: string
+                example: "Selamat datang di kelas Pemrograman Web Lanjutan"
+              type:
+                type: string
+                example: "post"
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        class_id:
+          type: number
+          example: 1
+        class_enrollment_id:
+          type: number
+          example: 1
+        file_id:
+          type: number
+          example: null
+        message:
+          type: string
+          example: "Selamat datang di kelas Pemrograman Web Lanjutan"
+        type:
+          type: string
+          enum: [post, task]
+          example: "post"
         created_at:
           type: string
           format: date-time
@@ -1734,36 +2077,82 @@ components:
           format: date-time
           example: "2024-11-23T10:00:00Z"
 
-    DosenWithUsername:
+    PostWithFile:
       allOf:
-        - $ref: "#/components/schemas/Dosen"
+        - $ref: "#/components/schemas/Post"
+        - type: object
+          properties:
+            file:
+              $ref: "#/components/schemas/File"
 
-    Mahasiswa:
-      allOf:
-        - $ref: "#/components/schemas/User"
+    Task:
       type: object
       properties:
         id:
           type: number
           example: 1
-        major_id:
+        post_id:
+          type: number
+          example: 3
+        class_enrollment_id:
+          type: number
+          example: 7
+        file_id:
           type: number
           example: 1
-        study_program_id:
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+
+    TaskItem:
+      type: object
+      properties:
+        id:
           type: number
           example: 1
-        nim:
+        class_id:
+          type: number
+          example: 1
+        class_name:
           type: string
-          example: "235150200111001"
-        name:
+          example: "Pemrograman Web Lanjutan"
+        title:
           type: string
-          example: "Agus Setiawan"
-        email:
+          example: "Tugas 1: Buat sebuah landing page sederhana"
+        status:
           type: string
-          example: "agus.s@student.college.id"
-        username:
+          enum: [completed, incoming]
+          example: "incoming"
+
+    File:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        mahasiswa_id:
+          type: number
+          example: 1
+        dosen_id:
+          type: number
+          example: null
+        upload_name:
           type: string
-          example: "agus.setiawan"
+          example: "tugas_1.pdf"
+        random_name:
+          type: string
+          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.pdf"
+        size:
+          type: number
+          example: 1024
+        mimetype:
+          type: string
+          example: "application/pdf"
         created_at:
           type: string
           format: date-time
@@ -1812,7 +2201,65 @@ components:
           format: date-time
           example: "2024-11-23T10:00:00Z"
 
-    Class:
+    Mahasiswa:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        major_id:
+          type: number
+          example: 1
+        study_program_id:
+          type: number
+          example: 1
+        nim:
+          type: string
+          example: "235150200111001"
+        name:
+          type: string
+          example: "Agus Setiawan"
+        email:
+          type: string
+          format: email
+          example: "agus.s@student.college.id"
+        username:
+          type: string
+          example: "agus.setiawan"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+
+    Dosen:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        nip:
+          type: string
+          example: "198501012010011001"
+        name:
+          type: string
+          example: "Dr. Budi Hartono, M.Kom."
+        username:
+          type: string
+          example: "budi.hartono"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-11-23T10:00:00Z"
+
+    Admin:
       type: object
       properties:
         id:
@@ -1820,23 +2267,10 @@ components:
           example: 1
         name:
           type: string
-          example: "Pemrograman Web Lanjutan"
-        enroll_key:
+          example: "Super Admin"
+        username:
           type: string
-          example: "WEB2025ADV"
-        schedule:
-          type: number
-          example: 1
-        start_time:
-          type: string
-          example: "08:00"
-        end_time:
-          type: string
-          example: "10:00"
-        activated_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
+          example: "superadmin"
         created_at:
           type: string
           format: date-time
@@ -1846,160 +2280,18 @@ components:
           format: date-time
           example: "2024-11-23T10:00:00Z"
 
-    News:
+    PaginationMeta:
       type: object
       properties:
-        id:
-          type: number
-          example: 1
-        title:
-          type: string
-          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
-        thumbnail_file_id:
-          type: number
-          example: 5
-        content:
-          type: string
-          example: "Telah dibuka pendaftaran untuk semester baru tahun ajaran 2025/2026. Segera lakukan pendaftaran ulang melalui portal akademik."
-        created_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-        updated_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-
-    NewsListItem:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        title:
-          type: string
-          example: "Pembukaan Pendaftaran Semester Baru 2025/2026"
-        thumbnail:
-          type: string
-          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.jpg"
-
-    Post:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        class_id:
-          type: number
-          example: 1
-        class_enrollment_id:
-          type: number
-          example: 1
-        file_id:
-          type: number
-          example: null
-        message:
-          type: string
-          example: "Selamat datang di kelas Pemrograman Web Lanjutan"
-        type:
-          type: string
-          example: "post"
-        created_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-        updated_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-
-    PostWithFile:
-      allOf:
-        - $ref: "#/components/schemas/Post"
-      type: object
-      properties:
-        file:
-          $ref: "#/components/schemas/File"
-        task:
-          $ref: "#/components/schemas/Task"
-        tasks:
-          type: array
-          items:
-            $ref: "#/components/schemas/Task"
-
-    File:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        mahasiswa_id:
-          type: number
-          example: null
-        dosen_id:
-          type: number
-          example: null
-        upload_name:
-          type: string
-          example: "tugas_1.pdf"
-        random_name:
-          type: string
-          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6.pdf"
         size:
           type: number
-          example: 1024
-        mimetype:
-          type: string
-          example: "application/pdf"
-        created_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-        updated_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-
-    Task:
-      type: object
-      properties:
-        id:
+          example: 10
+        page:
           type: number
           example: 1
-        post_id:
+        limit:
           type: number
-          example: 3
-        class_enrollment_id:
-          type: number
-          example: 7
-        file_id:
-          type: number
-          example: 1
-        created_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-        updated_at:
-          type: string
-          format: date-time
-          example: "2024-11-23T10:00:00Z"
-
-    TaskItem:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        class_id:
-          type: number
-          example: 1
-        title:
-          type: string
-          example: "Tugas 1: Buat sebuah landing page sederhana"
-        status:
-          type: string
-          enum: [completed, incoming]
-          example: "incoming"
+          example: 10
 
     Presence:
       type: object
@@ -2033,23 +2325,36 @@ components:
     PresenceRecap:
       type: object
       properties:
-        accumulated_late:
+        lateness_time:
           type: number
           example: 0
-        recap:
+          description: Total accumulated lateness time in minutes
+        data:
           type: array
           items:
-            $ref: "#/components/schemas/Presence"
-
-    PaginationMeta:
-      type: object
-      properties:
-        size:
-          type: number
-          example: 10
-        page:
-          type: number
-          example: 1
-        limit:
-          type: number
-          example: 10
+            type: object
+            properties:
+              class_id:
+                type: number
+                example: 1
+              class_name:
+                type: string
+                example: "Pemrograman Web Lanjutan"
+              recap:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    schedule_date:
+                      type: string
+                      format: date
+                      example: "2025-01-01"
+                    status:
+                      type: string
+                      enum: [hadir, izin, sakit, alpha, null]
+                      example: "hadir"
+                      description: null if no presence record exists
+                    late_time:
+                      type: number
+                      example: 5
+                      description: 0 if no presence record exists
