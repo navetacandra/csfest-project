@@ -86,6 +86,14 @@ export class MahasiswaRepository {
     return result.length > 0 ? result[0]! : null;
   }
 
+  findByClassId(classId: number) {
+    const result = this.db.query(
+      "SELECT m.name, m.nim FROM class_enrollment ce JOIN mahasiswa m ON m.id=ce.mahasiswa_id WHERE ce.class_id = ?",
+      classId,
+    );
+    return result;
+  }
+
   update(id: number, data: MahasiswaForUpdate): void {
     const fields = Object.keys(data);
     if (fields.length === 0) {

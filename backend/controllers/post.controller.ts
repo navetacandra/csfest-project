@@ -3,6 +3,8 @@ import { PostService } from "../services/post.service";
 import { Sqlite } from "../config/database";
 import type { SuccessResponse, ErrorResponse } from "../config/response";
 import type { Post } from "../models/post.model";
+import { ClassEnrollmentRepository } from "../repositories/classEnrollment.repository";
+import { FileRepository } from "../repositories/file.repository";
 
 interface PostCreateRequest {
   class_id: number;
@@ -19,9 +21,13 @@ interface PostUpdateRequest {
 
 export class PostController {
   private postService: PostService;
+  private fileRepo: FileRepository;
+  private enrollmentRepository: ClassEnrollmentRepository;
 
   constructor(sqlite: Sqlite) {
     this.postService = new PostService(sqlite);
+    this.fileRepo = new FileRepository(sqlite);
+    this.enrollmentRepository = new ClassEnrollmentRepository(sqlite);
   }
 
   async getById(req: Request, res: Response) {
@@ -83,12 +89,41 @@ export class PostController {
 
   async create(req: Request, res: Response) {
     try {
-      const { class_id, class_enrollment_id, file_id, message, type } =
-        req.body as PostCreateRequest;
+      const { class_id } = req.params!;
+      const { id: userId, role } = req.user!;
+      const class_enrollment = this.enrollmentRepository.find(
+        userId,
+        Number(class_id),
+        role,
+      );
+      const { message, type } = req.body as PostCreateRequest;
+      let file_id: number | null = null;
+
+      if (role !== "dosen") {
+        return res.status(403).json({
+          code: 403,
+          error: {
+            message: "Your role is not dosen",
+            code: "FORBIDDEN",
+          },
+        } as ErrorResponse);
+      }
+
+      if (req.file) {
+        file_id = this.fileRepo.create({
+          mahasiswa_id: null,
+          mimetype: req.file!.mimetype,
+          random_name: req.file.path.replace(Bun.env.UPLOAD_PATH || "", ""),
+          size: req.file!.size,
+          upload_name: req.file!.originalname,
+          dosen_id: userId,
+        });
+      }
 
       if (
         class_id === undefined ||
-        class_enrollment_id === undefined ||
+        class_enrollment === undefined ||
+        class_enrollment === null ||
         !type
       ) {
         return res.status(400).json({
@@ -112,7 +147,7 @@ export class PostController {
 
       const postData = {
         class_id,
-        class_enrollment_id,
+        class_enrollment_id: class_enrollment.id,
         ...(file_id !== undefined && { file_id: Number(file_id) }),
         ...(message && { message }),
         type,

@@ -12,6 +12,10 @@ const ALLOWED_MIME_TYPES: string[] = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+Bun.env.UPLOAD_PATH = Bun.env.UPLOAD_PATH?.endsWith("/")
+  ? Bun.env.UPLOAD_PATH
+  : Bun.env.UPLOAD_PATH + "/";
+
 const storage = (directory: string = "") =>
   multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
@@ -39,10 +43,23 @@ const fileFilter = (
   );
 };
 
-const multerUpload = (directory: string = "") =>
+const imageFileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback,
+) => {
+  if (file.mimetype.startsWith("image/")) return cb(null, true);
+  cb(
+    new Error(
+      "File type not allowed. Only PDF, JPG, PNG, and DOCX are permitted.",
+    ),
+  );
+};
+
+const multerUpload = (directory: string = "", image: boolean = false) =>
   multer({
     storage: storage(directory),
-    fileFilter: fileFilter,
+    fileFilter: image ? imageFileFilter : fileFilter,
     limits: {
       fileSize: MAX_FILE_SIZE,
     },

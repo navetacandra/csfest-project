@@ -40,6 +40,21 @@ export class ClassEnrollmentRepository {
     ) as ClassEnrollment[];
   }
 
+  find(
+    userId: number,
+    classId: number,
+    role: "mahasiswa" | "dosen" | "admin",
+  ): ClassEnrollment | null {
+    if (!["mahasiswa", "dosen", "admin"].includes(role))
+      throw new Error("invalid role");
+    const result = this.db.query(
+      `SELECT * FROM class_enrollment WHERE class_id = ? AND ${role}_id = ? LIMIT 1`,
+      classId,
+      userId,
+    ) as ClassEnrollment[];
+    return result[0] || null;
+  }
+
   findByMahasiswaId(mahasiswaId: number): ClassEnrollment[] {
     return this.db.query(
       "SELECT * FROM class_enrollment WHERE mahasiswa_id = ?",

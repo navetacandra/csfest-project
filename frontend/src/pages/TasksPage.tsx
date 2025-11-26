@@ -1,17 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from "react-router-dom"
-
-const tasks = [
-  { id: 1, title: 'Task Title 1', className: 'class name', status: 'Completed' },
-  { id: 2, title: 'Task Title 2', className: 'class name', status: 'Incomplete' },
-  { id: 3, title: 'Task Title 3', className: 'class name', status: 'Completed' },
-  { id: 4, title: 'Task Title 4', className: 'class name', status: 'Incomplete' },
-];
+import api from '@/lib/api';
+import type { TaskItem, ApiResponse } from '@/types';
 
 const TasksPage: React.FC = () => {
   const navigate = useNavigate()
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
 
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await api.get<ApiResponse<TaskItem[]>>('/tasks');
+        setTasks(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch tasks', error);
+      }
+    }
+
+    fetchTasks();
+  }, []);
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-display">
@@ -19,14 +27,11 @@ const TasksPage: React.FC = () => {
         <main>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary">Your Tasks</h2>
-            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
-              All
-            </Button>
           </div>
           <div className="space-y-6">
-            {tasks.map((task, index) => (
+            {tasks.map((task) => (
               <div
-                key={index}
+                key={task.id}
                 className="
                         flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6
                         border-2 border-primary rounded-lg
@@ -36,16 +41,16 @@ const TasksPage: React.FC = () => {
                         hover:shadow-none
                         shadow-shadow
                       "
-                onClick={() => navigate("/task/" + task.id)}
+                onClick={() => navigate(`/class/${task.class_id}/task/${task.id}`)}
               >
                 <div className='mb-4 sm:mb-0'>
                   <h2 className="text-lg sm:text-xl font-bold text-primary">{task.title}</h2>
                   <p className="text-sm sm:text-base text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                    {task.className}
+                    Class ID: {task.class_id}
                   </p>
                 </div>
 
-                <Button className="
+                {/* <Button className="
                         px-5 py-2 border-2 border-black
                         bg-danger text-white rounded-lg font-bold
                         shadow-[-3px_4px_0px_0px_black]
@@ -53,7 +58,7 @@ const TasksPage: React.FC = () => {
                         transition-all w-full sm:w-auto
                       ">
                   View Task
-                </Button>
+                </Button> */}
               </div>
             ))}
           </div>
