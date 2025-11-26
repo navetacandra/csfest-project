@@ -13,7 +13,7 @@ export interface ClassDetails {
   schedule: number;
   start_time: string;
   end_time: string;
-  actived_at: string;
+  activated_at: string;
   created_at: string;
   updated_at: string;
   posts: {
@@ -43,11 +43,22 @@ export class ClassService {
   create(
     data: Omit<
       Class,
-      "id" | "created_at" | "updated_at" | "actived_at" | "enroll_key"
+      "id" | "created_at" | "updated_at" | "activated_at" | "enroll_key"
     >,
   ): Class | null {
     const enrollKey = randomBytes(4).toString("hex").toUpperCase();
     const newClassId = this.classRepository.create(data, enrollKey);
+    return this.classRepository.findById(Number(newClassId));
+  }
+
+  createWithActivationDate(
+    data: Omit<
+      Class,
+      "id" | "created_at" | "updated_at" | "enroll_key"
+    >
+  ): Class | null {
+    const enrollKey = randomBytes(4).toString("hex").toUpperCase();
+    const newClassId = this.classRepository.createWithActivationDate(data, enrollKey);
     return this.classRepository.findById(Number(newClassId));
   }
 

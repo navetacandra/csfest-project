@@ -2,15 +2,15 @@ import type { Request, Response } from "express";
 import { PresenceService } from "../services/presence.service";
 import { Sqlite } from "../config/database";
 import type { SuccessResponse, ErrorResponse } from "../config/response";
-import type { Presence } from "../models/presence.model";
 
-interface PresenceCreateRequest {
-  classId: number;
+type PresenceData = {
   schedule_date: string;
   status: "hadir" | "sakit" | "izin" | "alpha";
   studentId?: number;
   late_time?: number;
-}
+};
+
+type PresenceCreateRequest = PresenceData | PresenceData[];
 
 export class PresenceController {
   private presenceService: PresenceService;
@@ -21,14 +21,14 @@ export class PresenceController {
 
   async setPresence(req: Request, res: Response) {
     try {
-      const { classId, schedule_date, status, studentId, late_time } =
-        req.body as PresenceCreateRequest;
+      const { class_id } = req.params;
+      const payload = req.body as PresenceCreateRequest;
 
-      if (!classId || !schedule_date || !status) {
+      if (!class_id) {
         return res.status(400).json({
           code: 400,
           error: {
-            message: "classId, schedule_date, and status are required",
+            message: "class_id is required",
             code: "VALIDATION_ERROR",
           },
         } as ErrorResponse);
@@ -44,20 +44,13 @@ export class PresenceController {
         } as ErrorResponse);
       }
 
-      const payload = {
-        schedule_date,
-        status,
-        ...(studentId && { studentId: Number(studentId) }),
-        ...(late_time && { late_time: Number(late_time) }),
-      };
-
       const actor = {
         role: req.user.role as "mahasiswa" | "dosen",
         id: req.user.id,
       };
 
       const result = this.presenceService.setPresence(
-        Number(classId),
+        Number(class_id),
         actor,
         payload,
       );
@@ -65,9 +58,12 @@ export class PresenceController {
       res.status(200).json({
         code: 200,
         data: result,
-      } as SuccessResponse<Presence>);
+      } as SuccessResponse<any>);
     } catch (error) {
-      if ((error as Error).message.includes("can only set")) {
+      if (
+        (error as Error).message.includes("can only set") ||
+        (error as Error).message.includes("must provide an array")
+      ) {
         return res.status(400).json({
           code: 400,
           error: {
@@ -87,7 +83,10 @@ export class PresenceController {
         } as ErrorResponse);
       }
 
-      if ((error as Error).message.includes("Student is not enrolled")) {
+      if (
+        (error as Error).message.includes("is not enrolled") ||
+        (error as Error).message.includes("studentId is required")
+      ) {
         return res.status(400).json({
           code: 400,
           error: {
@@ -119,27 +118,26 @@ export class PresenceController {
         } as ErrorResponse);
       }
 
-      if (req.user.role !== "mahasiswa") {
+      let data;
+      if (req.user.role === "mahasiswa") {
+        data = this.presenceService.getMahasiswaRecap(req.user.id);
+      } else if (req.user.role === "dosen") {
+        const { class_id } = req.params;
+        data = this.presenceService.getDosenRecap(Number(class_id));
+      } else {
         return res.status(403).json({
           code: 403,
           error: {
-            message: "Only mahasiswa can get presence recap",
+            message: "Forbidden access",
             code: "FORBIDDEN_ACCESS",
           },
         } as ErrorResponse);
       }
 
-      const { accumulated_late, recap } = this.presenceService.getRecap(
-        req.user.id,
-      );
-
       res.status(200).json({
         code: 200,
-        data: {
-          accumulated_late,
-          recap,
-        },
-      } as SuccessResponse<{ accumulated_late: number; recap: Presence[] }>);
+        data: data,
+      } as SuccessResponse<any>);
     } catch (error) {
       res.status(500).json({
         code: 500,

@@ -11,8 +11,17 @@ router.post(
   AuthMiddleware.authenticate,
   (req: Request, res: Response) => presenceController.setPresence(req, res),
 );
+
+// student
 router.get(
   "/recap",
+  AuthMiddleware.authenticate,
+  (req: Request, res: Response) => presenceController.getRecap(req, res),
+);
+
+// lecturer
+router.get(
+  "/:class_id/recap",
   AuthMiddleware.authenticate,
   (req: Request, res: Response) => presenceController.getRecap(req, res),
 );

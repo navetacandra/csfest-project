@@ -352,7 +352,7 @@ paths:
                       end_time:
                         type: string
                         example: "10:00"
-                      actived_at:
+                      activated_at:
                         type: string
                         example: "2024-11-23T10:00:00Z"
                       created_at:
@@ -1833,7 +1833,7 @@ components:
         end_time:
           type: string
           example: "10:00"
-        actived_at:
+        activated_at:
           type: string
           format: date-time
           example: "2024-11-23T10:00:00Z"
