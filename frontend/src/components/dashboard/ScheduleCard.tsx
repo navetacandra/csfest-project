@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { Class } from '@/types';
 import api from '@/lib/api';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -34,10 +35,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule }) => {
 
     try {
       await api.post(`/presence/${classId}`, {
+        classId: classId,
         schedule_date: scheduleDate,
         status: 'hadir',
       });
       displayAlert('Presence recorded successfully!', 'default');
+      // Optionally, refetch dashboard data or update local state to reflect the change
     } catch (error) {
       console.error('Failed to record presence', error);
       displayAlert('Failed to record presence.', 'destructive');
@@ -52,18 +55,20 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule }) => {
           <AlertDescription>{alertMessage}</AlertDescription>
         </Alert>
       )}
-      <div className="space-y-4">
-        {schedule.map((item) => (
-          <div key={item.id} className="flex justify-between items-center p-4 bg-background rounded-base border-2 border-border hover:shadow-none shadow-shadow hover:-translate-x-[2px] transition-all">
-            <div>
-              <p className="font-semibold text-foreground">{item.name}</p>
-              <p className="text-sm text-foreground/80">{getDayName(item.schedule)}, {item.start_time} - {item.end_time}</p>
-            </div>
-            <Button onClick={() => handlePresence(item.id)}>
-              Presence
-            </Button>
-          </div>
-        ))}
+      <div className="space-y-4 max-h-[250px] overflow-y-auto ps-1 pb-1">
+        {schedule.map((item) => {
+          const isAttended = item.presence_status === 'hadir';
+          return (
+                          <div key={item.id} className={`flex justify-between items-center p-4 rounded-base border-2 border-border hover:shadow-none shadow-shadow hover:-translate-x-[2px] transition-all ${isAttended ? 'bg-emerald-100' : 'bg-background'}`}>
+                            <div>
+                              <p className="font-semibold text-foreground">{item.name}</p>
+                              <p className="text-sm text-foreground/80">{getDayName(item.schedule)}, {item.start_time} - {item.end_time}</p>
+                            </div>
+                            <Button onClick={() => handlePresence(item.id)} disabled={isAttended} variant={isAttended ? 'neutral' : 'default'}>
+                              {isAttended ? 'Attended' : 'Presence'}
+                            </Button>
+                          </div>          );
+        })}
       </div>
     </div>
   );

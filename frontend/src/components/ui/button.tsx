@@ -11,16 +11,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none",
         noShadow: "text-main-foreground bg-main border-2 border-border",
         neutral:
-          "bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none",
         reverse:
-          "text-main-foreground bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow",
+          "text-main-foreground bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow active:translate-x-reverseBoxShadowX active:translate-y-reverseBoxShadowY active:shadow-shadow",
         outline:
-          "bg-transparent border-2 border-border hover:bg-main hover:text-main-foreground hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-transparent border-2 border-border hover:bg-main hover:text-main-foreground hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:bg-main active:text-main-foreground active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none",
         destructive:
-          "bg-destructive text-destructive-foreground border-2 border-destructive hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-destructive text-destructive-foreground border-2 border-destructive hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none",
       },
       size: {
         default: "h-10 px-4 py-2",

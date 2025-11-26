@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const MahasiswaPage: React.FC = () => {
-  const [mahasiswa, setMahasiswa] = useState<Mahasiswa[]>([]);
+  const [mahasiswa, setMahasiswa] = useState<any[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [filters, setFilters] = useState({ name: '', major_id: '', study_program_id: '', page: 1, limit: 10 });
   const [majors, setMajors] = useState<Major[]>([]);
@@ -33,7 +33,6 @@ const MahasiswaPage: React.FC = () => {
   const [selectedMahasiswa, setSelectedMahasiswa] = useState<Mahasiswa | null>(null);
   const [mahasiswaToDelete, setMahasiswaToDelete] = useState<Mahasiswa | null>(null);
   const [formData, setFormData] = useState({
-    nim: '',
     name: '',
     email: '',
     major_id: '',
@@ -149,7 +148,7 @@ const MahasiswaPage: React.FC = () => {
   const handleOpenAddDialog = () => {
     setSelectedMahasiswa(null);
     setFormData({
-      nim: '', name: '', email: '', major_id: '', study_program_id: '', username: '', password: ''
+       name: '', email: '', major_id: '', study_program_id: '', username: '', password: ''
     });
     setIsFormDialogOpen(true);
   };
@@ -157,7 +156,6 @@ const MahasiswaPage: React.FC = () => {
   const handleOpenEditDialog = (m: Mahasiswa) => {
     setSelectedMahasiswa(m);
     setFormData({
-      nim: m.nim,
       name: m.name,
       email: m.email,
       major_id: String(m.major_id),
@@ -274,7 +272,6 @@ const MahasiswaPage: React.FC = () => {
               <thead className="bg-primary">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">NIM</th>
                   <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Major</th>
                   <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Study Program</th>
                   <th className="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider">Actions</th>
@@ -284,9 +281,8 @@ const MahasiswaPage: React.FC = () => {
                 {mahasiswa.map((m) => (
                   <tr key={m.id}>
                     <td className="px-6 py-4 whitespace-nowrap">{m.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{m.nim}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{majors.find(major => major.id === m.major_id)?.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{allStudyPrograms.find(sp => sp.id === m.study_program_id)?.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{m.major}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{m.study_program}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="outline" size="sm" onClick={() => handleOpenEditDialog(m)}><Edit className="h-4 w-4" /></Button>
                       <Button variant="destructive" size="sm" className="ml-2" onClick={() => handleOpenDeleteDialog(m)}><Trash className="h-4 w-4" /></Button>
@@ -318,7 +314,6 @@ const MahasiswaPage: React.FC = () => {
           </AlertDialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="name" className="text-right">Name</Label><Input id="name" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} className="col-span-3" /></div>
-            <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nim" className="text-right">NIM</Label><Input id="nim" value={formData.nim} onChange={(e) => setFormData(p => ({ ...p, nim: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="email" className="text-right">Email</Label><Input id="email" type="email" value={formData.email} onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="major" className="text-right">Major</Label><Select onValueChange={(v) => setFormData(p => ({...p, major_id: v, study_program_id: ''}))} value={formData.major_id}><SelectTrigger className="col-span-3"><SelectValue placeholder="Select Major" /></SelectTrigger><SelectContent>{majors.map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}</SelectContent></Select></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="study_program" className="text-right">Study Program</Label><Select onValueChange={(v) => setFormData(p => ({...p, study_program_id: v}))} value={formData.study_program_id} disabled={!formData.major_id}><SelectTrigger className="col-span-3"><SelectValue placeholder="Select Study Program" /></SelectTrigger><SelectContent>{formStudyPrograms.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}</SelectContent></Select></div>
