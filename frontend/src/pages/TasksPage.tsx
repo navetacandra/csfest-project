@@ -27,9 +27,6 @@ const TasksPage: React.FC = () => {
         <main>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary">Your Tasks</h2>
-            <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
-              All
-            </Button>
           </div>
           <div className="space-y-6">
             {tasks.map((task) => (

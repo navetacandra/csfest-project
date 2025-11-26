@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const DosenPage: React.FC = () => {
   const [dosen, setDosen] = useState<Dosen[]>([]);
@@ -28,6 +29,19 @@ const DosenPage: React.FC = () => {
   const [selectedDosen, setSelectedDosen] = useState<Dosen | null>(null);
   const [dosenToDelete, setDosenToDelete] = useState<Dosen | null>(null);
   const [formData, setFormData] = useState({ name: '', nip: '', username: '' , password: ''});
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'destructive'>('default');
+
+  const displayAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage('');
+    }, 3000);
+  };
 
   const fetchDosen = useCallback(async () => {
     try {
@@ -89,14 +103,16 @@ const DosenPage: React.FC = () => {
       if (selectedDosen) {
         // According to openapi.yaml, only name and nip can be updated.
         await api.put(`/admin/dosen/${selectedDosen.id}`, { name: formData.name, nip: formData.nip });
+        displayAlert('Dosen updated successfully!', 'default');
       } else {
         await api.post('/admin/dosen', formData);
+        displayAlert('Dosen created successfully!', 'default');
       }
       fetchDosen();
       setIsFormDialogOpen(false);
     } catch (error) {
       console.error('Failed to save dosen', error);
-      // You might want to show an error to the user here
+      displayAlert('Failed to save dosen.', 'destructive');
     }
   };
 
@@ -107,9 +123,10 @@ const DosenPage: React.FC = () => {
       fetchDosen();
       setIsDeleteDialogOpen(false);
       setDosenToDelete(null);
+      displayAlert('Dosen deleted successfully!', 'default');
     } catch (error) {
       console.error('Failed to delete dosen', error);
-      // You might want to show an error to the user here
+      displayAlert('Failed to delete dosen.', 'destructive');
     }
   };
   
@@ -136,6 +153,13 @@ const DosenPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base dark:border-gray-600 sm:p-8">
       <h1 className="text-4xl font-bold text-primary mb-8">Manage Dosen</h1>
+      
+      {showAlert && (
+        <Alert variant={alertVariant} className="mb-4">
+          <AlertTitle>{alertVariant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       
       <Card className="mb-8">
         <CardHeader>

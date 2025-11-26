@@ -36,7 +36,7 @@ const NewsDetailPage: React.FC = () => {
               <p className="text-text-secondary-light dark:text-text-secondary-dark">posted at: {new Date(news.created_at).toLocaleString()}</p>
             </header>
             <div className="mb-12 flex justify-center">
-              <img src={news.thumbnail} alt={news.title} className="w-full max-w-3xl aspect-video object-cover border-2 border-primary rounded-lg" />
+              <img src={`https://kulmsin.juraganweb.web.id/storage/${news.thumbnail}`} alt={news.title} className="w-full max-w-3xl aspect-video object-cover border-2 border-primary rounded-lg" />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none text-text-main-light dark:text-text-main-dark">
               <p>{news.content}</p>

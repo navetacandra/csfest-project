@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -42,7 +42,7 @@ const ClassPage: React.FC = () => {
       setNewPostMessage("");
       setNewPostType("post");
       setIsCreatingPost(false);
-      fetchClassDetails(); 
+      fetchClassDetails();
     } catch (error) {
       console.error('Failed to create post', error);
     }
@@ -58,7 +58,7 @@ const ClassPage: React.FC = () => {
         return <HelpCircle className="w-8 h-8 sm:w-10 sm:h-10" />;
     }
   };
-  
+
   if (!classDetails) {
     return <div>Loading...</div>;
   }
@@ -77,12 +77,14 @@ const ClassPage: React.FC = () => {
                   </Button>
                 </Link>
               )}
-              <Button 
-                onClick={() => setIsCreatingPost(!isCreatingPost)}
-                className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto"
-              >
-                Create New Post
-              </Button>
+              {userRole === 'dosen' && (
+                <Button
+                  onClick={() => setIsCreatingPost(!isCreatingPost)}
+                  className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto"
+                >
+                  Create New Post
+                </Button>
+              )}
             </div>
           </div>
           <div className="space-y-4">
@@ -93,7 +95,7 @@ const ClassPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input 
+                    <Input
                       placeholder="Post message"
                       value={newPostMessage}
                       onChange={(e) => setNewPostMessage(e.target.value)}
@@ -108,7 +110,7 @@ const ClassPage: React.FC = () => {
                         <SelectItem value="task">Task</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button 
+                    <Button
                       onClick={handleCreatePost}
                       className="sm:col-span-2 bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none"
                     >

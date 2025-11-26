@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const AdminNewsPage: React.FC = () => {
   const [news, setNews] = useState<NewsListItem[]>([]);
@@ -30,7 +31,19 @@ const AdminNewsPage: React.FC = () => {
   
   const [formData, setFormData] = useState({ title: '', content: '' });
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'destructive'>('default');
+
+  const displayAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage('');
+    }, 3000);
+  };
 
   const fetchNews = useCallback(async () => {
     try {
@@ -56,7 +69,6 @@ const AdminNewsPage: React.FC = () => {
     setSelectedNews(null);
     setFormData({ title: '', content: '' });
     setThumbnailFile(null);
-    setPreviewUrl(null);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -68,11 +80,6 @@ const AdminNewsPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setThumbnailFile(file);
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
   };
 
   const handleOpenAddDialog = () => {
@@ -87,13 +94,10 @@ const AdminNewsPage: React.FC = () => {
         const response = await api.get<ApiResponse<News>>(`/admin/news/${newsItem.id}`);
         const fullNews = response.data.data;
         setFormData({ title: fullNews.title, content: fullNews.content });
-        // The list item already contains the thumbnail url
-        setPreviewUrl(newsItem.thumbnail); 
     } catch(error) {
         console.error("Failed to fetch news details", error);
         // Fallback to list data if details fail
         setFormData({ title: newsItem.title, content: 'Could not load content.' });
-        setPreviewUrl(newsItem.thumbnail);
     }
     setIsFormDialogOpen(true);
   };
@@ -117,15 +121,18 @@ const AdminNewsPage: React.FC = () => {
         await api.put(`/admin/news/${selectedNews.id}`, data, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
+        displayAlert('News updated successfully!', 'default');
       } else {
         await api.post('/admin/news', data, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
+        displayAlert('News created successfully!', 'default');
       }
       fetchNews();
       setIsFormDialogOpen(false);
     } catch (error) {
       console.error('Failed to save news', error);
+      displayAlert('Failed to save news.', 'destructive');
     }
   };
 
@@ -135,8 +142,10 @@ const AdminNewsPage: React.FC = () => {
       await api.delete(`/admin/news/${newsToDelete.id}`);
       fetchNews();
       setIsDeleteDialogOpen(false);
+      displayAlert('News deleted successfully!', 'default');
     } catch (error) {
       console.error('Failed to delete news', error);
+      displayAlert('Failed to delete news.', 'destructive');
     }
   };
 
@@ -154,6 +163,13 @@ const AdminNewsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base dark:border-gray-600 sm:p-8">
       <h1 className="text-4xl font-bold text-primary mb-8">Manage News</h1>
+      
+      {showAlert && (
+        <Alert variant={alertVariant} className="mb-4">
+          <AlertTitle>{alertVariant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       
       <Card className="mb-8">
         <CardHeader>
@@ -213,7 +229,6 @@ const AdminNewsPage: React.FC = () => {
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="title" className="text-right">Title</Label><Input id="title" value={formData.title} onChange={e => setFormData(p => ({...p, title: e.target.value}))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="content" className="text-right">Content</Label><Textarea id="content" value={formData.content} onChange={e => setFormData(p => ({...p, content: e.target.value}))} className="col-span-3" rows={6} /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="thumbnail" className="text-right">Thumbnail</Label><Input id="thumbnail" type="file" onChange={handleFileChange} className="col-span-3" accept="image/*" /></div>
-            {previewUrl && <div className="col-start-2 col-span-3"><img src={previewUrl} alt="Thumbnail preview" className="mt-2 w-32 h-32 object-cover rounded-md" /></div>}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

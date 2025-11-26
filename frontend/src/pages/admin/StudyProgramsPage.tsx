@@ -6,6 +6,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PlusCircle, Edit, Trash } from 'lucide-react';
 import type { Major, StudyProgram, ApiResponse } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const StudyProgramsPage: React.FC = () => {
   const [majors, setMajors] = useState<Major[]>([]);
@@ -13,6 +25,19 @@ const StudyProgramsPage: React.FC = () => {
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([]);
   const [newStudyProgramName, setNewStudyProgramName] = useState('');
   const [editingStudyProgram, setEditingStudyProgram] = useState<StudyProgram | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'destructive'>('default');
+
+  const displayAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage('');
+    }, 3000);
+  };
 
   useEffect(() => {
     fetchMajors();
@@ -51,8 +76,10 @@ const StudyProgramsPage: React.FC = () => {
       await api.post(`/admin/major/${selectedMajorId}/study_program`, { name: newStudyProgramName, major_id: Number(selectedMajorId) });
       setNewStudyProgramName('');
       fetchStudyPrograms(selectedMajorId);
+      displayAlert('Study program created successfully!', 'default');
     } catch (error) {
       console.error('Failed to create study program', error);
+      displayAlert('Failed to create study program.', 'destructive');
     }
   };
 
@@ -62,8 +89,10 @@ const StudyProgramsPage: React.FC = () => {
   //     await api.put(`/admin/major/${selectedMajorId}/study_program/${editingStudyProgram.id}`, { name: editingStudyProgram.name });
   //     setEditingStudyProgram(null);
   //     fetchStudyPrograms(selectedMajorId);
+  //     displayAlert('Study program updated successfully!', 'default');
   //   } catch (error) {
   //     console.error('Failed to update study program', error);
+  //     displayAlert('Failed to update study program.', 'destructive');
   //   }
   // };
 
@@ -72,8 +101,10 @@ const StudyProgramsPage: React.FC = () => {
     try {
       await api.delete(`/admin/major/${selectedMajorId}/study_program/${studyProgramId}`);
       fetchStudyPrograms(selectedMajorId);
+      displayAlert('Study program deleted successfully!', 'default');
     } catch (error) {
       console.error('Failed to delete study program', error);
+      displayAlert('Failed to delete study program.', 'destructive');
     }
   };
 
@@ -81,90 +112,107 @@ const StudyProgramsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base dark:border-gray-600 sm:p-8">
       <h1 className="text-4xl font-bold text-primary mb-8">Manage Study Programs</h1>
 
+      {showAlert && (
+        <Alert variant={alertVariant} className="mb-4">
+          <AlertTitle>{alertVariant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
+
       <Card className="mb-8">
         <CardHeader>
-            <CardTitle>Select Major</CardTitle>
+          <CardTitle>Select Major</CardTitle>
         </CardHeader>
         <CardContent>
-            <Select onValueChange={setSelectedMajorId} value={selectedMajorId} >
-              <SelectTrigger className="w-full ">
-                <SelectValue placeholder="Select a Major" />
-              </SelectTrigger>
-              <SelectContent>
-                {majors.map((major) => (
-                  <SelectItem key={major.id} value={String(major.id)}>{major.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select onValueChange={setSelectedMajorId} value={selectedMajorId} >
+            <SelectTrigger className="w-full ">
+              <SelectValue placeholder="Select a Major" />
+            </SelectTrigger>
+            <SelectContent>
+              {majors.map((major) => (
+                <SelectItem key={major.id} value={String(major.id)}>{major.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
       {selectedMajorId && (
         <>
-            <Card className="mb-8">
-                <CardHeader>
-                    <CardTitle>Add New Study Program</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-4">
-                      <Input
-                        value={newStudyProgramName}
-                        onChange={(e) => setNewStudyProgramName(e.target.value)}
-                        placeholder="New study program name"
-                        className="flex-grow shadow-shadow"
-                      />
-                      <Button onClick={handleCreate}>
-                        <PlusCircle className="mr-2" /> Add Study Program
-                      </Button>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Add New Study Program</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <Input
+                  value={newStudyProgramName}
+                  onChange={(e) => setNewStudyProgramName(e.target.value)}
+                  placeholder="New study program name"
+                  className="flex-grow shadow-shadow"
+                />
+                <Button onClick={handleCreate}>
+                  <PlusCircle className="mr-2" /> Add Study Program
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Study Programs List</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-primary">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Study Program Name</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-secondary-background divide-y divide-gray-200">
-                                {studyPrograms.map((program) => (
-                                <tr key={program.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {editingStudyProgram?.id === program.id ? (
-                                            <Input 
-                                            value={editingStudyProgram.name}
-                                            onChange={(e) => setEditingStudyProgram({ ...editingStudyProgram, name: e.target.value })}
-                                            />
-                                        ) : (
-                                            <p className="font-bold">{program.name}</p>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {/* {editingStudyProgram?.id === program.id ? (
-                                            <Button onClick={handleUpdate}>Save</Button>
-                                        ) : (
-                                            <Button onClick={() => setEditingStudyProgram(program)} variant="outline" size="sm">
-                                            <Edit className="h-4 w-4" />
-                                            </Button>
-                                        )} */}
-                                        <Button onClick={() => handleDelete(program.id)} variant="destructive" size="sm" className="ml-2">
-                                            <Trash className="h-4 w-4" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Study Programs List</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-primary">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Study Program Name</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-secondary-background divide-y divide-gray-200">
+                    {studyPrograms.map((program) => (
+                      <tr key={program.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingStudyProgram?.id === program.id ? (
+                            <Input
+                              value={editingStudyProgram.name}
+                              onChange={(e) => setEditingStudyProgram({ ...editingStudyProgram, name: e.target.value })}
+                            />
+                          ) : (
+                            <p className="font-bold">{program.name}</p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm" className="ml-2">
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the study program.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(program.id)}>Continue</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

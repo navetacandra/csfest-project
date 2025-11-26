@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const MahasiswaPage: React.FC = () => {
   const [mahasiswa, setMahasiswa] = useState<Mahasiswa[]>([]);
@@ -41,6 +42,19 @@ const MahasiswaPage: React.FC = () => {
     password: ''
   });
   const [formStudyPrograms, setFormStudyPrograms] = useState<StudyProgram[]>([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'destructive'>('default');
+
+  const displayAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage('');
+    }, 3000);
+  };
 
   const fetchMahasiswa = useCallback(async () => {
     try {
@@ -170,13 +184,16 @@ const MahasiswaPage: React.FC = () => {
         if (selectedMahasiswa) {
             const { password, ...updatePayload } = payload; // Exclude password for update
             await api.put(`/admin/mahasiswa/${selectedMahasiswa.id}`, updatePayload);
+            displayAlert('Mahasiswa updated successfully!', 'default');
         } else {
             await api.post('/admin/mahasiswa', payload);
+            displayAlert('Mahasiswa created successfully!', 'default');
         }
         fetchMahasiswa();
         setIsFormDialogOpen(false);
     } catch (error) {
         console.error('Failed to save mahasiswa', error);
+        displayAlert('Failed to save mahasiswa.', 'destructive');
     }
   };
 
@@ -187,8 +204,10 @@ const MahasiswaPage: React.FC = () => {
           fetchMahasiswa();
           setIsDeleteDialogOpen(false);
           setMahasiswaToDelete(null);
+          displayAlert('Mahasiswa deleted successfully!', 'default');
       } catch (error) {
           console.error('Failed to delete mahasiswa', error);
+          displayAlert('Failed to delete mahasiswa.', 'destructive');
       }
   };
   
@@ -214,6 +233,13 @@ const MahasiswaPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base dark:border-gray-600 sm:p-8">
       <h1 className="text-4xl font-bold text-primary mb-8">Manage Mahasiswa</h1>
+      
+      {showAlert && (
+        <Alert variant={alertVariant} className="mb-4">
+          <AlertTitle>{alertVariant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       
       <Card className="mb-8">
         <CardHeader><CardTitle>Filter Mahasiswa</CardTitle></CardHeader>

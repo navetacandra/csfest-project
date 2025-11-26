@@ -5,11 +5,36 @@ import { Input } from '@/components/ui/input';
 import { PlusCircle, Edit, Trash } from 'lucide-react';
 import type { Major, ApiResponse } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const MajorsPage: React.FC = () => {
   const [majors, setMajors] = useState<Major[]>([]);
   const [newMajorName, setNewMajorName] = useState('');
   const [editingMajor, setEditingMajor] = useState<Major | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'destructive'>('default');
+
+  const displayAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage('');
+    }, 3000);
+  };
 
   useEffect(() => {
     fetchMajors();
@@ -29,8 +54,10 @@ const MajorsPage: React.FC = () => {
       await api.post('/admin/major', { name: newMajorName });
       setNewMajorName('');
       fetchMajors();
+      displayAlert('Major created successfully!', 'default');
     } catch (error) {
       console.error('Failed to create major', error);
+      displayAlert('Failed to create major.', 'destructive');
     }
   };
 
@@ -40,8 +67,10 @@ const MajorsPage: React.FC = () => {
       await api.put(`/admin/major/${editingMajor.id}`, { name: editingMajor.name });
       setEditingMajor(null);
       fetchMajors();
+      displayAlert('Major updated successfully!', 'default');
     } catch (error) {
       console.error('Failed to update major', error);
+      displayAlert('Failed to update major.', 'destructive');
     }
   };
 
@@ -49,14 +78,23 @@ const MajorsPage: React.FC = () => {
     try {
       await api.delete(`/admin/major/${id}`);
       fetchMajors();
+      displayAlert('Major deleted successfully!', 'default');
     } catch (error) {
       console.error('Failed to delete major', error);
+      displayAlert('Failed to delete major.', 'destructive');
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto border-3 bg-secondary-background border-border shadow-shadow p-6 rounded-base dark:border-gray-600 sm:p-8">
       <h1 className="text-4xl font-bold text-primary mb-8">Manage Majors</h1>
+      
+      {showAlert && (
+        <Alert variant={alertVariant} className="mb-4">
+          <AlertTitle>{alertVariant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       
       <Card className="mb-8">
         <CardHeader>
@@ -105,15 +143,47 @@ const MajorsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       {editingMajor?.id === major.id ? (
-                        <Button onClick={handleUpdate}>Save</Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button>Save</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action will update the major's name. Are you sure you want to continue?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleUpdate}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       ) : (
                         <Button onClick={() => setEditingMajor(major)} variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button onClick={() => handleDelete(major.id)} variant="outline" size="sm" className="ml-2">
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="ml-2">
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the major.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(major.id)}>Continue</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </td>
                   </tr>
                 ))}

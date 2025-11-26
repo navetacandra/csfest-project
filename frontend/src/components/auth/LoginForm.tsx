@@ -46,7 +46,7 @@ export function LoginForm() {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div className="relative">
+          <div className="relative mb-5">
             <Label htmlFor="password"className="sr-only">Password</Label>
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <Input id="password" type="password" placeholder="Password" className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md focus:ring-primary focus:border-primary placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-slate-200 transition" 
@@ -61,9 +61,7 @@ export function LoginForm() {
             {loading ? "Logging in..." : "Login"}
             <ArrowRight />
           </Button>
-          <div className="text-center mt-4">
-            <a className="text-sm text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">Forgot password?</a>
-          </div>
+
         </CardFooter>
       </form>
     </Card>
