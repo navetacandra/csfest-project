@@ -75,4 +75,9 @@ export class Sqlite {
   }
 }
 
-export const sqlite = await Sqlite.createInstance(Bun.env.DB_NAME);
+export let sqlite = await Sqlite.createInstance(Bun.env.DB_NAME);
+
+export async function reinitializeDb(filename: string) {
+  sqlite = await Sqlite.createInstance(filename);
+  return sqlite;
+}

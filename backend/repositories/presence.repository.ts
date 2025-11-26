@@ -37,14 +37,14 @@ export class PresenceRepository {
     ) as Presence[];
   }
 
-  findByClass(classId: number): Presence[] {
+  findByClass(classId: number): any[] {
     const query = `
-      SELECT p.*
+      SELECT p.*, ce.mahasiswa_id
       FROM presence p
       INNER JOIN class_enrollment ce ON p.class_enrollment_id = ce.id
       WHERE ce.class_id = ?
     `;
-    return this.db.query(query, classId) as Presence[];
+    return this.db.query(query, classId) as any[];
   }
 
   findByEnrollmentIds(enrollmentIds: number[]): any[] {
@@ -53,7 +53,7 @@ export class PresenceRepository {
     }
     const placeholders = enrollmentIds.map(() => "?").join(",");
     const query = `
-      SELECT p.id, p.status, p.late_time, p.class_enrollment_id, c.id as class_id, c.name as class_name
+      SELECT p.id, p.status, p.late_time, p.schedule_date, p.class_enrollment_id, c.id as class_id, c.name as class_name
       FROM presence p
       JOIN class_enrollment ce ON p.class_enrollment_id = ce.id
       JOIN class c ON ce.class_id = c.id
@@ -95,5 +95,42 @@ export class PresenceRepository {
       `UPDATE presence SET ${setClause}, updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE id = ?`,
       ...values,
     );
+  }
+
+  createOrUpdateMany(
+    presences: {
+      class_enrollment_id: number;
+      schedule_date: string;
+      status: "hadir" | "sakit" | "izin" | "alpha";
+      late_time: number;
+    }[],
+  ): void {
+    for (const p of presences) {
+      const existing = this.findByEnrollmentIdAndDate(
+        p.class_enrollment_id,
+        p.schedule_date,
+      );
+      if (existing) {
+        this.update(existing.id, {
+          status: p.status,
+          late_time: p.late_time,
+        });
+      } else {
+        this.create(p);
+      }
+    }
+  }
+
+  findByMahasiswaIdAndClassId(
+    mahasiswaId: number,
+    classId: number,
+  ): Presence[] {
+    const query = `
+      SELECT p.*
+      FROM presence p
+      INNER JOIN class_enrollment ce ON p.class_enrollment_id = ce.id
+      WHERE ce.mahasiswa_id = ? AND ce.class_id = ?
+    `;
+    return this.db.query(query, mahasiswaId, classId) as Presence[];
   }
 }

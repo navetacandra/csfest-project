@@ -3,7 +3,7 @@ import type { Sqlite } from "../config/database";
 
 type ClassForCreate = Omit<
   Class,
-  "id" | "created_at" | "updated_at" | "actived_at" | "enroll_key"
+  "id" | "created_at" | "updated_at" | "activated_at" | "enroll_key"
 >;
 
 export class ClassRepository {
@@ -22,6 +22,24 @@ export class ClassRepository {
       classData.start_time,
       classData.end_time,
       enrollKey,
+    );
+    const firstResult = result[0] as { id: number | bigint };
+    return firstResult.id as number;
+  }
+
+  createWithActivationDate(
+    classData: Omit<Class, "id" | "created_at" | "updated_at" | "enroll_key">,
+    enrollKey: string,
+  ): number {
+    const result = this.db.query(
+      `INSERT INTO class (name, schedule, start_time, end_time, enroll_key, activated_at)
+       VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
+      classData.name,
+      classData.schedule,
+      classData.start_time,
+      classData.end_time,
+      enrollKey,
+      classData.activated_at,
     );
     const firstResult = result[0] as { id: number | bigint };
     return firstResult.id as number;

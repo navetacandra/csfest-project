@@ -1,9 +1,8 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import express, { type Express } from "express";
 import request from "supertest";
-import cors from "cors";
 import compression from "compression";
-import { Sqlite } from "../config/database";
+import { Sqlite, reinitializeDb } from "../config/database";
 import { AdminService } from "../services/admin.service";
 import { MahasiswaService } from "../services/mahasiswa.service";
 import { DosenService } from "../services/dosen.service";
@@ -14,13 +13,15 @@ Bun.env.JWT_SECRET = Bun.env.JWT_SECRET || "test_secret_for_e2e_tests";
 Bun.env.PASSWORD_SECRET_KEY =
   Bun.env.PASSWORD_SECRET_KEY || "test_password_secret";
 
+Bun.env.DB_NAME = `e2e_test_${Date.now()}.db`;
+
 const { default: apiRouter } = await import("../routes");
 
-const DB_TEST = Bun.env.DB_NAME || `e2e_test.db`;
+const DB_TEST = Bun.env.DB_NAME;
 
 describe("E2E API Tests - Full API Contract", () => {
   let app: Express;
-  let db: typeof Sqlite;
+  let db: Sqlite;
   let adminService: AdminService;
   let mahasiswaService: MahasiswaService;
   let dosenService: DosenService;
@@ -39,7 +40,16 @@ describe("E2E API Tests - Full API Contract", () => {
   let studyProgramId: number | null = null;
 
   beforeAll(async () => {
-    db = await Sqlite.createInstance(DB_TEST);
+    try {
+      const dbPath = Bun.fileURLToPath(
+        import.meta.resolve(`${__dirname}/../database/${DB_TEST}`),
+      );
+      await Bun.file(dbPath).delete();
+    } catch (e) {}
+
+    db = await reinitializeDb(DB_TEST);
+    const { default: apiRouter } = await import("../routes");
+
     adminService = new AdminService(db);
     mahasiswaService = new MahasiswaService(db);
     dosenService = new DosenService(db);
@@ -47,7 +57,6 @@ describe("E2E API Tests - Full API Contract", () => {
     userRepository = new UserRepository(db);
 
     app = express();
-    app.use(cors());
     app.use(compression());
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true }));
@@ -93,7 +102,7 @@ describe("E2E API Tests - Full API Contract", () => {
     if (db) {
       db.close();
       const dbPath = Bun.fileURLToPath(
-        import.meta.resolve(`${__dirname}/../database/${DB_TEST}`),
+        import.meta.resolve(`${__dirname}/../database/e2e_test.db`),
       );
       try {
         await Bun.file(dbPath).delete();
@@ -384,9 +393,9 @@ describe("E2E API Tests - Full API Contract", () => {
       expect(response.status).toBe(200);
       expect(response.body.code).toBe(200);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data).toHaveProperty("accumulated_late");
-      expect(response.body.data).toHaveProperty("recap");
-      expect(Array.isArray(response.body.data.recap)).toBe(true);
+      expect(response.body.data).toHaveProperty("lateness_time");
+      expect(response.body.data).toHaveProperty("data");
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
   });
 

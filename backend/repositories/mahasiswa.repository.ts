@@ -94,6 +94,22 @@ export class MahasiswaRepository {
     return result;
   }
 
+  findMembersByClassId(
+    classId: number,
+  ): { id: number; name: string; nim: string }[] {
+    const query = `
+      SELECT m.id, m.name, m.nim
+      FROM mahasiswa m
+      INNER JOIN class_enrollment ce ON m.id = ce.mahasiswa_id
+      WHERE ce.class_id = ?
+    `;
+    return this.db.query(query, classId) as {
+      id: number;
+      name: string;
+      nim: string;
+    }[];
+  }
+
   update(id: number, data: MahasiswaForUpdate): void {
     const fields = Object.keys(data);
     if (fields.length === 0) {

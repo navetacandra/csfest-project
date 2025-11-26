@@ -7,7 +7,7 @@ export interface Class {
   schedule: number;
   start_time: string;
   end_time: string;
-  actived_at: string;
+  activated_at: string;
   created_at: string;
   updated_at: string;
 }
