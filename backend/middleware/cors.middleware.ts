@@ -13,10 +13,7 @@ const corsWhitelist = [
 export function cors(req: Request, res: Response, next: NextFunction) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With",
-  );
+  res.setHeader("Access-Control-Allow-Headers", "*");
 
   if (req.method === "OPTIONS") {
     const origin = req.headers.origin || "";
