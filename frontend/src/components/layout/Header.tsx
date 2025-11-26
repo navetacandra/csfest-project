@@ -7,6 +7,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import api from '@/lib/api';
@@ -30,7 +33,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex justify-between items-center mb-10 max-w-7xl mx-auto pt-4 sm:pt-6 lg:pt-8">
+    <header className="flex justify-between items-center mb-10 max-w-7xl mx-auto pt-4 sm:pt-6 lg:pt-8 px-5">
       <div className="text-4xl font-bold text-primary cursor-pointer" onClick={() => {navigate('/dashboard')}}>Ku-LMSin</div>
       
       {/* Mobile Navigation */}
@@ -43,9 +46,29 @@ const Header: React.FC = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             {userRole === 'admin' && (
-              <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
-                Admin
-              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Admin</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => navigate('/admin/majors')}>
+                    Major
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/study-programs')}>
+                    Study Program
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/dosen')}>
+                    Dosen
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/mahasiswa')}>
+                    Mahasiswa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/news')}>
+                    News
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/classes')}>
+                    Class
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
             )}
             {userRole === 'dosen' && (
               <DropdownMenuItem onClick={() => navigate('/classes')}>

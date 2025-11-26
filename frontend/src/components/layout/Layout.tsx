@@ -15,7 +15,7 @@ const Layout: React.FC = () => {
   return (
     <>
       <Header />
-      <main>
+      <main className="px-5">
         <Outlet />
       </main>
     </>

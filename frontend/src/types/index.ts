@@ -20,19 +20,10 @@ export interface Mahasiswa extends User {
   nim: string;
 }
 
-export interface Major {
-  id: number;
+export interface ClassMember {
+  id: number; // Assuming the API will provide an ID for members in the class details endpoint
   name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface StudyProgram {
-  id: number;
-  major_id: number;
-  name: string;
-  created_at: string;
-  updated_at: string;
+  nim: string;
 }
 
 export interface Class {
@@ -45,6 +36,8 @@ export interface Class {
   actived_at: string;
   created_at: string;
   updated_at: string;
+  presence_status?: string;
+  members?: ClassMember[]; // Add members array to Class interface
 }
 
 export interface News {
@@ -109,21 +102,38 @@ export interface TaskItem {
   status: 'all' | 'completed' | 'incoming';
 }
 
-export interface Presence {
-    id: number;
-    class_enrollment_id: number;
-    class_name: string;
-    class_id: number;
-    schedule_date: string;
-    status: 'hadir' | 'izin' | 'sakit' | 'alpha';
-    late_time: number;
-    created_at: string;
-    updated_at: string;
+export interface PresenceStatusItem {
+  schedule_date: string;
+  status: 'hadir' | 'izin' | 'sakit' | 'alpha' | null;
+  late_time: number | null;
+}
+
+export interface ClassPresenceRecap {
+  class_id: number;
+  class_name: string;
+  recap: PresenceStatusItem[];
 }
 
 export interface PresenceRecap {
     total_lateness: number;
-    recap: Presence[];
+    recap: ClassPresenceRecap[]; // Changed from Presence[] to ClassPresenceRecap[]
+}
+
+export interface PresenceRecapApiResponse {
+  lateness_time: number;
+  data: ClassPresenceRecap[];
+}
+
+export interface PresenceUpdateItem {
+  mahasiswa_id: number;
+  status: string;
+  late_time: number;
+}
+
+export interface BatchPresencePayload {
+  class_id: number;
+  schedule_date: string;
+  presences: PresenceUpdateItem[];
 }
 
 export interface ClassDetails extends Class {
