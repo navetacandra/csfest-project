@@ -175,6 +175,16 @@ export class PostController {
   async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id as string);
+      const { id: userId, role } = req.user!;
+      if (role !== "dosen") {
+        return res.status(403).json({
+          code: 403,
+          error: {
+            message: "Your role is not dosen",
+            code: "FORBIDDEN",
+          },
+        } as ErrorResponse);
+      }
 
       if (isNaN(id)) {
         return res.status(400).json({
@@ -186,7 +196,38 @@ export class PostController {
         } as ErrorResponse);
       }
 
-      const { file_id, message } = req.body as PostUpdateRequest;
+      const { message } = req.body as PostUpdateRequest;
+      let file_id: number | null = null;
+
+      const current = this.postService.getById(id);
+      if (!current) {
+        return res.status(404).json({
+          code: 404,
+          error: {
+            message: "Post not found",
+            code: "NOT_FOUND",
+          },
+        } as ErrorResponse);
+      }
+
+      if (req.file) {
+        file_id = this.fileRepo.create({
+          mahasiswa_id: null,
+          mimetype: req.file!.mimetype,
+          random_name: req.file.path.replace(Bun.env.UPLOAD_PATH || "", ""),
+          size: req.file!.size,
+          upload_name: req.file!.originalname,
+          dosen_id: userId,
+        });
+
+        if (current.file_id) {
+          const oldFile = this.fileRepo.findById(current.file_id);
+          if (oldFile) {
+            this.fileRepo.delete(current.file_id);
+            Bun.file(`${Bun.env.UPLOAD_PATH}/${oldFile?.random_name}`).delete();
+          }
+        }
+      }
 
       const updateData: Partial<Post> = {};
       if (file_id !== undefined) updateData.file_id = Number(file_id);
@@ -233,7 +274,25 @@ export class PostController {
         } as ErrorResponse);
       }
 
+      const current = this.postService.getById(id);
+      if (!current) {
+        return res.status(404).json({
+          code: 404,
+          error: {
+            message: "Post not found",
+            code: "NOT_FOUND",
+          },
+        } as ErrorResponse);
+      }
+
       const deletedPost = this.postService.delete(id);
+      if (current.file_id) {
+        const oldFile = this.fileRepo.findById(current.file_id);
+        if (oldFile) {
+          this.fileRepo.delete(current.file_id);
+          Bun.file(`${Bun.env.UPLOAD_PATH}/${oldFile?.random_name}`).delete();
+        }
+      }
 
       res.json({
         code: 200,

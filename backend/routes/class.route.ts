@@ -36,6 +36,7 @@ router.get(
 router.put(
   "/:class_id/posts/:id",
   AuthMiddleware.authenticate,
+  multerUpload("post_attachment").single("file"),
   (req: Request, res: Response) => postController.update(req, res),
 );
 router.delete(
