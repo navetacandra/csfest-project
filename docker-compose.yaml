@@ -10,6 +10,7 @@ services:
       - PORT=5000
       - DB_NAME=sqlite.db
       - JWT_SECRET=<set-your-jwt_secret> # change this
+      - UPLOAD_PATH=/app/uploads
     volumes:
       - ./backend/database:/app/database
     networks:
