@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '@/lib/api';
 import type { PostWithFile, ApiResponse } from '@/types';
+import { CheckCircleIcon } from 'lucide-react';
 
 const TaskDetailPage: React.FC = () => {
   const { class_id, id } = useParams<{ class_id: string, id: string }>();
@@ -71,35 +72,51 @@ const TaskDetailPage: React.FC = () => {
                 </a>
               )}
             </section>
-            <hr className="border-t-2 border-primary" />
-            <section className="space-y-8">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-bold text-primary mb-4">Your Submission</h3>
-                {post.task && post.task.file_id && (
-                  <div className="flex items-center gap-4">
-                    <span className="inline-flex items-center gap-2 px-4 py-2 border-2 border-green-500 text-green-600 bg-green-100 rounded-lg text-md font-bold shadow-[-3px_3px_0px_0px_black]">
-                      <span className="material-icons-outlined text-lg">check_circle_outline</span>
-                      submitted.pdf 
-                    </span>
-                  </div>
-                )}
-              </div>
-              <label htmlFor="file-upload" className="flex flex-col items-center justify-center p-8 sm:p-12 border-2 border-dashed border-primary rounded-xl bg-green-50 text-center cursor-pointer">
-                <span className="material-icons-outlined text-3xl sm:text-4xl text-primary mb-4">cloud_upload</span>
-                <div className="relative font-bold text-primary text-sm sm:text-base">
-                  <span>Choose File or </span>
-                  <span className="text-blue-500">Drag n Drop </span>
-                  <span>File to Upload</span>
-                </div>
-                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
-                <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">PDF, DOCX, PNG, JPG up to 10MB</p>
-              </label>
-              <div className="flex justify-end">
-                <button onClick={handleSubmit} className="px-8 py-2.5 bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] text-white font-bold rounded-lg hover:translate-y-1 hover:shadow-none transition-all w-full sm:w-auto" type="submit">
-                  Submit
-                </button>
-              </div>
-            </section>
+            {post.type === 'task' && (
+              <>
+                <hr className="border-t-2 border-primary" />
+                <section className="space-y-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-primary mb-4">Your Submission</h3>
+                  {post.task ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <span className="inline-flex items-center gap-2 px-4 py-2 border-2 border-green-500 text-green-600 bg-green-100 rounded-lg text-md font-bold shadow-[-3px_3px_0px_0px_black]">
+                          <CheckCircleIcon className="w-6 h-6" />
+                          Submitted
+                        </span>
+                      </div>
+                      {post.task.file && (
+                        <a className="mt-6 inline-flex items-center gap-2 px-4 py-2 border-2 border-primary text-primary rounded-lg text-md font-bold hover:bg-green-100 transition-colors shadow-[-3px_3px_0px_0px_black] hover:shadow-none hover:translate-y-[1px]" href={`/storage/${post.task.file.id}`} target="_blank" rel="noopener noreferrer">
+                          <span className="material-icons-outlined text-lg">attach_file</span>
+                          {post.task.file.upload_name}
+                        </a>
+                      )}
+                      <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                        Submitted at: {new Date(post.task.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <label htmlFor="file-upload" className="flex flex-col items-center justify-center p-8 sm:p-12 border-2 border-dashed border-primary rounded-xl bg-green-50 text-center cursor-pointer">
+                        <span className="material-icons-outlined text-3xl sm:text-4xl text-primary mb-4">cloud_upload</span>
+                        <div className="relative font-bold text-primary text-sm sm:text-base">
+                          <span>Choose File or </span>
+                          <span className="text-blue-500">Drag n Drop </span>
+                          <span>File to Upload</span>
+                        </div>
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                        <p className="mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">PDF, DOCX, PNG, JPG up to 10MB</p>
+                      </label>
+                      <div className="flex justify-end">
+                        <button onClick={handleSubmit} className="px-8 py-2.5 bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] text-white font-bold rounded-lg hover:translate-y-1 hover:shadow-none transition-all w-full sm:w-auto" type="submit">
+                          Submit
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </section>
+              </>
+            )}
           </div>
         </main>
       </div>

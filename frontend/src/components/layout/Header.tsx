@@ -47,18 +47,24 @@ const Header: React.FC = () => {
                 Admin
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={() => navigate('/profile')}>
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/classes')}>
-              Classes
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/tasks')}>
-              Tasks
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/presence')}>
-              Presence
-            </DropdownMenuItem>
+            {userRole === 'dosen' && (
+              <DropdownMenuItem onClick={() => navigate('/classes')}>
+                Classes
+              </DropdownMenuItem>
+            )}
+            {userRole === 'mahasiswa' && (
+              <>
+                <DropdownMenuItem onClick={() => navigate('/classes')}>
+                  Classes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/tasks')}>
+                  Tasks
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/presence')}>
+                  Presence
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuItem onClick={handleLogout}>
               Logout
             </DropdownMenuItem>
@@ -100,26 +106,32 @@ const Header: React.FC = () => {
               </DropdownMenu>
             </li>
           )}
-          <li>
-            <Button className="hover:underline" onClick={() => {navigate('/profile')}}>
-              Profile
-            </Button>
-          </li>
-          <li>
-            <Button className="hover:underline" onClick={() => {navigate('/classes')}}>
-              Classes
-            </Button>
-          </li>
-          <li>
-            <Button className="hover:underline" onClick={() => {navigate('/tasks')}}>
-              Tasks
-            </Button>
-          </li>
-          <li>
-            <Button className="hover:underline" onClick={() => {navigate('/presence')}}>
-              Presence
-            </Button>
-          </li>
+          {userRole === 'dosen' && (
+            <li>
+              <Button className="hover:underline" onClick={() => {navigate('/classes')}}>
+                Classes
+              </Button>
+            </li>
+          )}
+          {userRole === 'mahasiswa' && (
+            <>
+              <li>
+                <Button className="hover:underline" onClick={() => {navigate('/classes')}}>
+                  Classes
+                </Button>
+              </li>
+              <li>
+                <Button className="hover:underline" onClick={() => {navigate('/tasks')}}>
+                  Tasks
+                </Button>
+              </li>
+              <li>
+                <Button className="hover:underline" onClick={() => {navigate('/presence')}}>
+                  Presence
+                </Button>
+              </li>
+            </>
+          )}
           <li>
             <Button className="hover:underline" onClick={handleLogout}>
               Logout

@@ -53,7 +53,7 @@ const TasksPage: React.FC = () => {
                   </p>
                 </div>
 
-                <Button className="
+                {/* <Button className="
                         px-5 py-2 border-2 border-black
                         bg-danger text-white rounded-lg font-bold
                         shadow-[-3px_4px_0px_0px_black]
@@ -61,7 +61,7 @@ const TasksPage: React.FC = () => {
                         transition-all w-full sm:w-auto
                       ">
                   View Task
-                </Button>
+                </Button> */}
               </div>
             ))}
           </div>

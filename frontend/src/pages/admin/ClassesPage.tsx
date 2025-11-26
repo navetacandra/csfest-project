@@ -17,6 +17,8 @@ const AdminClassesPage: React.FC = () => {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [newClassName, setNewClassName] = useState('');
   const [newClassSchedule, setNewClassSchedule] = useState<string>('');
+  const [newClassStartTime, setNewClassStartTime] = useState('00:00');
+  const [newClassEndTime, setNewClassEndTime] = useState('00:00');
 
   useEffect(() => {
     fetchClasses();
@@ -24,7 +26,7 @@ const AdminClassesPage: React.FC = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await api.get<ApiResponse<Class[]>>('/admin/class');
+      const response = await api.get<ApiResponse<Class[]>>('/classes');
       setClasses(response.data.data);
     } catch (error) {
       console.error('Failed to fetch classes', error);
@@ -33,12 +35,16 @@ const AdminClassesPage: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      await api.post('/admin/class', { 
+      await api.post('/admin/classes', { 
           name: newClassName, 
-          schedule: parseInt(newClassSchedule, 10)
+          schedule: parseInt(newClassSchedule, 10),
+          start_time: newClassStartTime,
+          end_time: newClassEndTime
       });
       setNewClassName('');
       setNewClassSchedule('');
+      setNewClassStartTime('00:00');
+      setNewClassEndTime('00:00');
       fetchClasses();
     } catch (error) {
       console.error('Failed to create class', error);
@@ -48,7 +54,12 @@ const AdminClassesPage: React.FC = () => {
   const handleUpdate = async () => {
     if (!editingClass) return;
     try {
-      await api.put(`/admin/class/${editingClass.id}`, { name: editingClass.name, schedule: editingClass.schedule });
+      await api.put(`/admin/class/${editingClass.id}`, {
+        name: editingClass.name,
+        schedule: editingClass.schedule,
+        start_time: editingClass.start_time,
+        end_time: editingClass.end_time
+      });
       setEditingClass(null);
       fetchClasses();
     } catch (error) {
@@ -96,6 +107,18 @@ const AdminClassesPage: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Input 
+              type="time"
+              value={newClassStartTime}
+              onChange={(e) => setNewClassStartTime(e.target.value)}
+              placeholder="Start Time"
+            />
+            <Input 
+              type="time"
+              value={newClassEndTime}
+              onChange={(e) => setNewClassEndTime(e.target.value)}
+              placeholder="End Time"
+            />
             <Button onClick={handleCreate} className="sm:col-span-2">
               <PlusCircle className="mr-2" /> Add Class
             </Button>
@@ -112,9 +135,10 @@ const AdminClassesPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-primary">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Class Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Schedule Day</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Class Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Schedule Day</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Time</th>
+                  {/* <th className="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider">Actions</th> */}
                 </tr>
               </thead>
               <tbody className="bg-secondary-background divide-y divide-gray-200">
@@ -146,7 +170,26 @@ const AdminClassesPage: React.FC = () => {
                         getDayName(cls.schedule)
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {editingClass?.id === cls.id ? (
+                        <div className="flex gap-2 items-center">
+                          <Input 
+                            type="time"
+                            value={editingClass.start_time}
+                            onChange={(e) => handleEditChange('start_time', e.target.value)}
+                          />
+                          <span>-</span>
+                          <Input 
+                            type="time"
+                            value={editingClass.end_time}
+                            onChange={(e) => handleEditChange('end_time', e.target.value)}
+                          />
+                        </div>
+                      ) : (
+                        `${cls.start_time} - ${cls.end_time}`
+                      )}
+                    </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       {editingClass?.id === cls.id ? (
                         <Button onClick={handleUpdate} size="sm">Save</Button>
                       ) : (
@@ -157,7 +200,7 @@ const AdminClassesPage: React.FC = () => {
                       <Button onClick={() => handleDelete(cls.id)} variant="destructive" size="sm" className="ml-2">
                         <Trash className="h-4 w-4" />
                       </Button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

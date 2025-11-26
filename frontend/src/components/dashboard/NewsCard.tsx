@@ -24,7 +24,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
             onClick={() => handleNewsClick(item.id)}
           >
             <div className="w-24 h-16 bg-chart-2 rounded-base flex-shrink-0 flex items-center justify-center border-2 border-border">
-              <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover rounded-base" />
+              <img src={`https://kulmsin.juraganweb.web.id/storage/${item.thumbnail}`} alt={item.title} className="w-full h-full object-cover rounded-base" />
             </div>
             <p className="font-medium text-foreground">{item.title}</p>
           </div>

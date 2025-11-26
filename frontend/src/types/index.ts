@@ -97,6 +97,7 @@ export interface Task {
     post_id: number;
     class_enrollment_id: number;
     file_id: number;
+    file?: File;
     created_at: string;
     updated_at: string;
 }
@@ -111,6 +112,8 @@ export interface TaskItem {
 export interface Presence {
     id: number;
     class_enrollment_id: number;
+    class_name: string;
+    class_id: number;
     schedule_date: string;
     status: 'hadir' | 'izin' | 'sakit' | 'alpha';
     late_time: number;
@@ -120,7 +123,7 @@ export interface Presence {
 
 export interface PresenceRecap {
     total_lateness: number;
-    presences: Presence[];
+    recap: Presence[];
 }
 
 export interface ClassDetails extends Class {

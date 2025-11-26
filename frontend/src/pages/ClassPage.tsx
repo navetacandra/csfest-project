@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardList, FileText, HelpCircle } from 'lucide-react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
@@ -8,22 +11,42 @@ import type { ClassDetails, ApiResponse } from '@/types';
 const ClassPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [classDetails, setClassDetails] = useState<ClassDetails | null>(null);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
+  const [newPostMessage, setNewPostMessage] = useState("");
+  const [newPostType, setNewPostType] = useState<"post" | "task">("post");
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('role');
+
+  const fetchClassDetails = async () => {
+    try {
+      const response = await api.get<ApiResponse<ClassDetails>>(`/classes/${id}`);
+      setClassDetails(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch class details', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchClassDetails = async () => {
-      try {
-        const response = await api.get<ApiResponse<ClassDetails>>(`/classes/${id}`);
-        setClassDetails(response.data.data);
-      } catch (error) {
-        console.error('Failed to fetch class details', error);
-      }
-    };
-
     if (id) {
       fetchClassDetails();
     }
   }, [id]);
+
+  const handleCreatePost = async () => {
+    if (!id) return;
+    try {
+      await api.post(`/classes/${id}/posts`, {
+        message: newPostMessage,
+        type: newPostType,
+      });
+      setNewPostMessage("");
+      setNewPostType("post");
+      setIsCreatingPost(false);
+      fetchClassDetails(); 
+    } catch (error) {
+      console.error('Failed to create post', error);
+    }
+  };
 
   const getPostIcon = (type: string) => {
     switch (type) {
@@ -47,17 +70,54 @@ const ClassPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between  sm:items-center mb-8 gap-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary">{classDetails.name}</h2>
             <div className='flex flex-col sm:flex-row gap-4'>
-              <Link to={`/class/${classDetails.id}/presence`}>
-                <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
-                  Presence
-                </Button>
-              </Link>
-              <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
+              {userRole === 'dosen' && (
+                <Link to={`/class/${classDetails.id}/presence`}>
+                  <Button className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto">
+                    Presence
+                  </Button>
+                </Link>
+              )}
+              <Button 
+                onClick={() => setIsCreatingPost(!isCreatingPost)}
+                className="bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none w-full sm:w-auto"
+              >
                 Create New Post
               </Button>
             </div>
           </div>
           <div className="space-y-4">
+            {isCreatingPost && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>Create New Post</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input 
+                      placeholder="Post message"
+                      value={newPostMessage}
+                      onChange={(e) => setNewPostMessage(e.target.value)}
+                      className="sm:col-span-2"
+                    />
+                    <Select onValueChange={(value: "post" | "task") => setNewPostType(value)} value={newPostType}>
+                      <SelectTrigger className="sm:col-span-2">
+                        <SelectValue placeholder="Select post type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="post">Post</SelectItem>
+                        <SelectItem value="task">Task</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={handleCreatePost}
+                      className="sm:col-span-2 bg-green-400 border-2 border-black shadow-[-4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none"
+                    >
+                      Submit Post
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {classDetails.posts.map((post) => (
               <div
                 key={post.id}
